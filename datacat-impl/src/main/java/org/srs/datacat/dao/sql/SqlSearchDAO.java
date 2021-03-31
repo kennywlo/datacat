@@ -13,6 +13,7 @@ import org.srs.datacat.dao.sql.search.plugins.EXODatacatSearchPlugin;
 import org.srs.datacat.dao.sql.search.plugins.LsstFilesSearchPlugin;
 import org.srs.datacat.dao.sql.search.plugins.LsstKVSearchPlugin;
 import org.srs.datacat.dao.sql.search.plugins.LsstPositionsSearchPlugin;
+import org.srs.datacat.dao.sql.search.plugins.DependencySearchPlugin;
 import org.srs.datacat.model.DatasetContainer;
 import org.srs.datacat.model.DatasetModel;
 import org.srs.datacat.shared.Provider;
@@ -37,7 +38,8 @@ public class SqlSearchDAO extends SqlBaseDAO implements org.srs.datacat.dao.Sear
                 EXODatacatSearchPlugin.class,
                 LsstFilesSearchPlugin.class,
                 LsstKVSearchPlugin.class,
-                LsstPositionsSearchPlugin.class);
+                LsstPositionsSearchPlugin.class,
+                DependencySearchPlugin.class);
         return search.search(containers, datasetView, query, retrieveFields, sortFields);
     }
     

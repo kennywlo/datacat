@@ -65,7 +65,12 @@ public class AbstractPathTest extends TestCase {
 
     public void testCreate() throws IOException{
 
+        String os = System.getProperty("os.name");
+        if (os.contains("Windows"))
+                return;  // Assertions below do not apply for Windows (sep="\")
+
         AbstractFs fs = new MockAbstractFs();
+
         AbstractPath path = new AbstractPath(fs.getPathProvider(),"/") {};
         Path sysPath = Paths.get("/");
         

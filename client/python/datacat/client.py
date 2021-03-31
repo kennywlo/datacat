@@ -56,6 +56,8 @@ class Client(object):
             container = Folder(path=path, name=path.split("/")[-1], metadata=metadata, **kwargs)
         elif type.lower() == "group":
             container = Group(path=path, name=path.split("/")[-1], metadata=metadata, **kwargs)
+        elif type.lower() == "dependency":
+            container = Dependency(path=path, name=path.split("/")[-1], metadata=metadata, **kwargs)
         if parents:
             parts = []
             parentpath = os.path.dirname(path)
@@ -90,6 +92,39 @@ class Client(object):
         The object will be a Folder
         """
         return self.mkdir(path, "group", parents, metadata, **kwargs)
+
+    @staticmethod
+    def get_dependencyPk(dataset):
+        """
+        Fetach the dependency ID.
+        :param dataset: the dataset
+        :return: the version Pk of the dataset
+        """
+        return dataset.versionPk
+
+    @staticmethod
+    def get_dependents(datasets, recursive=False):
+        """
+        :param datasets: the dependent datasets
+        :return: the list of dependent IDs
+        """
+        if recursive:
+            raise Exception("Unsupported recursive operation")
+        ids = []
+        for ds in datasets:
+            ids.append(ds.versionPk)
+        return ids
+
+    def create_dependency(self, path, metadata=None, **kwargs):
+        """
+         Create a new Dependency
+        :param path: Dependency Target path or name
+        :param metadata: Metadata to add to when creating dependency
+        :param kwargs: Additional attributes to add to the dependency object
+        :return: A :class`requests.Response` object. A user can use Response.content to get the content.
+        The object will be a Dependency
+        """
+        return self.mkdir(path, "dependency", False, metadata, **kwargs)
 
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,

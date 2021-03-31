@@ -30,6 +30,7 @@ import org.srs.datacat.shared.metadata.MetadataEntry;
 @JsonSubTypes(value = {
         @JsonSubTypes.Type(LogicalFolder.class),
         @JsonSubTypes.Type(DatasetGroup.class),
+        @JsonSubTypes.Type(DatasetDependency.class),
         @JsonSubTypes.Type(Dataset.class),
         @JsonSubTypes.Type(FlatDataset.class),
         @JsonSubTypes.Type(FullDataset.class),
@@ -261,6 +262,8 @@ public class DatacatObject implements DatacatNode, HasMetadata {
                     return new LogicalFolder(this);
                 case GROUP:
                     return new DatasetGroup(this);
+                case DEPENDENCY:
+                    return new DatasetDependency(this);
                 case DATASET:
                     return new Dataset(this);
                 default:

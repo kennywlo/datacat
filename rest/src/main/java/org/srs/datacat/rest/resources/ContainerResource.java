@@ -54,7 +54,7 @@ import org.srs.datacat.vfs.DcFileSystemProvider;
  *
  * @author bvan
  */
-@Path("/{containerType: (groups|folders|containers)}" +  OPTIONAL_EXTENSIONS)
+@Path("/{containerType: (dependencies|groups|folders|containers)}" +  OPTIONAL_EXTENSIONS)
 public class ContainerResource extends BaseResource {
     
     private String requestPath;
@@ -92,6 +92,9 @@ public class ContainerResource extends BaseResource {
         RecordType type = RecordType.FOLDER; // Folder by default
         if(containerType.equalsIgnoreCase("groups")){
             type = RecordType.GROUP;
+        }
+        else if(containerType.equalsIgnoreCase("dependencies")){
+            type = RecordType.DEPENDENCY;
         }
         
         RequestView rv = null;
@@ -140,6 +143,10 @@ public class ContainerResource extends BaseResource {
         if(containerType.equalsIgnoreCase( "groups")){
             type = RecordType.GROUP;
         }
+        else if(containerType.equalsIgnoreCase( "dependencies")){
+            type = RecordType.DEPENDENCY;
+        }
+
 
         DatasetContainerBuilder builder = FormParamConverter.getContainerBuilder( type, formParams );
         java.nio.file.Path parentPath = getProvider().getPath(sParentPath);
@@ -173,6 +180,9 @@ public class ContainerResource extends BaseResource {
         RecordType type = RecordType.FOLDER; // Folder by default
         if(containerType.equalsIgnoreCase("groups")){
             type = RecordType.GROUP;
+        }
+        else if(containerType.equalsIgnoreCase("dependencies")) {
+            type = RecordType.DEPENDENCY;
         }
         DatasetContainerBuilder builder = getProvider().getModelProvider().getContainerBuilder().create(container);
 

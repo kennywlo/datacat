@@ -26,6 +26,7 @@ drop table  	DatasetSite ;
 drop table 	DatasetVersion ;
 drop table  	VerDataset ;
 drop table 	DatasetGroup ;
+drop table  DatasetDependency ;
 drop table 	DatasetLogicalFolder ;
 drop table 	DatasetSource ;
 drop table 	DatasetDataType ;
@@ -87,6 +88,19 @@ create table DatasetGroup (
 );
 create index IDX_DSG_DSLF on DatasetGroup(DatasetLogicalFolder);
 
+create table DatasetDependency (
+    ACL             varchar(1000),
+    Dependency    integer not null,
+    PathName      varchar(255),
+    Dependent     integer not null,
+    DependentType varchar(32),
+    constraint PK_DatasetDependents primary key (Dependency, Dependent, DependentType),
+    constraint FK_Dependency foreign key (DatasetVersion)
+        references DatasetVersion(DatasetVersion) on delete cascade,
+    constraint FK_Dependent foreign key (Dependent)
+        references DatasetVersion(DatasetVersion)
+);
+create index IDX_DD_FIND on DatasetDependency(Dependency, DependentType);
 
 create table VerDataset (
 	Dataset			SERIAL,

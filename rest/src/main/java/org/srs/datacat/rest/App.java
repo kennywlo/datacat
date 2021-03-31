@@ -15,6 +15,7 @@ import org.srs.datacat.dao.sql.search.plugins.EXODatacatSearchPlugin;
 import org.srs.datacat.dao.sql.search.plugins.LsstFilesSearchPlugin;
 import org.srs.datacat.dao.sql.search.plugins.LsstKVSearchPlugin;
 import org.srs.datacat.dao.sql.search.plugins.LsstPositionsSearchPlugin;
+import org.srs.datacat.dao.sql.search.plugins.DependencySearchPlugin;
 import org.srs.datacat.rest.Binders.*;
 
 /**
@@ -63,7 +64,8 @@ public class App extends ResourceConfig {
                 EXODatacatSearchPlugin.class,
                 LsstFilesSearchPlugin.class,
                 LsstKVSearchPlugin.class,
-                LsstPositionsSearchPlugin.class
+                LsstPositionsSearchPlugin.class,
+                DependencySearchPlugin.class
         );
 
         register(provider.binder);

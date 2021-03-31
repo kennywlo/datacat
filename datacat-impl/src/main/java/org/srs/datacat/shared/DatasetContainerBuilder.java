@@ -45,6 +45,8 @@ public class DatasetContainerBuilder extends DatacatObject.Builder<DatasetContai
                 return new LogicalFolder.Builder(container);
             case GROUP:
                 return new DatasetGroup.Builder(container);
+            case DEPENDENCY:
+                return new DatasetDependency.Builder(container);
             default:
                 return null;
         }
@@ -54,7 +56,10 @@ public class DatasetContainerBuilder extends DatacatObject.Builder<DatasetContai
     public DatasetContainer build(){
         if(type == RecordType.GROUP){
             return new DatasetGroup.Builder(this).build();
+        } else if(type == RecordType.DEPENDENCY){
+            return new DatasetDependency.Builder(this).build();
         }
+
         return new LogicalFolder.Builder(this).build();
     }
 

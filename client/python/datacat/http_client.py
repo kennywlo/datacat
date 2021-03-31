@@ -75,6 +75,8 @@ class HttpClient:
         endpoint = "folders"
         if type.lower() == "group":
             endpoint = "groups"
+        elif type.lower() == "dependency":
+            endpoint = "dependencies"
         headers = kwargs.setdefault("headers", {})
         headers["Content-Type"] = self.content_type
         return self._req("post", self._target(endpoint, parentpath), data=payload, **kwargs)

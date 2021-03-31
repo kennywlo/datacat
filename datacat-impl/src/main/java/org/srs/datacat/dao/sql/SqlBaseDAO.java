@@ -271,6 +271,8 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 case GROUP:
                     mergeGroupMetadata(record.getPk(), metaData);
                     break;
+                case DEPENDENCY:
+                    mergeDependencyMetadata(record.getPk(), metaData);
                 case FOLDER:
                     mergeFolderMetadata(record.getPk(), metaData);
                     break;
@@ -305,6 +307,41 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     private void mergeFolderMetadata(long logicalFolderPK, Map<String, Object> metaData) throws SQLException {
         mergeDatacatObjectMetadata(logicalFolderPK, metaData, "LogicalFolder", "LogicalFolder");
+    }
+
+    protected void mergeDependencyMetadata(long dependencyPK, Map<String, Object> metaData) throws SQLException {
+        final String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ?";
+        PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
+        stmt.setLong(1, dependencyPK);
+        stmt.executeUpdate();
+        // Add the new dependency
+        addDatasetDependency(dependencyPK, metaData);
+
+    }
+
+    protected void addDatasetDependency(long dependencyPK, Map<String, Object> metaData) throws SQLException {
+
+        if (!(metaData instanceof HashMap)) {
+            metaData = new HashMap<>(metaData);
+        }
+
+        String depname = (String)metaData.get("pathname");
+        String dependentList = (String)metaData.get("dependents");
+        String dependentType = (String)metaData.get("dependentType");
+
+        final String dependencySql = "insert into DatasetDependency (Dependency, PathName, Dependent, DependentType)"
+                                        + " values (?, ?, ?, ?)";
+        PreparedStatement stmt = getConnection().prepareStatement(dependencySql);
+        String[] dependents = dependentList.split(",");
+        // store each dependent info from the list
+        for (String d : dependents) {
+            long dependent = Long.parseLong(d);
+            stmt.setLong(1, dependencyPK);
+            stmt.setString(2, depname);
+            stmt.setLong(3, dependent);
+            stmt.setString(4, dependentType);
+            stmt.executeUpdate();
+        }
     }
 
 //    protected void deleteDatasetVersionMetadata(Long pk, Set<String> metaDataKeys) throws SQLException{

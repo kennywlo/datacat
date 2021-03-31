@@ -21,19 +21,10 @@ import org.srs.datacat.model.container.ContainerStat;
 import org.srs.datacat.model.DatacatNode;
 import org.srs.datacat.model.DatacatRecord;
 import org.srs.datacat.model.DatasetContainer;
-import org.srs.datacat.shared.DatasetContainerBuilder;
+import org.srs.datacat.shared.*;
 import org.srs.datacat.model.dataset.DatasetLocationModel;
 import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.shared.DatacatObject;
-import org.srs.datacat.shared.Dataset;
-import org.srs.datacat.shared.DatasetGroup;
-import org.srs.datacat.shared.DatasetVersion;
-import org.srs.datacat.shared.LogicalFolder;
-import org.srs.datacat.shared.BasicStat;
-import org.srs.datacat.shared.DatasetStat;
-import org.srs.datacat.shared.DatasetViewInfo;
 import org.srs.datacat.model.RecordType;
-import org.srs.datacat.shared.Patchable;
 import org.srs.vfs.PathUtils;
 
 /**
@@ -77,9 +68,22 @@ public class ContainerDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.d
                 tableName = "DatasetGroup";
                 parentColumn = "DATASETLOGICALFOLDER";
                 break;
+            case DEPENDENCY:
+                builder = new DatasetDependency.Builder(request);
+                tableName = "DatasetDependency";
+                parentColumn = "DEPENDENCY";
+                break;
             default:
                 throw new SQLException("Unknown parent table: " + newType.toString());
         }
+
+        if(newType == RecordType.DEPENDENCY) {
+            addDatasetDependency(parent.getPk(), request.getMetadataMap());
+            builder.parentPk(parent.getPk());
+            retObject = builder.build();
+            return retObject;
+        }
+
         String insertSqlTemplate = "INSERT INTO %s (NAME, %s, DESCRIPTION) VALUES (?,?,?)";
         String sql = String.format(insertSqlTemplate, tableName, parentColumn);
 
@@ -117,6 +121,9 @@ public class ContainerDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.d
                     return;
                 case FOLDER:
                     deleteFolder(container.getPk());
+                    return;
+                case DEPENDENCY:
+                    deleteDependency(container.getPk());
                 default:
                     break;
             }
@@ -134,7 +141,11 @@ public class ContainerDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.d
         String deleteSql = "delete from DatasetGroup where DatasetGroup=?";
         delete1(deleteSql, groupPk);
     }
-    
+    protected void deleteDependency(long dependencyPk) throws SQLException{
+        String deleteSql = "delete from DatasetDependency where Dependency=?";
+        delete1(deleteSql, dependencyPk);
+    }
+
     @Override
     public <V extends ContainerStat> V getStat(DatacatRecord container, Class<V> statType) throws IOException{
         if(statType == BasicStat.class || statType == ContainerStat.class){
