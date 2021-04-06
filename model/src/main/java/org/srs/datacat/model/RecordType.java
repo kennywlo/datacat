@@ -11,7 +11,7 @@ import org.srs.datacat.model.dataset.DatasetVersionModel;
  * The basic type of this DatacatObject.
  */
 public enum RecordType {
-    DATASET, DATASETLOCATION, DATASETVERSION, FOLDER, GROUP, DEPENDENCY;
+    DATASET, DATASETLOCATION, DATASETVERSION, DEPENDENCY, FOLDER, GROUP;
 
     public boolean isContainer(){
         return this == FOLDER || this == GROUP || this == DEPENDENCY;

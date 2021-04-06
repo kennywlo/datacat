@@ -4,51 +4,51 @@
     <parent>
         <groupId>srs</groupId>
         <artifactId>org-srs-datacat</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.6-SNAPSHOT</version>
     </parent>
     <artifactId>org-srs-datacat-impl</artifactId>
     <packaging>jar</packaging>
-    
+
     <name>SRS DataCatalog Default Implementation</name>
-    
+
     <dependencies>
         <dependency>
             <groupId>srs</groupId>
             <artifactId>org-srs-datacat-model</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>srs</groupId>
             <artifactId>org-srs-datacat-model</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.6-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>srs</groupId>
             <artifactId>org-srs-datacat-vfs</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>srs</groupId>
             <artifactId>org-srs-datacat-test</artifactId>
-            <version>0.5-SNAPSHOT</version>
+            <version>0.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
-        
-        
+
+
         <!-- For search -->
         <dependency>
             <groupId>org.freehep.commons</groupId>
             <artifactId>freehep-lang</artifactId>
             <version>0.4</version>
         </dependency>
-        <dependency>    
+        <dependency>
             <groupId>org.zerorm</groupId>
             <artifactId>zerorm-core</artifactId>
             <version>0.2</version>
         </dependency>
-        
+
         <!-- For the model -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -60,7 +60,7 @@
             <artifactId>jackson-dataformat-xml</artifactId>
             <version>2.7.8</version>
         </dependency>
-        
+
         <!-- For testing the xml model -->
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -69,8 +69,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
-    <build> 
+
+    <build>
        <plugins>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>

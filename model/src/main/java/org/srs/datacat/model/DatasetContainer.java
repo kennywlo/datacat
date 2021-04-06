@@ -4,16 +4,21 @@ package org.srs.datacat.model;
 import org.srs.datacat.model.container.ContainerStat;
 
 /**
- * An interface denoting either a folder or a group.
+ * An interface denoting either a folder, a group, or a dependency.
  * 
  * @author bvan
- * @author klo
+ *
  */
 public interface DatasetContainer extends DatacatNode, HasMetadata {
     
     ContainerStat getStat();
     String getDescription();
-    
+
+    /**
+     * Dependency interface.
+     */
+    public interface Dependency extends DatasetContainer{}
+
     /**
      * Folder interface.
      */
@@ -23,10 +28,5 @@ public interface DatasetContainer extends DatacatNode, HasMetadata {
      * Group interface.
      */
     public interface Group extends DatasetContainer{}
-
-    /**
-     * Dependency interface.
-     */
-    public interface Dependency extends DatasetContainer{}
 
 }

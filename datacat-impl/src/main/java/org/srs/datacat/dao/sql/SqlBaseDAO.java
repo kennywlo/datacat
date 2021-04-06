@@ -186,6 +186,8 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         Long pk = builder.pk;
         if (builder instanceof LogicalFolder.Builder) {
             tableType = "LogicalFolder";
+        } else if (builder instanceof DatasetDependency.Builder) {
+            tableType = "DatasetDependency";
         } else if (builder instanceof DatasetGroup.Builder) {
             tableType = "DatasetGroup";
         }
@@ -273,6 +275,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     break;
                 case DEPENDENCY:
                     mergeDependencyMetadata(record.getPk(), metaData);
+                    break;
                 case FOLDER:
                     mergeFolderMetadata(record.getPk(), metaData);
                     break;
@@ -493,6 +496,8 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 return RecordType.GROUP;
             case "D":
                 return RecordType.DATASET;
+            case "DEP":
+                return RecordType.DEPENDENCY;
             default:
                 return null;
         }
@@ -511,6 +516,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 break;
             case GROUP:
                 o = new DatasetGroup.Builder();
+                break;
+            case DEPENDENCY:
+                o = new DatasetDependency.Builder();
                 break;
             default:
                 o = new DatacatObject.Builder();
