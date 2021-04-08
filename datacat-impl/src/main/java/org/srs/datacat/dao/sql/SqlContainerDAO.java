@@ -187,6 +187,9 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
                     case FOLDER:
                         cs.setFolderCount(count);
                         break;
+                    case DEPENDENCY:
+                        cs.setDependencyCount(count);
+                        break;
                     default:
                         break;
                 }
@@ -257,8 +260,21 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
     protected void patchContainerInternal(DatacatNode container, DatasetContainer request) throws SQLException, 
         IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException{
 
-        String table = container.getType()== RecordType.FOLDER ? "DatasetLogicalFolder" : "DatasetGroup";
-        
+        String table;
+        switch(container.getType()){
+            case FOLDER:
+                table = "DatasetLogicalFolder";
+                break;
+            case GROUP:
+                table = "DatasetGroup";
+                break;
+            case DEPENDENCY:
+                table = "DatasetDependency";
+                break;
+            default:
+                throw new IOException("Unrecognized container type");
+        }
+
         for(Method method: request.getClass().getMethods()){
             if(method.isAnnotationPresent(Patchable.class)){
                 Object patchedValue = method.invoke(request);

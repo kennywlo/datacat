@@ -82,23 +82,25 @@ create table DatasetGroup (
 	NumberEvents		numeric,
 	DiskSizeBytes		numeric,
 	Description		varchar(400),
-        ACL                     varchar(1000),
-        constraint PK_DSG primary key (DatasetGroup),
+    ACL             varchar(1000),
+    constraint PK_DSG primary key (DatasetGroup),
 	constraint UNQ_DatasetGroup UNIQUE(Name, DatasetLogicalFolder)
 );
 create index IDX_DSG_DSLF on DatasetGroup(DatasetLogicalFolder);
 
 create table DatasetDependency (
-    ACL             varchar(1000),
+    DatasetDependency   SERIAL,
     Dependency    integer not null,
-    PathName      varchar(255),
+    Name          varchar(255),
     Dependent     integer not null,
     DependentType varchar(32),
-    constraint PK_DatasetDependents primary key (Dependency, Dependent, DependentType),
+    ACL           varchar(1000),
+    constraint PK_DatasetDependency primary key (DatasetDependency),
     constraint FK_Dependency foreign key (DatasetVersion)
         references DatasetVersion(DatasetVersion) on delete cascade,
     constraint FK_Dependent foreign key (Dependent)
-        references DatasetVersion(DatasetVersion)
+        references DatasetVersion(DatasetVersion),
+    constraint UNQ_DD_Entry unique (Dependency, Dependent, DependentType)
 );
 create index IDX_DD_FIND on DatasetDependency(Dependency, DependentType);
 

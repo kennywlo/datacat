@@ -93,38 +93,51 @@ class Client(object):
         """
         return self.mkdir(path, "group", parents, metadata, **kwargs)
 
-    @staticmethod
-    def get_dependencyPk(dataset):
+    def mkdependency(self, name, parents=False, metadata=None, **kwargs):
         """
-        Fetach the dependency ID.
-        :param dataset: the dataset
-        :return: the version Pk of the dataset
-        """
-        return dataset.versionPk
-
-    @staticmethod
-    def get_dependents(datasets, recursive=False):
-        """
-        :param datasets: the dependent datasets
-        :return: the list of dependent IDs
-        """
-        if recursive:
-            raise Exception("Unsupported recursive operation")
-        ids = []
-        for ds in datasets:
-            ids.append(ds.versionPk)
-        return ids
-
-    def create_dependency(self, path, metadata=None, **kwargs):
-        """
-         Create a new Dependency
-        :param path: Dependency Target path or name
+        Make a new Dependency, and update if existing.
+        :param name: Dependency Target name
+        :param parents: Not used.
         :param metadata: Metadata to add to when creating dependency
         :param kwargs: Additional attributes to add to the dependency object
         :return: A :class`requests.Response` object. A user can use Response.content to get the content.
         The object will be a Dependency
         """
-        return self.mkdir(path, "dependency", False, metadata, **kwargs)
+        return self.mkdir(name, "dependency", parents, metadata, **kwargs)
+
+    @staticmethod
+    def get_dependency_id(ds):
+        """
+        Fetch the dependency ID.
+        :param ds: the dataset object
+        :return: the version Pk of the dataset
+        """
+        return ds.versionPk
+
+    def get_dataset_by_id(self, did, target=None):
+        """
+        Fetch the dataset of the dependency Id.
+        :param did: the dependency Id
+        :param target: container path if any
+        :return: the dataset
+        """
+        if target is None:
+            target = "/CDMS/**"
+        query = "versionPk eq" + str(did)
+        return self.search(target, query=query)
+
+    def get_dependents(self, did, target=None, recursive=False):
+        """
+        :param did: the target dependency Id
+        :param recursive: Yes for all dependents, with False as default
+        :return: the list of its dependents by their dependency Id
+        """
+        if recursive:
+            raise Exception("Unsupported recursive operation")
+        if target is None:
+            target = "/CDMS/**"
+        query = "Dependency eq" + str(did)
+        return self.search(target, query=query)
 
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,
@@ -139,7 +152,7 @@ class Client(object):
         :param site: Site where the dataset physically resides (i.e. SLAC, IN2P3)
         :param versionMetadata: Metadata to add to registered version if registering a version.
         :param resource: The actual file resource path at the given site (i.e. /nfs/farm/g/glast/dataset.dat)
-        :param kwargs: Additional attributes to pass throught to build_dataset
+        :param kwargs: Additional attributes to pass through to build_dataset
         :return: A representation of the dataset that was just created.
         """
         ds = build_dataset(name, dataType, fileFormat, site=site, versionId=versionId, resource=resource,

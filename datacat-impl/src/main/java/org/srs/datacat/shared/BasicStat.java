@@ -11,6 +11,7 @@ import org.srs.datacat.model.container.ContainerStat;
  * Basic stat info for a group or a folder.
  *
  * @author bvan
+ * @author klo
  */
 @JsonTypeName(value="stat")
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "_type", defaultImpl = BasicStat.class)
@@ -31,23 +32,25 @@ public class BasicStat implements ContainerStat {
     private int datasetCount;
     private int groupCount;
     private int folderCount;
+    private int dependencyCount;
 
     public BasicStat(){}
 
-    public BasicStat(int folderCount, int groupCount, int datasetCount){
+    public BasicStat(int folderCount, int groupCount, int datasetCount, int dependencyCount){
         this.datasetCount = datasetCount;
         this.groupCount = groupCount;
         this.folderCount = folderCount;
+        this.dependencyCount = dependencyCount;
     }
 
     public BasicStat(BasicStat stat){
-        this(stat.folderCount, stat.groupCount, stat.datasetCount);
+        this(stat.folderCount, stat.groupCount, stat.datasetCount, stat.dependencyCount);
     }
 
     @Override
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Integer getChildCount(){
-        return folderCount + groupCount + datasetCount;
+        return folderCount + groupCount + datasetCount + dependencyCount;
     }
     
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -65,6 +68,9 @@ public class BasicStat implements ContainerStat {
         return folderCount;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Integer getDependencyCount(){ return dependencyCount; }
+
     public void setDatasetCount(int datasets){
         this.datasetCount = datasets;
     }
@@ -75,6 +81,10 @@ public class BasicStat implements ContainerStat {
 
     public void setFolderCount(int folders){
         this.folderCount = folders;
+    }
+
+    public void setDependencyCount(int dependencies){
+        this.dependencyCount = dependencies;
     }
 
 }
