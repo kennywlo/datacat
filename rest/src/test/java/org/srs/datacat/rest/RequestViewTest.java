@@ -65,5 +65,10 @@ public class RequestViewTest extends TestCase {
         } catch (IllegalArgumentException ex){}
 
     }
+
+    // ToDo: Dependency testing
+    public void testDependency(){
+
+    }
     
 }

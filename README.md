@@ -1,6 +1,6 @@
 # Datacat
 
-Datacat is a system for the tracking and organization of files, their 
+Datacat is a system for the tracking and organization of files, their
 replicas, and user-defined metadata across heterogeneous storage systems.
 
 Main Components
@@ -32,8 +32,9 @@ A Dataset consists of one or more versions of a file, each with one or more poss
 
 ### Containers
 
-* *Folders* are the simplest containers. They are completely analagous to a POSIX directory
+* *Folders* are the simplest containers. They are completely analogous to a POSIX directory
 * *Groups* are a special container which may only contain datasets. They are meant to logically group datasets which might be treated as a macro dataset.
+  *Dependencies* are a special container which store relations, such as list of predecessors/successors, in datasets.
 
 # Components
 

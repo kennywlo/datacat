@@ -337,4 +337,10 @@ public class ContainerResourceTest extends JerseyTest {
         TestCase.assertFalse(resp.readEntity(String.class).contains("mdKey"));
     }
 
+    // ToDo: Dependency testing
+    @Test
+    public void testDeleteDependencies() throws IOException{
+
+    }
+
 }

@@ -53,7 +53,7 @@ public class DependencySearchPlugin implements DatacatPlugin {
         if(joined){
             return dependents;
         }
-        String metadataPivot = "dependency";
+        String metadataPivot = "Dependency";
         Column vecColumn = statement.setupMetadataOuterJoin(metadataPivot, Number.class);
 
         statement.selection(dependents.getColumns())

@@ -123,8 +123,7 @@ class Client(object):
         """
         if target is None:
             target = "/CDMS/**"
-        query = "versionPk eq" + str(did)
-        return self.search(target, query=query)
+        return self.search(target, versionId=did)
 
     def get_dependents(self, did, target=None, recursive=False):
         """
@@ -136,8 +135,8 @@ class Client(object):
             raise Exception("Unsupported recursive operation")
         if target is None:
             target = "/CDMS/**"
-        query = "Dependency eq" + str(did)
-        return self.search(target, query=query)
+        query = "Dependency == " + str(did)
+        return self.search(target, versionId=did, query=query)
 
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,

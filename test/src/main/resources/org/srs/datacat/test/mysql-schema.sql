@@ -99,7 +99,7 @@ create table DatasetDependency (
     constraint FK_Dependency foreign key (DatasetVersion)
         references DatasetVersion(DatasetVersion) on delete cascade,
     constraint FK_Dependent foreign key (Dependent)
-        references DatasetVersion(DatasetVersion),
+        references DatasetVersion(DatasetVersion) on delete cascade,
     constraint UNQ_DD_Entry unique (Dependency, Dependent, DependentType)
 );
 create index IDX_DD_FIND on DatasetDependency(Dependency, DependentType);

@@ -118,4 +118,14 @@ public class DAOTestUtils {
         return ret;
     }
 
+    // ToDo: Dependency testing
+    public static void generateDependencies(DAOFactory factory) throws IOException{
+
+    }
+
+    // ToDo: Dependency testing
+    public static List<DatacatNode> getDependencies(DAOFactory factory, int dependencies) throws IOException{
+        List<DatacatNode> ret = null;
+        return ret;
+    }
 }

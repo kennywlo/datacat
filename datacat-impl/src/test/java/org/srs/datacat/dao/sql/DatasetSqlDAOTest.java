@@ -137,7 +137,12 @@ public class DatasetSqlDAOTest {
         System.out.println(new Dataset.Builder(ds).version(newVer).build().toString());
         dao.deleteDatasetVersion(ds.getParentPk(), newVer);
     }
-    
+
+    @Test
+    public void testDeleteDependency() throws SQLException, IOException {
+        // ToDo: Dependency testing
+    }
+
     @Test
     public void testMetadata() throws SQLException, IOException {
         String dsName = "testCaseDataset002";

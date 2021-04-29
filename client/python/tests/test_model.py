@@ -69,6 +69,8 @@ class ModelTest(unittest.TestCase):
         print(pack(ds_new))
         ds_new2 = unpack(pack(ds_new), Dataset)
         print(pack(ds_new2))
+        # ToDo: Dependency testing
+        dependency = []
 
     def test_pack(self):
         vmd = {
@@ -106,7 +108,7 @@ class ModelTest(unittest.TestCase):
         build_dataset("ds1.txt", "DS", "txt", versionMetadata={"hi": "hello"},
                       locations=[{"site": "SLAC", "resource": "/path/to/somewhere", "created": "today"},
                                  {"site": "BNL", "resource": "/bnl/path/to/somewhere", "created": "yesterday"}])
-
+        # ToDo: Dependency testing
 
 if __name__ == '__main__':
     unittest.main()
