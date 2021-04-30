@@ -5,6 +5,7 @@
 /core/target/
 /rest/target/
 /client/target/
+/webapp/target/
 .tox/
 
 # Byte-compiled / optimized / DLL files

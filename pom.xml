@@ -10,7 +10,7 @@
 
     <groupId>srs</groupId>
     <artifactId>org-srs-datacat</artifactId>
-    <version>0.6-SNAPSHOT</version>
+    <version>0.6-DEPENDENCY</version>
     <packaging>pom</packaging>
 
     <name>SRS DataCatalog Main Project</name>
@@ -25,7 +25,7 @@
     <distributionManagement>
         <site>
             <id>srs-site</id>
-            <name>SRS Maven2 centreal site repository</name>
+            <name>SRS Maven2 central site repository</name>
             <url>dav:https://srs.slac.stanford.edu/nexus/content/sites/srs-site/${project.artifactId}</url>
         </site>
     </distributionManagement>
@@ -55,6 +55,7 @@
         <module>model</module>
         <module>datacat-impl</module>
         <module>rest</module>
+        <module>webapp</module>
     </modules>
 
     <dependencies>

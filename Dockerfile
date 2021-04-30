@@ -55,7 +55,7 @@ RUN curl -O https://downloads.apache.org/tomcat/tomcat-8/v8.5.65/src/apache-tomc
     mv apache-tomcat-8.5.65-src/* /opt/tomcat/.
 
 WORKDIR /opt/tomcat/webapps
-RUN curl -O -L https://github.com/AKSarav/SampleWebApp/raw/master/dist/SampleWebApp.war
+RUN curl -O -L https://gitlab.com/supercdms/slaclab-datacat/-/tree/master/webapp/target/org-srs-webapps-datacat-0.6-DEPENDENCY.war
 
 RUN rm -r /tmp/slaclab-datacat && \
     ln -fs /usr/bin/python3 /usr/bin/python

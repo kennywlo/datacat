@@ -4,7 +4,7 @@
     <parent>
         <groupId>srs</groupId>
         <artifactId>org-srs-datacat</artifactId>
-        <version>0.6-SNAPSHOT</version>
+        <version>0.6-DEPENDENCY</version>
     </parent>
     <artifactId>org-srs-datacat-client</artifactId>
     <packaging>jar</packaging>
