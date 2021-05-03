@@ -1,4 +1,3 @@
-from __future__ import print_function
 from datacat import client_from_config_file
 from datacat.error import DcException
 from datetime import datetime
@@ -12,20 +11,15 @@ __author__ = 'bvan'
 
 """
 A Simple single-threaded crawler-like application.
-
 This crawler only scans one folder at a time, retrieving up to 1000 results at a time.
-
 It searches for datasets which are unscanned for a particular location.
-
 """
 
-WATCH_FOLDER = '/LSST'
+WATCH_FOLDER = '/CDMS'
 WATCH_SITE = 'SLAC'
 
-
-# noinspection PyMethodMayBeStatic
 class Crawler:
-    RERUN_SECONDS = 5
+    RERUN_SECONDS = 300
 
     def __init__(self):
         self.client = client_from_config_file()  # Reads default config files or returns a default config
@@ -49,54 +43,65 @@ class Crawler:
         cksum = cksum_out[0]
         return cksum
 
-    # noinspection PyUnusedLocal
-    def get_metadata(self, path):
+    def get_metadata(self, dataset, dataset_location):
         """
         Extract metadata from :param path
         """
-        return {"FITS_RADIUS": 30}
+        file_path = datasetlocation.resource
+        # FIXME: Possibly based on value in Dataset, extract metadata
+        return {}
 
     def run(self):
-        print("Checking for new datasets at %s" % (datetime.now().ctime()))
+        print(f"Checking for new datasets at {datetime.now().ctime()}")
         try:
-            results = self.client.search(WATCH_FOLDER, version="current", site=WATCH_SITE,
-                                         query="scanStatus = 'UNSCANNED'", max_num=1000)
+            results = self.client.search(
+                WATCH_FOLDER + "/**", version="current", site=WATCH_SITE,
+                query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000
+            )
         except DcException as error:
             print(error)
-            sys.exit(1)
+            return False
 
         for dataset in results:
             locations = dataset.locations
-            check_location = None
+            dataset_location = None
             for location in locations:
                 if location.site == WATCH_SITE:
-                    check_location = location
+                    dataset_location = location
                     break
-            file_path = check_location.resource
+            # We should be guaran
+            assert dataset_location is not None, "Error: We should never get an empty dataset location"
+            file_path = dataset_location.resource
             dataset_path = dataset.path
-            stat = os.stat(file_path)
-            cksum = self.get_cksum(file_path)
-
-            # Note: While there may only be one version of a dataset,
-            # we tie the metadata to versionMetadata
-            scan_result = {"size": stat.st_size,
-                           "checksum": str(cksum),
-                           "locationScanned": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                           "scanStatus": "OK"}
-            # UTC datetime in ISO format (Note: We need Z to denote UTC Time Zone)
-
-            md = self.get_metadata(file_path)
-            if md:
-                scan_result["versionMetadata"] = md
-
-            print(scan_result)
             try:
-                patched_ds = self.client.patch_dataset(dataset_path, scan_result,
-                                                       versionId=dataset.versionId, site=WATCH_SITE)
-                print("Updated Dataset:")
+                stat = os.stat(file_path)
+                cksum = self.get_cksum(dataset_location)
+
+                # Note: While there may only be one version of a dataset,
+                # we tie the metadata to versionMetadata
+                scan_result = {
+                    "size": stat.st_size,
+                    "checksum": str(cksum),
+                    # UTC datetime in ISO format (Note: We need Z to denote UTC Time Zone)
+                    "locationScanned": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    "scanStatus": "OK"
+                    }
+
+                md = self.get_metadata(dataset, dataset_location)
+                if md:
+                    scan_result["versionMetadata"] = md
+            except FileNotFoundError as e:
+                scan_result = {
+                    "scanStatus": "MISSING",
+                }
+                print(f"Error: File {dataset.resource} not found for {dataset.site}. Status set to MISSING")
+
+            try:
+                patched_ds = self.client.patch_dataset(dataset_path, scan_result, versionId=dataset.versionId,
+                                                       site=WATCH_SITE)
+                print("How we would have updated Dataset:")
                 print(patched_ds)
             except DcException as error:
-                print("Encountered error while updating dataset")
                 print(error)
 
         return True
