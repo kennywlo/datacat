@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from datacat import client_from_config_file
 from datacat.error import DcException
 from datetime import datetime
@@ -47,7 +48,7 @@ class Crawler:
         """
         Extract metadata from :param path
         """
-        file_path = datasetlocation.resource
+        file_path = dataset_location.resource
         # FIXME: Possibly based on value in Dataset, extract metadata
         return {}
 

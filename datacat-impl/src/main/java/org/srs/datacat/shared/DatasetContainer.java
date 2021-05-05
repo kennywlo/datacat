@@ -15,6 +15,7 @@ import org.srs.datacat.model.container.ContainerStat;
 @JsonSubTypes(value = {
         @JsonSubTypes.Type(LogicalFolder.class),
         @JsonSubTypes.Type(DatasetGroup.class),
+        @JsonSubTypes.Type(DatasetDependency.class),
         }
     )
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, property="_type", defaultImpl=DatasetContainer.class)
