@@ -15,24 +15,24 @@
         <dependency>
             <groupId>srs</groupId>
             <artifactId>org-srs-datacat-model</artifactId>
-            <version>0.6-SNAPSHOT</version>
+            <version>0.6-DEPENDENCY</version>
         </dependency>
         <dependency>
             <groupId>srs</groupId>
             <artifactId>org-srs-datacat-model</artifactId>
-            <version>0.6-SNAPSHOT</version>
+            <version>0.6-DEPENDENCY</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>srs</groupId>
             <artifactId>org-srs-datacat-vfs</artifactId>
-            <version>0.6-SNAPSHOT</version>
+            <version>0.6-DEPENDENCY</version>
         </dependency>
         <dependency>
             <groupId>srs</groupId>
             <artifactId>org-srs-datacat-test</artifactId>
-            <version>0.6-SNAPSHOT</version>
+            <version>0.6-DEPENDENCY</version>
             <scope>test</scope>
         </dependency>
 
