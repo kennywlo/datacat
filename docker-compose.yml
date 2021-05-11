@@ -1,0 +1,53 @@
+# Copyright 2021 SLAC for the benefit of the SuperCDMS collaboration.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Authors:
+# - Kenny Lo <kennywlo@slac.stanford.edu>, 2021
+
+# To run/stop the containers in this file:
+#   docker-compose --file ./docker-compose.yml up -d
+#   docker-compose --file ./docker-compose.yml down
+
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: test_db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: test_db_user
+      MYSQL_PASSWORD: test_db_pass
+    volumes:
+      - ./docker/db:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+
+  datacat:
+    image: slac-lab/datacat:INT_TESTING
+    volumes:
+      - /tmp:/tmp
+
+  tomcat:
+    image: tomcat:8.5.65-jdk8-openjdk
+    environment:
+       JDBC_URL: jdbc:mysql://db:3306/test_db?connectTimeout=0&amp;socketTimeout=0&amp;autoReconnect=true
+       JDBC_USER: test_db_user
+       JDBC_PASS: test_db_pass
+    container_name: tomcat
+    volumes:
+      - /tmp/datacat.war:/usr/local/tomcat/webapps/datacat.war
+    ports:
+      - "8080:8080"

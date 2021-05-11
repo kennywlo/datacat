@@ -379,7 +379,7 @@ def _default_hook(raw):
             return Folder(**raw)
         elif _type.startswith("group"):
             return Group(**raw)
-        elif _type.startswith("depenency"):
+        elif _type.startswith("dependency"):
             return Dependency(**raw)
         elif _type.startswith("location"):
             return DatasetLocation(**raw)
