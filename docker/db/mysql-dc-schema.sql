@@ -1,36 +1,39 @@
 
 
---drop table      ContainerSearch;
+-- only for development
+set sql_mode = '';
 
-drop table	VerDatasetMetaString ;
-drop table	VerDatasetMetaNumber ;
-drop table	VerDatasetMetaTimestamp ;
-drop table   	VerDatasetMetaRoot ;
-drop table	DatasetGroupMetaString ;
-drop table	DatasetGroupMetaNumber ;
-drop table	DatasetGroupMetaTimestamp ;
-drop table	LogicalFolderMetaString ;
-drop table	LogicalFolderMetaNumber ;
-drop table	LogicalFolderMetaTimestamp ;
---drop table      DatasetMetaName ;
-drop table      DatasetMetaInfo ;
-drop table      DatasetGroupMetaName ;
-drop table      LogicalFolderMetaName ;
-drop table      DatasetLocationPurge ;
+-- drop table      ContainerSearch;
 
---alter table DatasetVersion drop constraint FK_DSV_MasterLocation;
-drop table  	VerDatasetLocation ;
-drop table  	DatasetSite ;
+drop table if exists VerDatasetMetaString ;
+drop table if exists VerDatasetMetaNumber ;
+drop table if exists VerDatasetMetaTimestamp ;
+drop table if exists VerDatasetMetaRoot ;
+drop table if exists DatasetGroupMetaString ;
+drop table if exists DatasetGroupMetaNumber ;
+drop table if exists DatasetGroupMetaTimestamp ;
+drop table if exists LogicalFolderMetaString ;
+drop table if exists LogicalFolderMetaNumber ;
+drop table if exists LogicalFolderMetaTimestamp ;
+-- drop table      DatasetMetaName ;
+drop table if exists DatasetMetaInfo ;
+drop table if exists DatasetGroupMetaName ;
+drop table if exists LogicalFolderMetaName ;
+drop table if exists DatasetLocationPurge ;
 
---alter table VerDataset drop constraint FK_VDS_LatestVersion;
-drop table 	DatasetVersion ;
-drop table  	VerDataset ;
-drop table 	DatasetGroup ;
-drop table  DatasetDependency ;
-drop table 	DatasetLogicalFolder ;
-drop table 	DatasetSource ;
-drop table 	DatasetDataType ;
-drop table 	DatasetFileFormat ;
+-- alter table DatasetVersion drop constraint FK_DSV_MasterLocation;
+drop table if exists VerDatasetLocation ;
+drop table if exists DatasetSite ;
+
+-- alter table VerDataset drop constraint FK_VDS_LatestVersion;
+drop table if exists DatasetVersion ;
+drop table if exists VerDataset ;
+drop table if exists DatasetGroup ;
+drop table if exists DatasetDependency ;
+drop table if exists DatasetLogicalFolder ;
+drop table if exists DatasetSource ;
+drop table if exists DatasetDataType ;
+drop table if exists DatasetFileFormat ;
 
 create table DatasetFileFormat (
 	DatasetFileFormat	varchar(20),
@@ -63,8 +66,8 @@ create table DatasetLogicalFolder (
 	Name			varchar(255),
 	Parent			integer,
 	Description		varchar(400),
-        ACL                     varchar(1000),
-        constraint PK_DSLF primary key (DatasetLogicalFolder),
+    ACL             varchar(1000),
+    constraint PK_DSLF primary key (DatasetLogicalFolder),
 	constraint UNQ_DatasetLogicalFolder UNIQUE(Name, Parent)
 );
 create index IDX_DatasetLogicalFolder on DatasetLogicalFolder(DatasetLogicalFolder);
@@ -141,9 +144,9 @@ create index IDX_DSV_DS_and_MasterLoc on DatasetVersion(Dataset, MasterLocation)
 
 create table DatasetDependency (
     DatasetDependency   SERIAL,
-    Dependency    integer not null,
+    Dependency    bigint unsigned not null,
     Name          varchar(255),
-    Dependent     integer not null,
+    Dependent     bigint unsigned not null,
     DependentType varchar(32),
     ACL           varchar(1000),
     constraint PK_DatasetDependency primary key (DatasetDependency),
@@ -180,7 +183,7 @@ create table VerDatasetLocation (
 	constraint UNQ_VDSL_DSSite_Path unique  (DatasetSite, Path)
 );
 -- we had to create the VerDatasetLocation table before we could add the following foreign key to the DatasetVersion table:
---alter table DatasetVersion add constraint FK_DSV_MasterLocation foreign key (MasterLocation) references VerDatasetLocation (DatasetLocation) on delete set null;
+-- alter table DatasetVersion add constraint FK_DSV_MasterLocation foreign key (MasterLocation) references VerDatasetLocation (DatasetLocation) on delete set null;
 
 create index IDX_VDSL_Path on VerDatasetLocation(Path);
 create index IDX_VDSL_RunMin on VerDatasetLocation(RunMin);
@@ -228,11 +231,11 @@ create table VerDatasetMetaTimestamp (
 create index IDX_FK_VDSMT_DSVersion on VerDatasetMetaTimestamp(DatasetVersion);
 create index IDX_VDSMT_NameValue on VerDatasetMetaTimestamp(MetaName, MetaValue);
 
---create table DatasetMetaName (
+-- create table DatasetMetaName (
 --     MetaName      varchar(64),
 --      MetaType      varchar(1),
 --     constraint    UNQ_DatasetMetaName unique (MetaName)
---);
+-- );
 
 create table DatasetMetaInfo (
      MetaName      varchar(64),
@@ -256,13 +259,13 @@ create table VerDatasetMetaRoot (
 		on delete cascade,
 	constraint UNQ_VDSMRoot unique (DatasetVersion)
 );
---create index IDX_FK_VDSMRoot_DSVersion on VerDatasetMetaRoot(DatasetVersion);
+-- create index IDX_FK_VDSMRoot_DSVersion on VerDatasetMetaRoot(DatasetVersion);
 create index IDX_VDSMRoot_RootVersion on VerDatasetMetaRoot(RootVersion);
 create index IDX_VDSMRoot_SoLibVersion on VerDatasetMetaRoot(SoLibVersion);
 create index IDX_VDSMRoot_TTreeName on VerDatasetMetaRoot(TTreeName);
 
 
---REM DatasetGroup Meta Data Tables
+-- REM DatasetGroup Meta Data Tables
 
 create table DatasetGroupMetaString (
 	DatasetGroup		bigint unsigned not null,
@@ -310,7 +313,7 @@ create table DatasetGroupMetaName (
 
 
 
---REM LogicalFolder Meta Data Tables
+-- REM LogicalFolder Meta Data Tables
 
 create table LogicalFolderMetaString (
 	LogicalFolder		bigint unsigned not null,
@@ -381,101 +384,110 @@ insert
   into DatasetLogicalFolder (DatasetLogicalFolder, Name, Parent, ACL)
   values(0, 'ROOT', NULL, '$PUBLIC$:g:r:,test_user@SRS:o::,test_group@SRS:g:idrwa:');
 
---create global temporary table ContainerSearch (
+-- create global temporary table ContainerSearch (
 --    DatasetLogicalFolder	bigint,
 --    DatasetGroup		bigint,
 --    ContainerPath varchar(500)
---) on commit delete rows;
+-- ) on commit delete rows;
 
 -- The block keyword should be removed, it's mostly used to tell the scanner
 -- that this is one statement.
 
---BLOCK
---CREATE TRIGGER TRIG_VDSMS_METANAME AFTER INSERT ON VerDatasetMetaString
+-- BLOCK
+-- CREATE TRIGGER TRIG_VDSMS_METANAME AFTER INSERT ON VerDatasetMetaString
 --  FOR EACH ROW
 --  BEGIN
 --   IF NOT EXISTS (SELECT 1 FROM DatasetMetaName d WHERE d.MetaName = NEW.MetaName) THEN 
 --     INSERT INTO DatasetMetaname (MetaName) VALUES (NEW.MetaName);
 --   END IF;
 --  END;
---END BLOCK;
+-- END BLOCK;
 
---BLOCK
---CREATE TRIGGER TRIG_VDSMN_METANAME AFTER INSERT ON VerDatasetMetaNumber
+-- BLOCK
+-- CREATE TRIGGER TRIG_VDSMN_METANAME AFTER INSERT ON VerDatasetMetaNumber
 --   FOR EACH ROW 
 --   IF NOT EXISTS 
 --     (SELECT 1 FROM DatasetMetaName d WHERE d.MetaName = NEW.MetaName )
 --     THEN 
 --     INSERT INTO DatasetMetaname (MetaName) VALUES (NEW.MetaName);
 --   END IF;
---END BLOCK;
+-- END BLOCK;
 
---BLOCK
---CREATE TRIGGER TRIG_VDSMTS_METANAME AFTER INSERT ON VerDatasetMetaTimeStamp
+-- BLOCK
+-- CREATE TRIGGER TRIG_VDSMTS_METANAME AFTER INSERT ON VerDatasetMetaTimeStamp
 --   FOR EACH ROW 
 --   IF NOT EXISTS 
 --     (SELECT 1 FROM DatasetMetaName d WHERE d.MetaName = NEW.MetaName )
 --     THEN 
 --     INSERT INTO DatasetMetaname (MetaName) VALUES (NEW.MetaName);
 --   END IF;
---END BLOCK;
+-- END BLOCK;
 
-BLOCK
+DELIMITER |
 CREATE TRIGGER TRIG_VDSMS_METAINFO AFTER INSERT ON VerDatasetMetaString
-   FOR EACH ROW 
+   FOR EACH ROW
+BEGIN
    IF NOT EXISTS 
      (SELECT 1 FROM DatasetMetaInfo d WHERE d.MetaName = NEW.MetaName and d.ValueType = 'S')
      THEN 
      INSERT INTO DatasetMetaInfo (MetaName, ValueType) VALUES (NEW.MetaName, 'S');
    END IF;
-END BLOCK;
 
-BLOCK
+END |
+
 CREATE TRIGGER TRIG_VDSMN_METAINFO AFTER INSERT ON VerDatasetMetaNumber
-   FOR EACH ROW 
+   FOR EACH ROW
+BEGIN
    IF NOT EXISTS 
      (SELECT 1 FROM DatasetMetaInfo d WHERE d.MetaName = NEW.MetaName and d.ValueType = 'N')
      THEN 
      INSERT INTO DatasetMetaInfo (MetaName, ValueType) VALUES (NEW.MetaName, 'N');
    END IF;
-END BLOCK;
 
-BLOCK
+END |
+
 CREATE TRIGGER TRIG_VDSMTS_METAINFO AFTER INSERT ON VerDatasetMetaTimestamp
-   FOR EACH ROW 
+   FOR EACH ROW
+BEGIN
    IF NOT EXISTS 
      (SELECT 1 FROM DatasetMetaInfo d WHERE d.MetaName = NEW.MetaName and d.ValueType = 'T')
      THEN 
      INSERT INTO DatasetMetaInfo (MetaName, ValueType) VALUES (NEW.MetaName, 'T');
    END IF;
-END BLOCK;
 
-BLOCK
+END |
+
 CREATE TRIGGER TRIG_DSCMS_METAINFO AFTER INSERT ON LogicalFolderMetaString
-   FOR EACH ROW 
+   FOR EACH ROW
+BEGIN
    IF NOT EXISTS 
      (SELECT 1 FROM ContainerMetaInfo d WHERE d.MetaName = NEW.MetaName and d.ValueType = 'S')
      THEN 
      INSERT INTO ContainerMetaInfo (MetaName, ValueType) VALUES (NEW.MetaName, 'S');
    END IF;
-END BLOCK;
 
-BLOCK
+END |
+
 CREATE TRIGGER TRIG_DSCMN_METAINFO AFTER INSERT ON LogicalFolderMetaNumber
-   FOR EACH ROW 
+   FOR EACH ROW
+BEGIN
    IF NOT EXISTS 
      (SELECT 1 FROM ContainerMetaInfo d WHERE d.MetaName = NEW.MetaName and d.ValueType = 'N')
      THEN 
      INSERT INTO ContainerMetaInfo (MetaName, ValueType) VALUES (NEW.MetaName, 'N');
    END IF;
-END BLOCK;
 
-BLOCK
+END |
+
 CREATE TRIGGER TRIG_DSCMTS_METAINFO AFTER INSERT ON LogicalFolderMetaTimestamp
    FOR EACH ROW 
-   IF NOT EXISTS 
+BEGIN
+   IF NOT EXISTS
      (SELECT 1 FROM ContainerMetaInfo d WHERE d.MetaName = NEW.MetaName and d.ValueType = 'T')
      THEN 
      INSERT INTO ContainerMetaInfo (MetaName, ValueType) VALUES (NEW.MetaName, 'T');
    END IF;
-END BLOCK;
+
+END |
+
+DELIMITER ;

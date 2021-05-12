@@ -19,17 +19,17 @@
 #   docker-compose --file ./docker-compose.yml up -d
 #   docker-compose --file ./docker-compose.yml down
 
-version: '3'
+version: '3.6'
 services:
   mysql:
     image: mysql:5.7
-    container_name: mysql
+    container_name: mysqldb
     restart: always
     environment:
-      MYSQL_DATABASE: test_db
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: test_db_user
-      MYSQL_PASSWORD: test_db_pass
+      MYSQL_DATABASE: dc_db
+      MYSQL_USER: dcuser
+      MYSQL_PASSWORD: dcpass
     volumes:
       - ./docker/db:/docker-entrypoint-initdb.d
     ports:
