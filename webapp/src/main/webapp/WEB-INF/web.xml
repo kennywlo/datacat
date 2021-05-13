@@ -7,7 +7,14 @@
         <param-name>org.srs.datacat.srs_client_id</param-name>
         <param-value>${srsClientId}</param-value>
     </context-param>
-    
+
+    <resource-ref>
+        <description>DB Connection for testing</description>
+        <res-ref-name>jdbc/config-srs</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
     <filter>
         <filter-name>ExpiresFilter</filter-name>
         <filter-class>org.apache.catalina.filters.ExpiresFilter</filter-class>

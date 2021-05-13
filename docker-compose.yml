@@ -19,11 +19,11 @@
 #   docker-compose --file ./docker-compose.yml up -d
 #   docker-compose --file ./docker-compose.yml down
 
-version: '3.6'
+version: '3'
 services:
-  mysql:
+  dcdb:
     image: mysql:5.7
-    container_name: mysqldb
+    container_name: dcmysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -37,17 +37,25 @@ services:
 
   datacat:
     image: slac-lab/datacat:INT_TESTING
+    container_name: datacat
     volumes:
       - /tmp:/tmp
 
   tomcat:
     image: tomcat:8.5.65-jdk8-openjdk
     environment:
-       JDBC_URL: jdbc:mysql://db:3306/test_db?connectTimeout=0&amp;socketTimeout=0&amp;autoReconnect=true
-       JDBC_USER: test_db_user
-       JDBC_PASS: test_db_pass
+       JDBC_URL: jdbc:mysql://dcdb:3306/dc_db?useSSL=false
+       JDBC_USER: dcuser
+       JDBC_PASS: dcpass
     container_name: tomcat
+    depends_on:
+      - dcdb
+      - datacat
     volumes:
+      - /tmp/server.xml:/usr/local/tomcat/conf/server.xml
       - /tmp/datacat.war:/usr/local/tomcat/webapps/datacat.war
+      - /tmp/mysql-connector-java-8.0.16.jar:/usr/local/tomcat/lib/mysql-connector-java-8.0.16.jar
+      - /tmp:/tmp
     ports:
       - "8080:8080"
+      - "8443:8443"

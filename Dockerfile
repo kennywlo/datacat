@@ -27,12 +27,11 @@ RUN yum -y install git vim
 ENV DCHOME=/opt/datacat
 RUN mkdir -p $DCHOME
 
+# copy over the current slaclab-datacat repo
+ADD . $DCHOME
+
 WORKDIR $DCHOME
+RUN yum -y install maven
+RUN mvn package -DskipTests
 
-RUN git clone https://gitlab.com/supercdms/slaclab-datacat.git
-
-WORKDIR $DCHOME/slaclab-datacat
-RUN yum -y install maven && mvn package -DskipTests
-
-CMD cp ./webapp/target/org-srs-webapps-datacat-0.6-DEPENDENCY.war /tmp/datacat.war
-
+CMD ./docker/cp_config_files.sh
