@@ -42,7 +42,7 @@
         <url-pattern>/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
-
+    <!--
     <filter>
         <filter-name>LoginFilter</filter-name>
         <filter-class>org.srs.web.base.filters.login.LoginFilter</filter-class>
@@ -59,7 +59,7 @@
         <filter-name>LoginFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
+    -->
     <servlet>
         <servlet-name>Jersey REST Service</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>

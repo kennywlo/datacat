@@ -42,9 +42,9 @@ services:
       - /tmp:/tmp
 
   tomcat:
-    image: tomcat:8.5.65-jdk8-openjdk
+    image: tomcat:8.5-jdk8-openjdk
     environment:
-       JDBC_URL: jdbc:mysql://dcdb:3306/dc_db?useSSL=false
+       JDBC_URL: jdbc:mysql://dcdb:3306/dc_db
        JDBC_USER: dcuser
        JDBC_PASS: dcpass
     container_name: tomcat
@@ -55,6 +55,7 @@ services:
       - /tmp/server.xml:/usr/local/tomcat/conf/server.xml
       - /tmp/datacat.war:/usr/local/tomcat/webapps/datacat.war
       - /tmp/mysql-connector-java-8.0.16.jar:/usr/local/tomcat/lib/mysql-connector-java-8.0.16.jar
+      - /tmp/java.security:/usr/local/openjdk-8/jre/lib/security/java.security
       - /tmp:/tmp
     ports:
       - "8080:8080"

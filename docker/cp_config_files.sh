@@ -3,6 +3,7 @@
 
 # copy out the files needed in Tomcat
 cp -f /opt/datacat/docker/tomcat/server.xml /tmp/server.xml
+cp -f /opt/datacat/docker/tomcat/java.security /tmp/java.security
 cp -f /opt/datacat/webapp/target/org-srs-webapps-datacat-0.6-DEPENDENCY.war /tmp/datacat.war
 cp -f ~/.m2/repository/mysql/mysql-connector-java/8.0.16/mysql-connector-java-8.0.16.jar /tmp/mysql-connector-java-8.0.16.jar
 
