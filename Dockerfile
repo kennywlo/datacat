@@ -34,4 +34,6 @@ WORKDIR $DCHOME
 RUN yum -y install maven
 RUN mvn package -DskipTests
 
-CMD ./docker/cp_config_files.sh
+RUN chmod +x /opt/datacat/docker/cp_config_files.sh
+ENTRYPOINT ["/bin/bash", "/opt/datacat/docker/cp_config_files.sh"]
+
