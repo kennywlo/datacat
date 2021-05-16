@@ -158,7 +158,7 @@ create table DatasetDependency (
 );
 create index IDX_DD_FIND on DatasetDependency(Dependency, DependentType);
 
-
+i
 create table VerDatasetLocation (
 	DatasetLocation		SERIAL,
 	DatasetVersion		bigint unsigned not null,
