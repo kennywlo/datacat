@@ -147,7 +147,7 @@ create table DatasetVersion (
 );
 -- we had to create the DatasetVersion table before we could add the following foreign key to the Dataset table:
 alter table VerDataset add constraint FK_VDS_LatestVersion foreign key (LatestVersion) 
-	references DatasetVersion (DatasetVersion) 
+	references DatasetVersion (DatasetVersion)
 	on delete set null;
 
 create index IDX_DSV_VersionID on DatasetVersion(VersionID);
@@ -169,7 +169,7 @@ create table DatasetDependency (
     constraint FK_Dependency foreign key (Dependency)
         references DatasetVersion(DatasetVersion) on delete cascade,
     constraint FK_Dependent foreign key (Dependent)
-        references DatasetVersion(DatasetVersion) on delete cascade,
+        references DatasetVersion(DatasetVersion) on delete set null,
    constraint UNQ_DD_Entry UNIQUE(Dependency, Dependent, DependentType)
 );
 create index IDX_DD_FIND on DatasetDependency(Dependency, DependentType);

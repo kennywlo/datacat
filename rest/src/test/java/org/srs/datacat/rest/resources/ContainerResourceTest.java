@@ -55,6 +55,22 @@ public class ContainerResourceTest extends JerseyTest {
         }
     }
 
+    public static void deleteFolders(JerseyTest testInstance, int folders) throws IOException{
+        String parent = "/testpath";
+
+        Response resp;
+        for(int i=0; i < folders; i++) {
+            String name =String.format("folder%05d", i);
+            String newPath = PathUtils.resolve(parent, name);
+            System.out.println("/folders.txt" + newPath);
+            resp = testInstance.target("/folders.txt" + parent)
+                    .request()
+                    .header("authentication", DbHarness.TEST_USER)
+                    .delete();
+            System.out.println(resp.getStatus());
+        }
+    }
+
     @Override
     protected Application configure(){
         DbHarness harness = null;
@@ -199,6 +215,7 @@ public class ContainerResourceTest extends JerseyTest {
         TestCase.assertEquals( Status.NO_CONTENT, Status.fromStatusCode(resp.getStatus()));
                 */
 
+        deleteFolders(this, 10);
     }
     
     @Test
@@ -278,6 +295,7 @@ public class ContainerResourceTest extends JerseyTest {
                     .header("authentication", DbHarness.TEST_USER)
                     .delete();
         TestCase.assertEquals(409, resp.getStatus());
+        DatasetsResourceTest.deleteFoldersAndDatasetsAndVersions(this, 5, 5);
     }
     
     @Test
@@ -290,7 +308,8 @@ public class ContainerResourceTest extends JerseyTest {
                     .method("PATCH", 
                             Entity.entity("{\"_type\":\"folder\", \"description\":\"A folder00001\", \"metadata\":[{\"mdKey\":\"mdValue\"}]}",
                                     MediaType.APPLICATION_JSON));
-        TestCase.assertEquals(200, resp.getStatus());        
+        TestCase.assertEquals(200, resp.getStatus());
+        DatasetsResourceTest.deleteFoldersAndDatasetsAndVersions(this, 2, 2);
     }
     
     @Test
@@ -335,6 +354,8 @@ public class ContainerResourceTest extends JerseyTest {
 
         TestCase.assertEquals(200, resp.getStatus());        
         TestCase.assertFalse(resp.readEntity(String.class).contains("mdKey"));
+
+        DatasetsResourceTest.deleteFoldersAndDatasetsAndVersions(this, 2, 2);
     }
 
     // ToDo: Dependency testing

@@ -389,7 +389,24 @@ public class DatasetsResourceTest extends JerseyTest {
             }
         }
     }
-    
+
+    public static void deleteFoldersAndDatasetsAndVersions(JerseyTest testCase, int folderCount, int datasetCount) throws IOException{
+        for(int i = 0; i < folderCount; i++){
+            String parent =PathUtils.resolve( "/testpath",String.format("folder%05d", i));
+            for(int j = 0; j < datasetCount; j++) {
+                String name = String.format("/dataset%05d", j);
+                MultivaluedHashMap<String,String> entity = new MultivaluedHashMap<>();
+                String child = parent + name;
+                Response resp = testCase.target("/datasets.txt" + child)
+                        .request()
+                        .header("authentication", DbHarness.TEST_USER)
+                        .delete();
+                System.out.println(resp.getStatus());
+            }
+        }
+        ContainerResourceTest.deleteFolders(testCase, folderCount);
+    }
+
     /*
     public static void generateFoldersAndDatasetsAndVersionsAndLocations(JerseyTest testCase, int folderCount, int datasetCount) throws IOException{
         ContainerResourceTest.generateFolders(testCase, folderCount);
