@@ -289,6 +289,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     protected void addDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
+        addDatasetDependency(pk, metaData);
         addDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }
 
@@ -301,6 +302,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     protected void mergeDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
+        mergeDependencyMetadata(pk, metaData);
         mergeDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }
 
@@ -314,6 +316,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     protected void mergeDependencyMetadata(long dependencyPK, Map<String, Object> metaData) throws SQLException {
         final String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ?";
+        if (!metaData.containsKey("dependencyName")) {
+            return;
+        }
         PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
         stmt.setLong(1, dependencyPK);
         stmt.executeUpdate();
@@ -323,12 +328,13 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     protected void addDatasetDependency(long dependencyPK, Map<String, Object> metaData) throws SQLException {
-
         if (!(metaData instanceof HashMap)) {
             metaData = new HashMap<>(metaData);
         }
-
-        String depname = (String)metaData.get("pathname");
+        if (!metaData.containsKey("dependencyName")) {
+            return;
+        }
+        String depname = (String)metaData.get("dependencyName");
         String dependentList = (String)metaData.get("dependents");
         String dependentType = (String)metaData.get("dependentType");
 
@@ -345,6 +351,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             stmt.setString(4, dependentType);
             stmt.executeUpdate();
         }
+        // remove the dependency fields
+        metaData.remove("dependencyName");
+        metaData.remove("dependents");
+        metaData.remove("dependentType");
     }
 
 //    protected void deleteDatasetVersionMetadata(Long pk, Set<String> metaDataKeys) throws SQLException{
