@@ -3,6 +3,8 @@
 Datacat is a system for the tracking and organization of files, their
 replicas, and user-defined metadata across heterogeneous storage systems.
 
+**If you or a team are looking to collaborate on the slaclab-datacat repository, read the [Datacat Collaboration Guidelines](GUIDELINES.md) before doing so.**
+
 Main Components
 -------
 
@@ -140,3 +142,13 @@ for dataset in datasets:
         dat = f.read()
         # do some work with the file
 ```
+# Test Documentation
+
+
+This repository uses the Maven Surefire plugin for all java unit/integration testing. For Python Client, testing is done by Pytest. See the "Prerequisites" link below for installation instructions.
+
+#### [Prerequisites](INSTALL.md)
+
+For information on running tests and what each individual tests does, refer to the link titled "Test documentation".
+
+#### [Test documentation](TEST.md)
