@@ -316,7 +316,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     protected void mergeDependencyMetadata(long dependencyPK, Map<String, Object> metaData) throws SQLException {
         final String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ?";
-        if (!metaData.containsKey("dependencyName")) {
+        if (!metaData.containsKey("dependents")) {
             return;
         }
         PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
@@ -331,14 +331,14 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         if (!(metaData instanceof HashMap)) {
             metaData = new HashMap<>(metaData);
         }
-        if (!metaData.containsKey("dependencyName")) {
+        if (!metaData.containsKey("dependents")) {
             return;
         }
         String depname = (String)metaData.get("dependencyName");
         String dependentList = (String)metaData.get("dependents");
         String dependentType = (String)metaData.get("dependentType");
 
-        final String dependencySql = "insert into DatasetDependency (Dependency, PathName, Dependent, DependentType)"
+        final String dependencySql = "insert into DatasetDependency (Dependency, Name, Dependent, DependentType)"
                                         + " values (?, ?, ?, ?)";
         PreparedStatement stmt = getConnection().prepareStatement(dependencySql);
         String[] dependents = dependentList.split(",");

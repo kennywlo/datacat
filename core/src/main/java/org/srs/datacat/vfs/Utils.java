@@ -29,6 +29,11 @@ public final class Utils {
                     public DatacatNode next(){
                         return list.pop();
                     }
+
+                    @Override
+                    public void remove() {
+                        list.remove();
+                    }
                 };
             }
 
