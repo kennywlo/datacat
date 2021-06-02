@@ -146,7 +146,7 @@ create table DatasetDependency (
     DatasetDependency   SERIAL,
     Dependency    bigint unsigned not null,
     Name          varchar(255),
-    Dependent     bigint unsigned not null,
+    Dependent     bigint unsigned,
     DependentType varchar(32),
     ACL           varchar(1000),
     constraint PK_DatasetDependency primary key (DatasetDependency),

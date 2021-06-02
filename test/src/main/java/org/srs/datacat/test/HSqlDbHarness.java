@@ -43,9 +43,10 @@ public class HSqlDbHarness extends DbHarness {
         }
         
         Properties props = new Properties();
-        props.put( "defaultAutoCommit", false);
+        props.setProperty("AutoCommit", "false");
+        props.setProperty("server.remote_open", "true");
         ConnectionFactory connectionFactory =
-            new DriverManagerConnectionFactory(url,null);
+            new DriverManagerConnectionFactory(url, props);
 
         PoolableConnectionFactory poolableConnectionFactory =
             new PoolableConnectionFactory(connectionFactory, null);

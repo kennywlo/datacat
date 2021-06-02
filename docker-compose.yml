@@ -47,6 +47,9 @@ services:
        JDBC_URL: jdbc:mysql://dcdb:3306/dc_db
        JDBC_USER: dcuser
        JDBC_PASS: dcpass
+       JPDA_ADDRESS: 8000
+       JPDA_TRANSPORT: dt_socket
+    entrypoint: /usr/local/tomcat/bin/catalina.sh jpda run
     container_name: tomcat
     depends_on:
       - dcdb
@@ -60,3 +63,4 @@ services:
     ports:
       - "8080:8080"
       - "8443:8443"
+      - "8000:8000"

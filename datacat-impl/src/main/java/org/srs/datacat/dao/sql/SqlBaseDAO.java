@@ -352,6 +352,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             stmt.executeUpdate();
         }
         // remove the dependency fields
+        metaData.remove("dependency");
         metaData.remove("dependencyName");
         metaData.remove("dependents");
         metaData.remove("dependentType");
