@@ -382,7 +382,7 @@ create index idx_DSLP_PurgeTime on DatasetLocationPurge (Purged);
 
 insert
   into DatasetLogicalFolder (DatasetLogicalFolder, Name, Parent, ACL)
-  values(0, 'ROOT', NULL, '$PUBLIC$:g:r:,test_user@CDMS:g:idrwa:,test_group@CDMS:g:idrwa:');
+  values(0, 'ROOT', NULL, '$PUBLIC$:g:idrwa:,test_user@SRS:g:idrwa:,test_group@SRS:g:idrwa:');
 
 -- create global temporary table ContainerSearch (
 --    DatasetLogicalFolder	bigint,
