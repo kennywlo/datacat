@@ -321,7 +321,7 @@ def _default_serializer(obj):
         if isinstance(obj, Metadata):
             # TODO: six.text_type: "string" for unicode
             type_mapping = {int: "integer", _integer: "integer", float: "decimal",
-                            unicode: "string", str: "string", datetime: "timestamp"}
+                            unicode: "string", str: "string", datetime: "timestamp", list: "[J"}
             ret = []
             for k, v in obj.dct.items():
                 if v:

@@ -38,28 +38,28 @@ public class FormParamConverter {
     final static HashMap<String, Method> datasetSetters = new HashMap<>();
     final static HashMap<String, Method> locationSetters = new HashMap<>();
     final static ObjectMapper mdMapper = new ObjectMapper();
-    
+
     static {
-        
+
         AnnotationIntrospector primary = new JacksonAnnotationIntrospector();
         AnnotationIntrospector secondary = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
         AnnotationIntrospector pair = new AnnotationIntrospectorPair(primary, secondary);
         mdMapper.setAnnotationIntrospector( pair );
-        
+
         Dataset.Builder dsBuilder = new Dataset.Builder();
         for(Method m: dsBuilder.getClass().getMethods()){
             if(m.getAnnotation( JsonSetter.class ) != null){
                 datasetSetters.put( m.getName(), m );
             }
         }
-        
+
         DatasetLocation.Builder dslBuilder = new DatasetLocation.Builder();
         for(Method m: dslBuilder.getClass().getMethods()){
             if(m.getAnnotation( JsonSetter.class ) != null){
                 locationSetters.put( m.getName(), m );
             }
         }
-        
+
         DatasetContainerBuilder builder = new DatasetContainerBuilder();
         for(Method m: builder.getClass().getMethods()){
             if(m.getAnnotation( JsonSetter.class ) != null){
@@ -68,7 +68,7 @@ public class FormParamConverter {
         }
 
     }
-    
+
     public static DatasetContainerBuilder getContainerBuilder(RecordType type, MultivaluedMap<String,String> formParams){
         DatasetContainerBuilder builder = new DatasetContainerBuilder();
         builder.jsonType(type.toString());
@@ -76,14 +76,14 @@ public class FormParamConverter {
         buildFromParams(mapper, builder, containerSetters, formParams);
         return builder;
     }
-    
+
     public static Dataset.Builder getDatasetBuilder(Map<String,List<String>> formParams){
         HashMap<String, List<String>> datasetInfo = new HashMap<>();
         HashMap<String,List<String>> locationInfo = new LinkedHashMap<>();
         List<String> formParamKeys = new ArrayList<>(formParams.keySet());
         Dataset.Builder builder = new Dataset.Builder();
         // Sort it so priority locations added to locationInfo first
-        Collections.sort( formParamKeys );  
+        Collections.sort( formParamKeys );
         for(String name: formParamKeys){
             if(name.startsWith("location")){
                 locationInfo.put( name, formParams.get( name ));
@@ -94,7 +94,7 @@ public class FormParamConverter {
             }
         }
         ObjectMapper mapper = new ObjectMapper();
-        
+
         buildFromParams(mapper, builder, datasetSetters, datasetInfo);
         if(!locationInfo.isEmpty()){
             HashMap<String,HashMap<String,List<String>>> locationsEntries = new LinkedHashMap<>();
@@ -140,21 +140,25 @@ public class FormParamConverter {
                         throw new RuntimeException( "Only one value per parameter is supported" );
                     }
                     Class<?> targetValueType = m.getParameterTypes()[0]; // Should only be one
-                    value = targetValueType == String.class ? lValue.get(0) : 
+                    value = targetValueType == String.class ? lValue.get(0) :
                             mapper.convertValue(lValue.get(0), targetValueType);
                 }
                 m.invoke( builder, value );
             }
-        } catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) { 
+        } catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             throw new IllegalArgumentException("Error attempting to build object. Check builder @JsonSetter annotations: " + key, ex);
         }
     }
-    
+
     private static List<MetadataEntry> processMetadata(List<String> mdEntries) throws RuntimeException{
         TypeReference<List<MetadataEntry>> compoundRef = new TypeReference<List<MetadataEntry>>(){};
         try {
             ArrayList<MetadataEntry> metadata = new ArrayList<>();
             for(String mdString: mdEntries){
+                if (mdString.contains("dependents")) {
+                    // WORKAROUND: support long[] as input for dependents
+                    mdString = mdString.replace("[J", "string").replace(":[", ":\"").replace("],", "\",");
+                }
                 List<MetadataEntry> mdList = mdMapper.readValue(mdString, compoundRef);
                 metadata.addAll(mdList);
             }

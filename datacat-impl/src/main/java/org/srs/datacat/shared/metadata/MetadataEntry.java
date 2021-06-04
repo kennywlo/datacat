@@ -40,6 +40,8 @@ public class MetadataEntry {
                 list.add(new MetadataEntry(e.getKey(), (Number) e.getValue()));
             } else if(e.getValue() instanceof Timestamp){
                 list.add(new MetadataEntry(e.getKey(), (Timestamp) e.getValue()));
+            } else if(e.getValue() instanceof long[]){
+                list.add(new MetadataEntry(e.getKey(), (long[]) e.getValue()));
             } else {
                 list.add(new MetadataEntry(e.getKey(), (String) e.getValue()));
             }
@@ -60,7 +62,12 @@ public class MetadataEntry {
         key = k;
         value = new MetadataString(v);
     }
-    
+
+    public MetadataEntry(String k, long[] v){
+        key = k;
+        value = new MetadataArray(v);
+    }
+
     public MetadataEntry(String k, Timestamp v){
         key = k;
         value = new MetadataTimestamp(v);
