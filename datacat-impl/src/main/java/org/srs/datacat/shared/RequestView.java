@@ -84,6 +84,7 @@ public class RequestView extends HashMap<String, String>{
             type = RecordType.FOLDER; // Assume to be folder in this case.
         }
         switch(type){
+            case DEPENDENCY:
             case GROUP:
                 if(params.containsKey("datasets") && params.containsKey("children")){
                     throw new IllegalArgumentException("Groups can only contain datasets as children.");
