@@ -49,12 +49,13 @@ public interface BaseDAO extends AutoCloseable {
     DatacatNode getObjectInParent(DatacatRecord parent, String name) throws IOException, NoSuchFileException;
 
     /**
-     * Get the dependency, based on its identifier.
+     * Get the dependents, based on the dependency identifier.
      * @param dependency the identifier
+     * @param parentPath path to the container
      * @return the object
      * throws IOException An exception occurred performing the operation or talking to the data source.
      */
-    DatasetContainer getDependency(long dependency) throws IOException;
+    DatasetContainer getDependents(long dependency, String parentPath) throws IOException;
 
     /**
      * Merge metadata of an existing record.

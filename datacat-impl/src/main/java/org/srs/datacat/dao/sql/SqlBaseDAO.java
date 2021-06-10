@@ -2,6 +2,7 @@ package org.srs.datacat.dao.sql;
 
 import com.google.common.base.Optional;
 import org.srs.datacat.model.DatasetContainer;
+import org.srs.datacat.model.DatasetContainer.Dependency;
 import org.srs.datacat.model.*;
 import org.srs.datacat.model.dataset.DatasetLocationModel;
 import org.srs.datacat.shared.*;
@@ -85,11 +86,19 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     @Override
-    public DatasetContainer getDependency(long dependency){
-        // Do SQL to retrieve the dependency infor
+    public DatasetContainer getDependents(long dependency, String path) throws IOException{
+        String sql = getDependencySql();
         DatasetContainer  dp = null;
-        return dp;
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
+            stmt.setLong(1, dependency);
+            ResultSet rs = stmt.executeQuery();
+            dp = (DatasetContainer) getBuilder(rs, path);
+            return dp;
+        }catch(SQLException ex){
+            throw new IOException("Exception occurred during fetching dependency in database");
+        }
     }
+
     private DatacatNode getDatacatObject(DatacatRecord parent, String name) throws IOException, NoSuchFileException {
         try {
             return getChild(parent, name);
@@ -182,6 +191,14 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 processMetadata(rs, metadata);
             }
         }
+        // fetch the dependency info
+        try {
+            Dependency dependents = (Dependency) getDependents(pk, builder.path);
+            metadata.putAll(dependents.getMetadataMap());
+        }catch(IOException ex){
+            throw new SQLException(ex);
+        }
+
         if (!metadata.isEmpty()) {
             builder.metadata(metadata);
         }
@@ -513,7 +530,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 return RecordType.GROUP;
             case "D":
                 return RecordType.DATASET;
-            case "DEP":
+            case "P":
                 return RecordType.DEPENDENCY;
             default:
                 return null;
@@ -540,7 +557,12 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             default:
                 o = new DatacatObject.Builder();
         }
-        String name = rs.getString("name");
+        String name;
+        if (type == RecordType.DEPENDENCY) {
+            name = rs.getString("dependencyName");
+        } else {
+            name = rs.getString("name");
+        }
         o.pk(rs.getLong("pk"))
                 .parentPk(rs.getLong("parent"))
                 .name(name)
@@ -761,5 +783,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 + "  )";
         return sql;
     }
-
+    protected String getDependencySql() {
+        return "SELECT dependency, dependencyName, dependent, dependentType FROM DatasetDependency";
+    }
 }

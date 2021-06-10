@@ -20,10 +20,7 @@ public class DatasetDependencyTest extends TestCase {
     }
     public void testDeserialization() throws IOException {
 
-        String json_text = "{\"_type\":\"dependency\",\"versionMetadata\":[{\"dependencyName\":\"test\"},"
-                + "{\"dependency\":12},"
-                + "{\"dependentType\": \"predecessor\"},"
-                + "{\"dependents\":\"43,78,87\"}]}";
+        String json_text = "{\"_type\":\"dependency\", \"path\":\"\\testpath\"}";
 
         AnnotationIntrospector primary = new JacksonAnnotationIntrospector();
         AnnotationIntrospector secondary = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
