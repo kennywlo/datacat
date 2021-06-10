@@ -103,6 +103,8 @@ class Client(object):
         :return: A :class`requests.Response` object. A user can use Response.content to get the content.
         The object will be a Dependency
         """
+        s = str(metadata["dependents"])
+        metadata["dependents"] = s
         return self.mkdir(name, "dependency", parents, metadata, **kwargs)
 
     @staticmethod
@@ -125,7 +127,7 @@ class Client(object):
             target = "/CDMS/**"
         return self.search(target, versionId=did)
 
-    def get_dependents(self, did, target=None, recursive=False):
+    def get_dependents(self, did, versionId=None, target=None, recursive=False):
         """
         :param did: the target dependency Id
         :param recursive: Yes for all dependents, with False as default
@@ -135,8 +137,11 @@ class Client(object):
             raise Exception("Unsupported recursive operation")
         if target is None:
             target = "/CDMS/**"
-        query = "Dependency == " + str(did)
-        return self.search(target, versionId=did, query=query)
+        if versionId is None:
+            # use the current version
+            versionId = -1
+        query = "dep.dependency == " + str(did)
+        return self.search(target, versionId=versionId, query=query, containerFilter="dependency")
 
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,
@@ -246,6 +251,8 @@ class Client(object):
             container = Group(**container)
         elif type == "folder":
             container = Folder(**container)
+        elif type == "dependency":
+            container = Dependency(**container)
 
         resp = self.http_client.patchdir(path, pack(container), type, **kwargs)
         return unpack(resp.content)
@@ -299,7 +306,7 @@ class Client(object):
         :param offset: Offset at which to start returning objects.
         :param max_num: Maximum number of objects to return.
         """
-        resp = self.http_client.search(target, versionId, site, query, sort, show, offset, max_num)
+        resp = self.http_client.search(target, versionId, site, query, sort, show, offset, max_num, **kwargs)
         return unpack(resp.content)
 
     @checked_error

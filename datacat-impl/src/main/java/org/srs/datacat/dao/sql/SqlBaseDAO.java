@@ -84,6 +84,12 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         return getDatacatObject(parent, name);
     }
 
+    @Override
+    public DatasetContainer getDependency(long dependency){
+        // Do SQL to retrieve the dependency infor
+        DatasetContainer  dp = null;
+        return dp;
+    }
     private DatacatNode getDatacatObject(DatacatRecord parent, String name) throws IOException, NoSuchFileException {
         try {
             return getChild(parent, name);
@@ -327,26 +333,26 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     }
 
-    protected void addDatasetDependency(long dependencyPK, Map<String, Object> metaData) throws SQLException {
+    protected void addDatasetDependency(long dependencyPk, Map<String, Object> metaData) throws SQLException {
         if (!(metaData instanceof HashMap)) {
             metaData = new HashMap<>(metaData);
         }
         if (!metaData.containsKey("dependents")) {
             return;
         }
-        String depname = (String)metaData.get("dependencyName");
-        String dependentList = (String)metaData.get("dependents");
+        String name = (String)metaData.get("dependencyName");
+        String dependents = (String)metaData.get("dependents");
         String dependentType = (String)metaData.get("dependentType");
 
-        final String dependencySql = "insert into DatasetDependency (Dependency, Name, Dependent, DependentType)"
-                                        + " values (?, ?, ?, ?)";
+        final String dependencySql = "insert into DatasetDependency (Dependency, DependencyName, Dependent," +
+                "                       DependentType)" + " values (?, ?, ?, ?)";
         PreparedStatement stmt = getConnection().prepareStatement(dependencySql);
-        String[] dependents = dependentList.split(",");
+        String[] dependentList = dependents.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
         // store each dependent info from the list
-        for (String d : dependents) {
+        for (String d : dependentList) {
             long dependent = Long.parseLong(d);
-            stmt.setLong(1, dependencyPK);
-            stmt.setString(2, depname);
+            stmt.setLong(1, dependencyPk);
+            stmt.setString(2, name);
             stmt.setLong(3, dependent);
             stmt.setString(4, dependentType);
             stmt.executeUpdate();

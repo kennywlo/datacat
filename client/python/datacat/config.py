@@ -5,12 +5,12 @@ except ImportError:
     import ConfigParser as cp
 import os
 
-ENDPOINTS = "children path search datasets containers groups folders permissions".split(" ")
+ENDPOINTS = "children path search datasets containers groups dependencies folders permissions".split(" ")
 DATATYPES = "json xml txt".split(" ")
 
 _logger = logging.getLogger(__name__)
 
-__version__ = "0.5"
+__version__ = "0.6-DEPENDENCY"
 
 
 def config_from_file(path=None, override_section=None, override_url=None):

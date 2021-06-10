@@ -78,7 +78,9 @@ public class ContainerDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.d
         }
 
         if(newType == RecordType.DEPENDENCY) {
-            addDatasetDependency(parent.getPk(), request.getMetadataMap());
+            HashMap versionMetadata = request.getMetadataMap();
+            long did = (Long) versionMetadata.get("dependency");
+            addDatasetDependency(did, versionMetadata);
             builder.parentPk(parent.getPk());
             retObject = builder.build();
             return retObject;

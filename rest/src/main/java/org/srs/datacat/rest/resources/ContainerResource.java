@@ -147,15 +147,17 @@ public class ContainerResource extends BaseResource {
             type = RecordType.DEPENDENCY;
         }
 
-
         DatasetContainerBuilder builder = FormParamConverter.getContainerBuilder( type, formParams );
         java.nio.file.Path parentPath = getProvider().getPath(sParentPath);
-        CallContext callContext = buildCallContext();
         java.nio.file.Path targetPath = parentPath.resolve(builder.build().getName());
         builder.path(targetPath.toString());
-        
+
         try {
-            getProvider().createDirectory(targetPath, callContext, builder.build());
+            CallContext callContext = buildCallContext();
+            if (type == RecordType.DEPENDENCY)
+                getProvider().createDependency(targetPath, callContext, builder.build());
+            else
+                getProvider().createDirectory(targetPath, callContext, builder.build());
             return Response.created(DcUriUtils.toFsUri(targetPath.toString())).entity(builder.build()).build();
         } catch (NoSuchFileException ex){
              throw new RestException(ex ,404, "Parent file doesn't exist", ex.getMessage());
@@ -170,7 +172,7 @@ public class ContainerResource extends BaseResource {
         }
         
     }
-    
+
     @POST
     @Path(idRegex)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -183,15 +185,20 @@ public class ContainerResource extends BaseResource {
         }
         else if(containerType.equalsIgnoreCase("dependencies")) {
             type = RecordType.DEPENDENCY;
-        }
-        DatasetContainerBuilder builder = getProvider().getModelProvider().getContainerBuilder().create(container);
 
+        }
+
+        DatasetContainerBuilder builder = getProvider().getModelProvider().getContainerBuilder().create(container);
         java.nio.file.Path parentPath = getProvider().getPath(sParentPath);
         java.nio.file.Path targetPath = parentPath.resolve(container.getName());
         builder.path(targetPath.toString());
-        
+
         try {
-            getProvider().createDirectory(targetPath, buildCallContext(), container);
+            CallContext callContext = buildCallContext();
+            if (type == RecordType.DEPENDENCY)
+                getProvider().createDependency(targetPath, callContext, builder.build());
+            else
+                getProvider().createDirectory(targetPath, callContext, container);
             return Response.created(DcUriUtils.toFsUri(targetPath.toString()))
                     .entity(builder.build()).build();
         } catch (NoSuchFileException ex){

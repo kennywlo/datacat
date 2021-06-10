@@ -101,8 +101,8 @@ create table VerDataset (
 	DatasetGroup		numeric,
 	LatestVersion		numeric,
 	Registered		timestamp DEFAULT CURRENT_TIMESTAMP,
-        ACL                     varchar(40),
-        constraint PK_VDS primary key (Dataset),
+    ACL                     varchar(40),
+    constraint PK_VDS primary key (Dataset),
 	constraint FK_VDS_DSDataType foreign key (DatasetDataType)
 		references DatasetDataType (DatasetDataType),
 	constraint FK_VDS_DSFileFormat foreign key (DatasetFileFormat)
@@ -144,11 +144,11 @@ create index IDX_DSV_DS_and_MasterLoc on DatasetVersion(Dataset, MasterLocation)
 
 create table DatasetDependency (
     DatasetDependency   SERIAL,
-    Dependency    bigint unsigned not null,
-    Name          varchar(255),
-    Dependent     bigint unsigned,
-    DependentType varchar(32),
-    ACL           varchar(1000),
+    Dependency      bigint unsigned not null,
+    DependencyName  varchar(255),
+    Dependent       bigint unsigned,
+    DependentType   varchar(32),
+    ACL             varchar(1000),
     constraint PK_DatasetDependency primary key (DatasetDependency),
     constraint FK_Dependency foreign key (Dependency)
         references DatasetVersion(DatasetVersion) on delete cascade,

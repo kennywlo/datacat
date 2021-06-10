@@ -1,6 +1,8 @@
 package org.srs.datacat.dao.sql.search.plugins;
 
 import java.util.HashMap;
+
+import org.srs.datacat.dao.sql.search.tables.DatasetVersions;
 import org.zerorm.core.Column;
 import org.zerorm.core.Table;
 import org.zerorm.core.interfaces.Schema;
@@ -13,11 +15,11 @@ import org.srs.datacat.dao.sql.search.tables.MetajoinedStatement;
  */
 public class DependencySearchPlugin implements DatacatPlugin {
 
-    @Schema(name="dependency", alias="dependents")
+    @Schema(name="DatasetDependency", alias="deps")
     class Dependency extends Table {
 
         @Schema public Column<Long> dependency;
-        @Schema public Column<String> name;
+        @Schema public Column<String> dependencyName;
         @Schema public Column<Long> dependent;
         @Schema public Column<String> dependentType;
 
@@ -25,7 +27,7 @@ public class DependencySearchPlugin implements DatacatPlugin {
 
     };
 
-    private static final String NAMESPACE = "dependency";
+    private static final String NAMESPACE = "dep";
     Dependency dependents = new Dependency();
     private boolean joined;
 
@@ -53,11 +55,11 @@ public class DependencySearchPlugin implements DatacatPlugin {
         if(joined){
             return dependents;
         }
-        String metadataPivot = "Dependency";
-        Column vecColumn = statement.setupMetadataOuterJoin(metadataPivot, Number.class);
-
-        statement.selection(dependents.getColumns())
-                .leftOuterJoin(dependents, vecColumn.eq(dependents.dependency));
+        String metadataPivot = "dependency";
+        DatasetVersions dsv = (DatasetVersions) statement;
+        // Column vecColumn = dsv.setupMetadataOuterJoin(metadataPivot, Number.class);
+        Column vecColumn = new Column(metadataPivot, null);
+        dsv.selection(dependents.getColumns()).leftOuterJoin(dependents, vecColumn.eq(dependents.dependency));
         joined = true;
         return dependents;
     }
