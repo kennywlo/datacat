@@ -21,6 +21,7 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.srs.datacat.client.auth.HeaderFilter;
+import org.srs.datacat.model.DatacatNode;
 import org.srs.datacat.model.DatasetModel;
 import org.srs.datacat.model.DatasetView;
 import org.srs.datacat.model.security.DcGroup;
@@ -31,6 +32,7 @@ import org.srs.datacat.rest.resources.ContainerResource;
 import org.srs.datacat.rest.resources.DatasetsResource;
 import org.srs.datacat.rest.resources.PathResource;
 import org.srs.datacat.rest.resources.PermissionsResource;
+import org.srs.datacat.shared.FlatDataset;
 import org.srs.datacat.shared.Provider;
 import org.srs.datacat.test.DbHarness;
 import org.srs.datacat.test.HSqlDbHarness;
@@ -73,17 +75,34 @@ public class DatasetClientsTest extends JerseyTest {
     }
     
     @Test
-    public void testCreation() throws JsonProcessingException, IOException, URISyntaxException {
+    public void testCreation() throws IOException, URISyntaxException {
         Client client = getDatacatClient();
         ContainerClientTest.generateFolders(client, 1);
-        DatasetModel created = createOne(client);
+        DatasetModel created = createOne(client,"dataset0001", null);
     }
-    
+
     @Test
-    public void testDatasetAcl() throws JsonProcessingException, IOException, URISyntaxException {
+    public void testDatasetDependency() throws IOException, URISyntaxException {
         Client client = getDatacatClient();
         ContainerClientTest.generateFolders(client, 1);
-        DatasetModel created = createOne(client);
+        FlatDataset ds_1 = (FlatDataset) createOne(client, "dataset001", null);
+        FlatDataset ds_2 = (FlatDataset) createOne(client,"dataset002", null);
+        HashMap versionMetadata = new HashMap();
+        versionMetadata.put("dependency", "");
+        versionMetadata.put("dependencyName", "test");
+        versionMetadata.put("dependentType", "predecessor");
+        String dependents = ds_1.getVersionPk().toString() + "," + ds_2.getVersionPk().toString();
+        versionMetadata.put("dependents", dependents);
+        FlatDataset ds_3 = (FlatDataset) createOne(client, "dataset003", versionMetadata);
+        FlatDataset ret = (FlatDataset) client.getObject(ds_3.getPath(), "current", null);
+        System.out.println("versionMetadata=" + ret.getVersionMetadata().toString());
+    }
+
+    @Test
+    public void testDatasetAcl() throws IOException, URISyntaxException {
+        Client client = getDatacatClient();
+        ContainerClientTest.generateFolders(client, 1);
+        DatasetModel created = createOne(client, "dataset0001", null);
         Assert.assertTrue(client.getAcl(created.getPath()).get(0).toString().contains("SRS"));
         HashSet<DcPermissions> expectedPermissions = new HashSet<>(
                 Arrays.asList(DcPermissions.READ, DcPermissions.INSERT,
@@ -98,15 +117,16 @@ public class DatasetClientsTest extends JerseyTest {
                 client.getPermissions(created.getPath(), new DcGroup("fake@")).getPermissions());
     }
         
-    public DatasetModel createOne(Client client) throws JsonProcessingException, URISyntaxException{
+    public DatasetModel createOne(Client client, String name, HashMap vMetadata) throws JsonProcessingException, URISyntaxException{
         String parent = "/testpath/folder00000";
-        String name = "dataset0001";
         
         HashMap<String, Object> metadata = new HashMap<>();
         metadata.put(DbHarness.numberName, DbHarness.numberMdValues[0]);
         metadata.put(DbHarness.alphaName, DbHarness.alphaMdValues[0]);
         
-        
+       if (vMetadata != null && !vMetadata.isEmpty()) {
+           metadata.putAll(vMetadata);
+       }
         DatasetModel newDataset = provider.getDatasetBuilder()
                 .name(name)
                 .dataType(HSqlDbHarness.JUNIT_DATASET_DATATYPE)
