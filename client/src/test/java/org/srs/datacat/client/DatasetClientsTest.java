@@ -32,6 +32,7 @@ import org.srs.datacat.rest.resources.ContainerResource;
 import org.srs.datacat.rest.resources.DatasetsResource;
 import org.srs.datacat.rest.resources.PathResource;
 import org.srs.datacat.rest.resources.PermissionsResource;
+import org.srs.datacat.shared.Dataset;
 import org.srs.datacat.shared.FlatDataset;
 import org.srs.datacat.shared.Provider;
 import org.srs.datacat.test.DbHarness;
@@ -95,8 +96,8 @@ public class DatasetClientsTest extends JerseyTest {
         versionMetadata.put("dependents", dependents);
         FlatDataset ds_3 = (FlatDataset) createOne(client, "dataset003", versionMetadata);
         System.out.println("DependencyPk="  + ds_3.getVersionPk().toString());
-        FlatDataset ret = (FlatDataset) client.getObject(ds_3.getPath()+";versionMetadata", "current", null);
-        System.out.println("versionMetadata=" + ret.getVersionMetadata().toString());
+        Dataset ret = (Dataset) client.getObject(ds_3.getPath()+";versionMetadata", "current", null);
+        System.out.println("versionMetadata=" + ret.getMetadataMap().toString());
     }
 
     @Test

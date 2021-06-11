@@ -40,7 +40,10 @@ import org.srs.datacat.model.security.DcGroup;
 import org.srs.datacat.rest.ErrorResponse;
 import org.srs.datacat.rest.JacksonFeature;
 import org.srs.datacat.rest.security.AclEntryProxy;
+import org.srs.datacat.shared.DatacatObject;
+import org.srs.datacat.shared.Dataset;
 import org.srs.datacat.shared.Provider;
+import org.srs.datacat.shared.metadata.MetadataEntry;
 import org.srs.vfs.PathUtils;
 
 /**
@@ -226,7 +229,13 @@ public class Client {
     public DatacatNode getObject(String path, String versionId, String site){
         Response resp = pathResource.getObject(path, Optional.fromNullable(versionId), Optional.fromNullable(site));
         checkResponse(resp);
-        return resp.readEntity(new GenericType<DatacatNode>() {});
+        if (path.contains("versionMetadata")){
+            List<MetadataEntry> ret = resp.readEntity(new GenericType<List<MetadataEntry>>() {});
+            Dataset.Builder builder = new Dataset.Builder();
+            return builder.metadata(ret).build();
+        }else {
+            return resp.readEntity(new GenericType<DatacatNode>() {});
+        }
     }
 
     /**
