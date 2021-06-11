@@ -85,17 +85,49 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         return getDatacatObject(parent, name);
     }
 
-    @Override
-    public DatasetContainer getDependents(long dependency, String path) throws IOException{
-        String sql = getDependencySql();
-        DatasetContainer  dp = null;
-        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
-            stmt.setLong(1, dependency);
-            ResultSet rs = stmt.executeQuery();
-            dp = (DatasetContainer) getBuilder(rs, path);
-            return dp;
+    public DatasetContainer getDependents(String path, long dependency, String type) throws IOException{
+        try{
+            Map<String, Object> dep_map = getDependency(dependency, type);
+            String name = (String)dep_map.get("dependencyName");
+            String acl = (String) dep_map.get("acl");
+            DatasetDependency.Builder dsDep = new DatasetDependency.Builder();
+            dsDep.pk(dependency)
+                    .parentPk(dependency)
+                    .name(name)
+                    .acl(acl);
+            completeObject(dsDep);
+            return dsDep.build();
         }catch(SQLException ex){
             throw new IOException("Exception occurred during fetching dependency in database");
+        }
+    }
+
+    protected Map<String, Object> getDependency(long dependency, String type) throws SQLException {
+        String sql = getDependencySql();
+        HashMap verMetadata = new HashMap();
+        if (type==null || type.isEmpty()) {
+            type = "predecessor";
+        }
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
+            stmt.setLong(1, dependency);
+            stmt.setString(2, type);
+            ResultSet rs = stmt.executeQuery();
+            StringBuilder dependents = new StringBuilder();
+            if (rs.next()) {
+                verMetadata.put("dependency", rs.getLong("dependency"));
+                verMetadata.put("dependentType", type);
+                verMetadata.put("dependentName", rs.getString("dependencyName"));
+                String acl = rs.getString("acl");
+                if (acl != null) {
+                    verMetadata.put("acl", rs.getString("acl"));
+                }
+                dependents.append((Long.valueOf(rs.getLong("dependent")).toString()));
+            }
+            while (rs.next()) {
+                dependents.append(",").append(Long.valueOf(rs.getLong("dependent")).toString());
+            }
+            verMetadata.put("dependents", dependents.toString());
+            return verMetadata;
         }
     }
 
@@ -151,6 +183,8 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             completeContainer((LogicalFolder.Builder) builder,
                     "select description from DatasetLogicalFolder where datasetlogicalfolder = ?");
             setContainerMetadata(builder);
+        }else if (builder instanceof DatasetDependency.Builder) {
+            setContainerMetadata(builder);
         }
     }
 
@@ -192,11 +226,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             }
         }
         // fetch the dependency info
-        try {
-            Dependency dependents = (Dependency) getDependents(pk, builder.path);
-            metadata.putAll(dependents.getMetadataMap());
-        }catch(IOException ex){
-            throw new SQLException(ex);
+        Map<String, Object> dependents = getDependency(pk, null);
+        if (!dependents.isEmpty()) {
+            metadata.putAll(dependents);
         }
 
         if (!metadata.isEmpty()) {
@@ -211,9 +243,13 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             tableType = "LogicalFolder";
         } else if (builder instanceof DatasetDependency.Builder) {
             tableType = "DatasetDependency";
+            Map<String, Object> deps = getDependency(pk, null);
+            builder.metadata(deps);
+            return;
         } else if (builder instanceof DatasetGroup.Builder) {
             tableType = "DatasetGroup";
         }
+
         Map<String, Object> metadata = getMetadata(pk, tableType, tableType);
         if (!metadata.isEmpty()) {
             builder.metadata(metadata);
@@ -551,18 +587,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             case GROUP:
                 o = new DatasetGroup.Builder();
                 break;
-            case DEPENDENCY:
-                o = new DatasetDependency.Builder();
-                break;
             default:
                 o = new DatacatObject.Builder();
         }
-        String name;
-        if (type == RecordType.DEPENDENCY) {
-            name = rs.getString("dependencyName");
-        } else {
-            name = rs.getString("name");
-        }
+        String name = rs.getString("name");
         o.pk(rs.getLong("pk"))
                 .parentPk(rs.getLong("parent"))
                 .name(name)
@@ -784,6 +812,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         return sql;
     }
     protected String getDependencySql() {
-        return "SELECT dependency, dependencyName, dependent, dependentType FROM DatasetDependency";
+        return "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency " +
+                "WHERE Dependency = ? and DependentType = ?";
     }
 }

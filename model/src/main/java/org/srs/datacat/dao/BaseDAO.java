@@ -50,12 +50,13 @@ public interface BaseDAO extends AutoCloseable {
 
     /**
      * Get the dependents, based on the dependency identifier.
+     * @param path path to the container
      * @param dependency the identifier
-     * @param parentPath path to the container
+     * @param type the dependent type
      * @return the object
      * throws IOException An exception occurred performing the operation or talking to the data source.
      */
-    DatasetContainer getDependents(long dependency, String parentPath) throws IOException;
+    DatasetContainer getDependents(String path, long dependency, String type) throws IOException;
 
     /**
      * Merge metadata of an existing record.

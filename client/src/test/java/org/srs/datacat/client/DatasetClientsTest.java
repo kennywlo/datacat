@@ -94,7 +94,8 @@ public class DatasetClientsTest extends JerseyTest {
         String dependents = ds_1.getVersionPk().toString() + "," + ds_2.getVersionPk().toString();
         versionMetadata.put("dependents", dependents);
         FlatDataset ds_3 = (FlatDataset) createOne(client, "dataset003", versionMetadata);
-        FlatDataset ret = (FlatDataset) client.getObject(ds_3.getPath(), "current", null);
+        System.out.println("DependencyPk="  + ds_3.getVersionPk().toString());
+        FlatDataset ret = (FlatDataset) client.getObject(ds_3.getPath()+";versionMetadata", "current", null);
         System.out.println("versionMetadata=" + ret.getVersionMetadata().toString());
     }
 

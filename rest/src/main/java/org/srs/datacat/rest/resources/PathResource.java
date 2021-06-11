@@ -36,6 +36,7 @@ import org.srs.datacat.model.container.ContainerStat;
 import org.srs.datacat.model.security.CallContext;
 
 import org.srs.datacat.rest.BaseResource;
+import org.srs.datacat.shared.DatacatObject;
 import org.srs.datacat.shared.RequestView;
 import static org.srs.datacat.rest.BaseResource.OPTIONAL_EXTENSIONS;
 import org.srs.datacat.shared.BasicStat.StatType;

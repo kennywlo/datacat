@@ -358,10 +358,10 @@ public class DcFileSystemProvider {
         }
     }
 
-    private boolean existsDependency(long dependency, String path){
+    private boolean existsDependency(String path, long dependency, String type){
         try {
             // file exists
-            DatasetContainer dep = retrieveDependency(dependency, path);
+            DatasetContainer dep = retrieveDependency(path, dependency, type);
             return !dep.getMetadataMap().isEmpty();
         } catch(IOException x) {
             // does not exist or unable to determine if dependency exists
@@ -369,9 +369,9 @@ public class DcFileSystemProvider {
         }
     }
 
-    private DatasetContainer retrieveDependency(long dependency, String path) throws IOException{
+    private DatasetContainer retrieveDependency(String path, long dependency, String type) throws IOException{
         try(BaseDAO dao = daoFactory.newBaseDAO()) {
-            return dao.getDependents(dependency, path);
+            return dao.getDependents(path, dependency, type);
         }
     }
 

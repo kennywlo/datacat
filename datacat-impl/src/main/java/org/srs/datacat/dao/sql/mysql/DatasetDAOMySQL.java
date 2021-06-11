@@ -27,11 +27,7 @@ import org.srs.datacat.model.DatasetModel;
 import org.srs.datacat.model.dataset.DatasetVersionModel;
 import org.srs.datacat.model.DatasetView;
 import org.srs.datacat.model.dataset.DatasetViewInfoModel;
-import org.srs.datacat.shared.Patchable;
-import org.srs.datacat.shared.Dataset;
-import org.srs.datacat.shared.DatasetLocation;
-import org.srs.datacat.shared.DatasetVersion;
-import org.srs.datacat.shared.DatasetViewInfo;
+import org.srs.datacat.shared.*;
 import org.srs.datacat.model.RecordType;
 import static org.srs.datacat.model.DcExceptions.*;
 import org.srs.datacat.model.dataset.DatasetOption;
@@ -213,6 +209,10 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
                 while(rs2.next()){
                     processLocation( rs2, builder.pk, locations);
                 }
+                try {
+                    DatasetContainer dp = (DatasetContainer) getDependents(builder.path, builder.pk, null);
+                    metadata.putAll(dp.getMetadataMap());
+                } catch (IOException ex) { }
                 builder.metadata(metadata);
                 return new DatasetViewInfo(builder.build(), locations);
             }
