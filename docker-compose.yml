@@ -18,6 +18,9 @@
 # To run/stop the containers in this file:
 #   docker-compose --file ./docker-compose.yml up -d
 #   docker-compose --file ./docker-compose.yml down
+#
+# To verify datacat status:
+#   http://localhost:8080/datacat/display/browser
 
 version: '3'
 services:

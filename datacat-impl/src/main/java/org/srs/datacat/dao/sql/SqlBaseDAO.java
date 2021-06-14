@@ -2,7 +2,6 @@ package org.srs.datacat.dao.sql;
 
 import com.google.common.base.Optional;
 import org.srs.datacat.model.DatasetContainer;
-import org.srs.datacat.model.DatasetContainer.Dependency;
 import org.srs.datacat.model.*;
 import org.srs.datacat.model.dataset.DatasetLocationModel;
 import org.srs.datacat.shared.*;
@@ -87,9 +86,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     public DatasetContainer getDependents(String path, long dependency, String type) throws IOException{
         try{
-            Map<String, Object> dep_map = getDependency(dependency, type);
-            String name = (String)dep_map.get("dependencyName");
-            String acl = (String) dep_map.get("acl");
+            Map<String, Object> depMap = getDependency(dependency, type);
+            String name = (String)depMap.get("dependencyName");
+            String acl = (String) depMap.get("acl");
             DatasetDependency.Builder dsDep = new DatasetDependency.Builder();
             dsDep.pk(dependency)
                     .parentPk(dependency)

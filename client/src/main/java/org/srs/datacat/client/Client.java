@@ -40,7 +40,6 @@ import org.srs.datacat.model.security.DcGroup;
 import org.srs.datacat.rest.ErrorResponse;
 import org.srs.datacat.rest.JacksonFeature;
 import org.srs.datacat.rest.security.AclEntryProxy;
-import org.srs.datacat.shared.DatacatObject;
 import org.srs.datacat.shared.Dataset;
 import org.srs.datacat.shared.Provider;
 import org.srs.datacat.shared.metadata.MetadataEntry;

@@ -212,7 +212,9 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
                 try {
                     DatasetContainer dp = (DatasetContainer) getDependents(builder.path, builder.pk, null);
                     metadata.putAll(dp.getMetadataMap());
-                } catch (IOException ex) { }
+                } catch (IOException ex) {
+                    assert true;
+                }
                 builder.metadata(metadata);
                 return new DatasetViewInfo(builder.build(), locations);
             }
