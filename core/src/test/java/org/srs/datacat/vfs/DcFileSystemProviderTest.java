@@ -8,12 +8,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+
 import junit.framework.TestCase;
 import org.junit.AfterClass;
 
@@ -32,6 +28,7 @@ import org.srs.datacat.model.DatasetView;
 import org.srs.datacat.model.ModelProvider;
 import org.srs.datacat.model.RecordType;
 
+import org.srs.datacat.shared.FlatDataset;
 import org.srs.datacat.test.DbHarness;
 
 import org.srs.datacat.model.dataset.DatasetOption;
@@ -309,9 +306,115 @@ public class DcFileSystemProviderTest {
         provider.delete(path.resolve(folderName), TestUtils.DEFAULT_TEST_CONTEXT);
     }
 
+
     @Test
     public void testCreateDeleteDependency() throws IOException {
-        // ToDo: Dependency testing
+
+        //build dataset1
+
+        DatasetModel.Builder builder1 = provider.getModelProvider().getDatasetBuilder();
+        builder1.name("testCaseDataset001");
+        builder1.dataType(DbHarness.TEST_DATATYPE_01);
+        builder1.fileFormat(DbHarness.TEST_FILEFORMAT_01);
+        builder1.datasetSource( DbHarness.TEST_DATASET_SOURCE);
+        builder1.versionId(DatasetView.NEW_VER);
+
+        //adding versionMetadata to dataset1
+        HashMap<String,Object> metadata1 = new HashMap<>();
+        metadata1.put(DbHarness.numberName, DbHarness.numberMdValues[0]);
+        metadata1.put(DbHarness.alphaName, DbHarness.alphaMdValues[0]);
+
+        builder1.versionMetadata(metadata1);
+
+        DatasetModel request1 = builder1.build();
+        Path parentPath1 = provider.getPath(DbHarness.TEST_BASE_PATH);
+        Path filePath1 = parentPath1.resolve(request1.getName());
+        HashSet<DatasetOption> options1 = new HashSet<>(Arrays.asList( DatasetOption.CREATE_NODE,DatasetOption.CREATE_VERSION));
+        DatasetModel m = provider.createDataset( filePath1, TestUtils.DEFAULT_TEST_CONTEXT, request1, options1);
+        //getting dataset1 versionPk
+        String ds1VersionPk = String.valueOf(((FlatDataset) m).getVersionPk());
+        System.out.println(ds1VersionPk);
+
+        //construct dependency metadata for dataset2
+        HashMap<String,Object> metadata2 = new HashMap<>();
+        metadata2.put(DbHarness.numberName, DbHarness.numberMdValues[0]);
+        metadata2.put(DbHarness.alphaName, DbHarness.alphaMdValues[0]);
+        metadata2.put("dependencyName","test");
+        metadata2.put("dependency","");
+        metadata2.put("dependents", ds1VersionPk);
+        metadata2.put("dependentType","predecessor");
+
+
+        //build dataset2
+        DatasetModel.Builder builder2 = provider.getModelProvider().getDatasetBuilder();
+        builder2.name("testCaseDataset002");
+        builder2.dataType(DbHarness.TEST_DATATYPE_01);
+        builder2.fileFormat(DbHarness.TEST_FILEFORMAT_01);
+        builder2.datasetSource( DbHarness.TEST_DATASET_SOURCE);
+        builder2.versionId(DatasetView.NEW_VER);
+        builder2.versionMetadata(metadata2);
+
+        DatasetModel request2 = builder2.build();
+        Path parentPath2 = provider.getPath(DbHarness.TEST_BASE_PATH);
+        Path filePath2 = parentPath2.resolve(request2.getName());
+        HashSet<DatasetOption> options2 = new HashSet<>(Arrays.asList( DatasetOption.CREATE_NODE,DatasetOption.CREATE_VERSION));
+        DatasetModel m2 = provider.createDataset( filePath2, TestUtils.DEFAULT_TEST_CONTEXT, request2, options2);
+
+
+
+
+        //delete dataset1
+        provider.delete(filePath1, TestUtils.DEFAULT_TEST_CONTEXT);
+        //delete dataset2
+        provider.delete(filePath2, TestUtils.DEFAULT_TEST_CONTEXT);
+
+
+        //confirmation of dataset1 deletion
+        try{
+            Path rootPath = provider.getPath(DbHarness.TEST_BASE_PATH);
+            DatacatRecord o = provider.getFile(rootPath.resolve(request1.getName()), TestUtils.DEFAULT_TEST_CONTEXT).getObject();
+            System.out.println("Dataset1 is not deleted yet");
+        } catch(NoSuchFileException ex){
+            System.out.println("Dataset1 is deleted");
+        }
+
+        //confirmation of dataset2 deletion (Therefore deleting dependency)
+        try{
+            Path rootPath = provider.getPath(DbHarness.TEST_BASE_PATH);
+            DatacatRecord o = provider.getFile(rootPath.resolve(request2.getName()), TestUtils.DEFAULT_TEST_CONTEXT).getObject();
+            System.out.println("Dataset2 is not deleted yet");
+        } catch(NoSuchFileException ex){
+            System.out.println("Dataset2 is deleted");
+        }
+
+
+
+        /**
+         * @author Chufan Wu
+         * If you want to confirm that dependency is created in dataset2, use this script in Evaluate window
+         *
+         *         ResultSet rs = getConnection().createStatement().executeQuery("select * from DatasetDependency");
+         *         System.out.println("\ndataset_dependency_table:");
+         *
+         *         while (rs.next()) {
+         *             String dependencyOut = rs.getString("Dependency");
+         *             System.out.println("Dependency:");
+         *             System.out.println(dependencyOut);
+         *
+         *             String nameOut = rs.getString("Name");
+         *             System.out.println("Name:");
+         *             System.out.println(nameOut);
+         *
+         *             String dependentOut = rs.getString("Dependent");
+         *             System.out.println("Dependent:");
+         *             System.out.println(dependentOut);
+         *
+         *             String dependentTypeOut = rs.getString("DependentType");
+         *             System.out.println("DependentType:");
+         *             System.out.println(dependentTypeOut);
+         *         }
+         */
+
     }
 
 

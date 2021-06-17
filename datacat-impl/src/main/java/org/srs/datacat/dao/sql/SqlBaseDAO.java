@@ -414,6 +414,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         metaData.remove("dependencyName");
         metaData.remove("dependents");
         metaData.remove("dependentType");
+        metaData.remove("dependency");
     }
 
 //    protected void deleteDatasetVersionMetadata(Long pk, Set<String> metaDataKeys) throws SQLException{
