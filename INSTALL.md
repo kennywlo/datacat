@@ -24,8 +24,11 @@ You can download these packages through the terminal using command line methods,
 
 Included in the datacat repo is the bash script `prerequisites.sh`, this script will help you download most of the packages you need. Run this script by using the following command line inside your linux terminal.
 ```
-bash prerequisites.sh
-``` 
+To run:
+    source ./prerequisites.sh
+After completion, to exit env:
+    deactivate
+```
 Execution of the script will automatically download the following packages onto your machine.
 
 * JDK 8
