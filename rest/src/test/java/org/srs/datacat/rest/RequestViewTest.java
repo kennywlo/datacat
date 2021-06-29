@@ -66,9 +66,14 @@ public class RequestViewTest extends TestCase {
 
     }
 
-    // ToDo: Dependency testing
+
     public void testDependency(){
 
+        RequestView rv;
+        Map<String,List<String>> mvmap = UriComponent.decodeMatrix( "/path;versionMetadata;", true);
+        rv = new RequestView(RecordType.DATASET, mvmap);
+
+        assertTrue(rv.containsKey("versionMetadata"));
     }
     
 }

@@ -118,14 +118,37 @@ public class DAOTestUtils {
         return ret;
     }
 
-    // ToDo: Dependency testing
-    public static void generateDependencies(DAOFactory factory) throws IOException{
+
+    public static HashMap<String, Object> generateDependencies(String dependencyNamePT, String dependentsPT, String dependentTypePT, HashMap<String, Object> metadataPT) throws IOException{
+        /**
+         * @author CesarAxel
+         */
+        /**
+         * Generates a dependency hashmap using provided dependency fields.
+         * @param dependencyNamePT      The name of the dependency
+         * @param dependentsPT      A comma delimited string containing the version PKs of all Datasets the current DS is dependent of
+         * @param dependentTypePT       The number of dataset you want to create
+         * @param metadataPT    HashMap containing current metadata fields and values
+         * @return          An updated version of metadataPT containing dependency MetaData
+         * @author ChufanWu
+         */
+
+        metadataPT.put("dependencyName", dependencyNamePT);
+        metadataPT.put("dependency","");
+        metadataPT.put("dependents", dependentsPT);
+        metadataPT.put("dependentType", dependentTypePT);
+
+        return metadataPT;
 
     }
 
-    // ToDo: Dependency testing
-    public static List<DatacatNode> getDependencies(DAOFactory factory, int dependencies) throws IOException{
-        List<DatacatNode> ret = null;
-        return ret;
+
+    public static DatasetContainer getDependencies(DAOFactory factory, long dependencies,String path, String type) throws IOException{
+        DatasetDAO dao = factory.newDatasetDAO();
+        System.out.println("\nDependency Information for Dataset at location:" + path + ":");
+        System.out.println(dao.getDependents(path,dependencies,type) + "\n");
+
+        DatasetContainer depInfo = dao.getDependents(path,dependencies,type);
+        return depInfo;
     }
 }

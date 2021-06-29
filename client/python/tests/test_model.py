@@ -70,7 +70,17 @@ class ModelTest(unittest.TestCase):
         ds_new2 = unpack(pack(ds_new), Dataset)
         print(pack(ds_new2))
         # ToDo: Dependency testing
-        dependency = []
+
+        dependency = [
+            {"_type": "dependency", "dependency": 54924979, "name": None, "dependent": 54811843, "dependentType": "predecessor"},
+            {"_type": "dependency", "dependency": 53811843, "name": None, "dependent": 54924979, "dependentType": "successor"}
+        ]
+
+        json_str = json.dumps(dependency)
+        print(json_str)
+        dependency_new = unpack(json_str)
+        print(dependency_new)
+        assert "test_unpack() success"
 
     def test_pack(self):
         vmd = {
@@ -108,7 +118,38 @@ class ModelTest(unittest.TestCase):
         build_dataset("ds1.txt", "DS", "txt", versionMetadata={"hi": "hello"},
                       locations=[{"site": "SLAC", "resource": "/path/to/somewhere", "created": "today"},
                                  {"site": "BNL", "resource": "/bnl/path/to/somewhere", "created": "yesterday"}])
+
+
+    def test_build_dependency(self):
         # ToDo: Dependency testing
+
+        vmd1 = {"dependencyName":"test", "dependency":78, "dependents": [21, 12], "dependentType":"predecessor"}
+        vmd2 = {"dependencyName":"test", "dependency": 79,"dependents": [321, 234], "dependentType":"successor"}
+
+        ds1 = build_dataset("ds1.txt", "DS", "txt", versionMetadata=vmd1,
+                      site="SLAC", resource="/path/to/somewhere")
+        ds2 = build_dataset("ds2.txt", "DS", "txt", versionMetadata=vmd2,
+                            site="SLAC", resource="/path/to/somewhere")
+
+        txt1 = pack(ds1)
+        print(txt1)
+        txt2 = pack(ds2)
+        print(txt2)
+
+        vmd1 = {"dependencyName": "test", "dependency": 1678, "dependents": 721, "dependentType": "predecessor"}
+        vmd2 = {"dependencyName": "test", "dependency": 679, "dependents": 4321, "dependentType": "successor"}
+
+        ds1 = build_dataset("ds1.txt", "DS", "txt", versionMetadata=vmd1,site="SLAC", resource="/path/to/somewhere")
+        ds2 = build_dataset("ds2.txt", "DS", "txt", versionMetadata=vmd2, site="SLAC", resource="/path/to/somewhere")
+        txt1 = pack(ds1)
+        print(txt1)
+        txt2 = pack(ds2)
+        print(txt2)
+
+
+
+        assert "test_build_dependency() success"
+
 
 if __name__ == '__main__':
     unittest.main()

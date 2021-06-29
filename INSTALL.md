@@ -31,7 +31,9 @@ Execution of the script will automatically download the following packages onto 
 * JDK 8
 * Maven
 * Python3
-*  Pip3
+* Pip3
+* Pytest
+
 
 As you can see, this will install all required packages except for Pytest. Not to worry though, that will be covered later down in this document.
 
@@ -76,6 +78,14 @@ pip3 --version
 
 -----Should Return-----
 pip 20.0.2 from /usr/lib/python3/dist-packages/pip (python 3.8)
+```
+***Verifying Pytest:***
+```
+-----Command-----
+pytest --version
+
+-----Should Return-----
+pytest 6.2.2
 ```
 
 
@@ -162,35 +172,7 @@ If you get something like this, your JAVA_HOME path is now set. If your changes 
 recognized please reset your linux environment as this tends to apply those changes.
 
 
-**You are now ready to run the Maven tests as outlined in [TEST.md](TEST.md)**
-
-### Step 3) - Finishing Python Client Test Setup
-
-Once we have installed and verified the required packages, we can finish setting up for Python Client testing by installing Pytest.
-
-### Installing Pytest
-
-#### ***Step 1 ) Installation***
-
-To install pytest run following command line:
-
-```
-pip install -U pytest
-```
-
-#### ***Step 2 ) Verifying the Installation***
-
-You can run the following command to see if Pytest is installed:
-
-```
------Command-----
-pytest --version
-
------Should Return-----
-pytest 6.2.2
-```
-
-**You are now ready to run python client tests as outlined in [TEST.md](TEST.md)**
+**You are now ready to run the Maven and Python client tests as outlined in [TEST.md](TEST.md)**
 
 ***
 
