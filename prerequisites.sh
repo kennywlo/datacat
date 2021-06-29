@@ -3,6 +3,11 @@
 shopt -s expand_aliases
 
 # This script will install Java8, Python3, Pip, PyTest, and Maven.
+# To run:
+#         source ./prerequisites.sh
+# After completion, to exit env:
+#         deactivate
+
 function toggle_os()
 {
         if cat /etc/os-release | grep -nw rhel ; then
@@ -64,16 +69,44 @@ if pkg_tool install python3-pip ; then
 else
         echo "pip installation failed"
 fi
+#-----Install virtualenv----
+echo -e "\n----virtualenv installation----"
+if pkg_tool install python3-venv ; then
+        echo "virtualenv installed"
+else
+        echo "virtualenv installation failed"
+fi
+#----Create env----
+echo -e "\n----create env----"
+if python3 -m venv env ; then
+        echo "env created"
+else
+        echo "env creation failed"
+fi
+#----Activate env----
+echo -e "\n----env activation----"
+if source env/bin/activate ; then
+        echo "env activated"
+else
+        echo "env activation failed"
+fi
+#----install wheel----
+echo -e "\n----wheel installation----"
+if pip3 install wheel ; then
+        echo "wheel installed"
+else
+        echo "wheel installation failed"
+fi
 #-----Python Client Packages Installation script-----
 echo -e "\n-----Python Client Packages Installation-----"
-if pip3 install --user client/python/. ;then
+if pip3 install client/python/. ;then
         echo "Python Client Packages installed"
 else
         echo "Python Client Packages installation failed"
 fi
 #-----Pytest install script-----
 echo -e "\n-----Pytest Installation-----"
-if pip3 install --user pytest ; then
+if pip3 install pytest ; then
         echo "pytest installed using pip3"
 else
         echo "pytest installation failed"
