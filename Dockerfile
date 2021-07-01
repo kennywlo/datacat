@@ -22,7 +22,9 @@ FROM centos:7
 
 MAINTAINER kennylo@slac.stanford.edu
 
-RUN yum -y install git vim
+RUN yum -y install vim python3 python3-pip
+RUN pip3 install --user pytest
+
 
 ENV DCHOME=/opt/datacat
 RUN mkdir -p $DCHOME
@@ -31,6 +33,11 @@ RUN mkdir -p $DCHOME
 ADD . $DCHOME
 
 WORKDIR $DCHOME
+
+RUN pip3 install --user client/python/.
+
+RUN python3 -m pytest client/python/tests
+
 RUN yum -y install maven
 RUN mvn package -DskipTests
 

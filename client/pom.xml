@@ -149,8 +149,12 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <executable>pytest</executable>
+                            <executable>python3</executable>
                             <workingDirectory>python/tests</workingDirectory>
+			    <arguments>
+                            	<argument>-m</argument>
+                            	<argument>pytest</argument>
+                            </arguments>
                         </configuration>
                         <id>python-build</id>
                         <phase>test</phase>
