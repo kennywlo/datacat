@@ -151,6 +151,7 @@
                         <configuration>
                             <executable>python3</executable>
                             <workingDirectory>python/tests</workingDirectory>
+			    <skip>${skipTests}</skip>
 			    <arguments>
                             	<argument>-m</argument>
                             	<argument>pytest</argument>
