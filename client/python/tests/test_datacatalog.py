@@ -12,8 +12,8 @@ if __name__ == "__main__":
     client = client_from_config(config)
 
     # file/datacatalog path
-    file_name = 'test_slac_sdf_1.root'
-    file_path = '/home/kennylo/Lo/supercdms/pipeline_packages/dev'
+    file_name = 'test_slac.root'
+    file_path = os.path.abspath("../../../test/data/")
     datacat_path = '/testpath'
     full_file = file_path + '/' + file_name
 
