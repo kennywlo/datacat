@@ -126,7 +126,7 @@ public class SearchResource extends BaseResource {
             @FormParam("containerFilter") String containerFilter,
             @FormParam("sort") List<String> sortParams,
             @FormParam("show") List<String> metadata,
-            @FormParam("ignoreShowFieldError") boolean ignoreShowFieldError,
+            @FormParam("ignoreShowKeyError") boolean ignoreShowKeyError,
             @DefaultValue("100000") @FormParam("max") int max,
             @DefaultValue("0") @FormParam("offset") int offset){
 
@@ -138,7 +138,7 @@ public class SearchResource extends BaseResource {
         DatasetResultSetModel searchResults = null;
         try(DirectoryStream<DatasetModel> stream
                 = getProvider().search(targets, buildCallContext(), dv, filter,
-                        containerFilter, metafields, sortFields, ignoreShowFieldError)) {
+                        containerFilter, metafields, sortFields, ignoreShowKeyError)) {
             List<DatasetModel> datasets = new ArrayList<>();
             int count = 0;
             Iterator<DatasetModel> iter = stream.iterator();

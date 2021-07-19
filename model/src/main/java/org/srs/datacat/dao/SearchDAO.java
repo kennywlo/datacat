@@ -22,14 +22,14 @@ public interface SearchDAO extends BaseDAO {
      * @param query String to be parsed by underlying search mechanism.
      * @param metaFieldsToRetrieve A list of fields to return as metadata, or null for none.
      * @param sortFields A list of fields to sort by, or null.
-     * @param ignoreShowFieldError
+     * @param ignoreShowKeyError flag to ignore error in show fields
      * @return Stream of datasets from the search
      * @throws ParseException The parser failed to parse the query.
      * @throws IOException An exception occurred performing the operation or talking to the data source.
      */
     DirectoryStream<DatasetModel> search(DirectoryStream<DatacatNode> containers, DatasetView datasetView,
                                          String query, String[] metaFieldsToRetrieve, String[] sortFields,
-                                         boolean ignoreShowFieldError) throws ParseException, IOException;
+                                         boolean ignoreShowKeyError) throws ParseException, IOException;
     
     /**
      * Search containers for containers.

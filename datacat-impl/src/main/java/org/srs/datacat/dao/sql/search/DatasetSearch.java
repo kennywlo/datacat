@@ -77,13 +77,13 @@ public class DatasetSearch {
     
     public DirectoryStream<DatasetModel> search(DirectoryStream<DatacatNode> containers, DatasetView datasetView,
                                                 String query, String[] metaFieldsToRetrieve, String[] sortFields,
-                                                boolean ignoreShowFieldError) throws ParseException, IOException {
+                                                boolean ignoreShowKeyError) throws ParseException, IOException {
         try {
             compileStatement(containers, datasetView, 
                     Optional.fromNullable(query), 
                     Optional.fromNullable(metaFieldsToRetrieve), 
                     Optional.fromNullable(sortFields),
-                    ignoreShowFieldError);
+                    ignoreShowKeyError);
             return retrieveDatasets();
         } catch (SQLException ex) {
             throw new IOException("Error retrieving results", ex);
@@ -101,7 +101,7 @@ public class DatasetSearch {
     protected Select compileStatement(DirectoryStream<DatacatNode> containers, DatasetView datasetView, 
             Optional<String> query, 
             Optional<String[]> retrieveFields, Optional<String[]> sortFields,
-                                      boolean ignoreShowFieldError) throws ParseException, SQLException, IOException {
+                                      boolean ignoreShowKeyError) throws ParseException, SQLException, IOException {
         
         // Prepare DatasetVersions Selection 
         DatasetVersions dsv = prepareDatasetVersion(datasetView);
@@ -139,7 +139,7 @@ public class DatasetSearch {
             ).selection(dsv.getColumns());
         
         handleSortFields(sd, dsv, sortFields);
-        handleRetrieveFields(sd, dsv, retrieveFields, ignoreShowFieldError);
+        handleRetrieveFields(sd, dsv, retrieveFields, ignoreShowKeyError);
         
         return selectStatement;
     }            
@@ -202,7 +202,7 @@ public class DatasetSearch {
     }
     
     private void handleRetrieveFields(DatacatSearchContext sd, DatasetVersions dsv, 
-            Optional<String[]> retrieveFields, boolean ignoreShowFieldError){
+            Optional<String[]> retrieveFields, boolean ignoreShowKeyError){
         
         if(retrieveFields.isPresent()){
             for(String s: retrieveFields.get()){
@@ -241,7 +241,7 @@ public class DatasetSearch {
                     retrieve = getColumnFromSelectionScope( dsv, s );
                     metadataFields.add( s );
                 }
-                if(retrieve == null && !ignoreShowFieldError){
+                if(retrieve == null && !ignoreShowKeyError){
                     throw new IllegalArgumentException("Unable to find retrieval field: " + s);
                 }
                 if (retrieve != null) {

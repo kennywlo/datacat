@@ -519,7 +519,7 @@ public class DcFileSystemProvider {
      * @param containerQuery The container query string
      * @param retrieveFields Metadata fields of datasets to also retrieve
      * @param sortFields Dataset metadata fiels to sort by
-     * @param ignoreShowFieldError flag for displaying error in Retrieve fields
+     * @param ignoreShowKeyError flag for displaying error in Retrieve fields
      * @return Stream of datasets
      * @throws IOException
      * @throws ParseException 
@@ -528,7 +528,7 @@ public class DcFileSystemProvider {
             DatasetView datasetView, String query,
             String containerQuery,
             String[] retrieveFields, String[] sortFields,
-                                                boolean ignoreShowFieldError) throws IOException, ParseException{
+                                                boolean ignoreShowKeyError) throws IOException, ParseException{
 
         final DirectoryStream<? extends DatacatNode> targetContainers;
         if(containerQuery != null || (query != null && query.contains("dependency"))){
@@ -548,7 +548,7 @@ public class DcFileSystemProvider {
                     query,
                     retrieveFields,
                     sortFields,
-                    ignoreShowFieldError
+                    ignoreShowKeyError
             );
         } catch(ParseException | IOException | RuntimeException ex) {
             dao.close();
