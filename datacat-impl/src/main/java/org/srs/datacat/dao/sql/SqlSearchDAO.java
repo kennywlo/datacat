@@ -31,8 +31,7 @@ public class SqlSearchDAO extends SqlBaseDAO implements org.srs.datacat.dao.Sear
     @Override
     public DirectoryStream<DatasetModel> search(DirectoryStream<DatacatNode> containers,
             DatasetView datasetView, String query, String[] retrieveFields,
-            
-            String[] sortFields) throws ParseException, IOException{
+            String[] sortFields, boolean ignoreShowFieldError) throws ParseException, IOException{
         DatasetSearch search = new DatasetSearch(super.getConnection(),
                 new Provider(),
                 EXODatacatSearchPlugin.class,
@@ -40,7 +39,7 @@ public class SqlSearchDAO extends SqlBaseDAO implements org.srs.datacat.dao.Sear
                 LsstKVSearchPlugin.class,
                 LsstPositionsSearchPlugin.class,
                 DependencySearchPlugin.class);
-        return search.search(containers, datasetView, query, retrieveFields, sortFields);
+        return search.search(containers, datasetView, query, retrieveFields, sortFields, ignoreShowFieldError);
     }
     
     @Override

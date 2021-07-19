@@ -246,7 +246,7 @@ public class DatacatSearchTest {
                 dsView,
                 Optional.fromNullable(queryString),
                 Optional.fromNullable(metaFieldsToRetrieve),
-                Optional.fromNullable(sortFields));
+                Optional.fromNullable(sortFields), false);
         
         conn.commit(); // Remove from parents on commit
         
@@ -256,7 +256,7 @@ public class DatacatSearchTest {
                 dsView,
                 Optional.fromNullable(queryString),
                 Optional.fromNullable(metaFieldsToRetrieve),
-                Optional.fromNullable(sortFields));
+                Optional.fromNullable(sortFields), false);
         
         conn.commit(); // Remove from parents on commit
         
@@ -272,7 +272,7 @@ public class DatacatSearchTest {
         datacatSearch.compileStatement(getStream(searchContainers), dsView, 
                 Optional.fromNullable(queryString), 
                 Optional.fromNullable(metaFieldsToRetrieve), 
-                Optional.fromNullable(sortFields));
+                Optional.fromNullable(sortFields), false);
         try (DirectoryStream<DatasetModel> stream = datacatSearch.retrieveDatasets()){
             Iterator<DatasetModel> iter = stream.iterator();
             List<DatasetModel> datasets = new ArrayList<>();
