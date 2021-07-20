@@ -173,6 +173,8 @@ class HttpClient:
         param_list = "query:filter sort:sort show:show offset:offset max_num:max".split(" ")
         param_map = dict([tuple(i.split(":")) for i in param_list])
         params = {param_map[k]: v for k, v in list(locals().items()) if k in param_map and v is not None}
+        if "ignoreShowKeyError" in kwargs:
+            params["ignoreShowKeyError"] = kwargs["ignoreShowKeyError"]
         return self._req("get", self._target(endpoint, target, versionId, site), params, **kwargs)
 
     def permissions(self, path, group=None):
