@@ -45,7 +45,8 @@ public abstract class MetajoinedStatement extends Select {
                 .as( sName );
 
         getMetajoins().put( metaName, mSelect );
-        selection( new Column( ms.metaValue.getName(), mSelect ).asExact( metaName ) )
+        // FIXME: MySQL doesn't like asExact() which inserts double quotes around metaName
+        selection( new Column( ms.metaValue.getName(), mSelect ).as( metaName ) )
                 .leftOuterJoin(mSelect, getMetajoinColumn().eq( ms.datacatKey ) );
         return ms.metaValue;
     }

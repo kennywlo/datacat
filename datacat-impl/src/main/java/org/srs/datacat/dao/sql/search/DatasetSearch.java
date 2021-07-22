@@ -234,7 +234,8 @@ public class DatasetSearch {
                         Iterator<Class> typeIter = dmc.getTypes(s).iterator();
                         Class type = typeIter.hasNext() ? typeIter.next() : null;
                         dsv.setupMetadataOuterJoin( s, type);
-                        retrieve = getColumnFromAllScope( dsv, aliased);
+                        // FIXME: MySQL does not like quoted alias for column name
+                        retrieve = getColumnFromAllScope( dsv, s);
                     }
                     metadataFields.add( s );
                 } else {
