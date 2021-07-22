@@ -30,6 +30,7 @@ import org.srs.datacat.model.DatasetView;
 import org.srs.datacat.model.ModelProvider;
 import org.srs.datacat.dao.sql.search.plugins.DatacatPlugin;
 import org.srs.datacat.dao.sql.search.tables.DatasetVersions;
+import org.srs.datacat.dao.sql.search.MetanameContext.Entry;
 import org.srs.datacat.model.DatasetModel;
 import org.zerorm.core.Column;
 import org.zerorm.core.Op;
@@ -238,14 +239,35 @@ public class DatasetSearch {
                         retrieve = getColumnFromAllScope( dsv, s);
                     }
                     metadataFields.add( s );
-                } else {
-                    retrieve = getColumnFromSelectionScope( dsv, s );
-                    metadataFields.add( s );
+                } else{
+                    if (s.equals("*")) {
+                        // get all the available metadata fields
+                        for(Entry entry: dmc){
+                            String m = entry.metaname;
+                            retrieve = getColumnFromAllScope(dsv, m);
+                            if (retrieve == null){
+                                Iterator<Class> typeIter = entry.getTypes().iterator();
+                                Class type = typeIter.hasNext() ? typeIter.next() : null;
+                                dsv.setupMetadataOuterJoin(m, type );
+                                retrieve = getColumnFromAllScope(dsv, m );
+                            }
+                            if (retrieve != null){
+                                metadataFields.add(m);
+                                selectStatement.selection(retrieve);
+                            }
+                        }
+                        continue;
+                    } else{
+                        retrieve = getColumnFromSelectionScope(dsv, s);
+                        if (retrieve != null) {
+                            metadataFields.add(s);
+                        }
+                    }
                 }
                 if(retrieve == null && !ignoreShowKeyError){
                     throw new IllegalArgumentException("Unable to find retrieval field: " + s);
                 }
-                if (retrieve != null) {
+                if (retrieve != null){
                     selectStatement.selection(retrieve);
                 }
             }
