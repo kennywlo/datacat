@@ -11,43 +11,39 @@ if __name__ == "__main__":
 
     #Case 1 Valid query and ignoreShowKeyError flag is present
     try:
-        client.search(target='/testpath', show='nIsTest', ignoreShowKeyError=True)
+        client.search(target='/testpath/testfolder', show='nIsTest', ignoreShowKeyError=True)
         print("Query passed as expected (Case 1: valid query and ignoreShowKeyError flag is present)")
     except:
-        print("Error. Query should be valid (Case 1).")
+        assert False, "Error. Query should be valid (Case 1)."
 
     #Case 2 Valid query and ignoreShowKeyError flag is not present
     try:
-        client.search(target='/testpath', show='nIsTest', ignoreShowKeyError=False)
+        client.search(target='/testpath/testfolder', show='nIsTest', ignoreShowKeyError=False)
         print("Query passed as expected (Case 2: Valid query and ignoreShowKeyError flag is not present)")
     except:
-        print("Error. Query should be valid (Case 2).")
+        assert False, "Error. Query should be valid (Case 2)."
 
     #Case 3 Invalid query and ignoreShowKeyError flag is present
     try:
-        client.search(target='/testpath', show='FakeKey', ignoreShowKeyError=True)
+        client.search(target='/testpath/testfolder', show='FakeKey', ignoreShowKeyError=True)
         print("Query passed as expected (Case 3: Invalid query and ignoreShowKeyError flag is present)")
     except:
-        print("Error. Query should be valid (Case 3).")
+        assert False, "Error. Query should be valid (Case 3)."
 
     #Case 4 Invalid query and ignoreShowKeyError flag is not present
     try:
-        client.search(target='/testpath', show='FakeKey', ignoreShowKeyError=False)
-        print("Query passed as expected (Case 4: Invalid query and ignoreShowKeyError flag is not present)")
-        print("Error. Query should had failed.")
+        client.search(target='/testpath/testfolder', show='FakeKey', ignoreShowKeyError=False)
+        assert False, "Error. Query should had failed (Case 4)."
     except:
         print("Query failed as expected (Case 4: Invalid query and ignoreShowKeyError flag is not present).")
 
     #Case 5 * query
     try:
-        for dataset in client.search(target='/testpath', show='*', ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/testfolder', show='*', ignoreShowKeyError=True):
             print("Dataset metadata: %s" %(dataset.metadata))
 
         print("Query passed as expected (Case 5: * query)")
     except:
-        print("Error. All metadata keys retrieval unsuccessful.")
-
-
-
+        assert False, "Error. All metadata keys retrieval unsuccessful."
 
 
