@@ -14,7 +14,7 @@ if __name__ == "__main__":
     # file/datacatalog path
     file_name = 'test_slac.root'
     file_path = os.path.abspath("../../../test/data/")
-    datacat_path = '/testpath'
+    datacat_path = '/testpath/testfolder'
     full_file = file_path + '/' + file_name
 
     # metadata

@@ -16,14 +16,16 @@ This crawler only scans one folder at a time, retrieving up to 1000 results at a
 It searches for datasets which are unscanned for a particular location.
 """
 
-WATCH_FOLDER = '/CDMS'
+WATCH_FOLDER = '/testpath'
 WATCH_SITE = 'SLAC'
 
 class Crawler:
     RERUN_SECONDS = 300
 
     def __init__(self):
-        self.client = client_from_config_file()  # Reads default config files or returns a default config
+
+        config_file = os.path.dirname(__file__) + '/../tests/config_srs.ini'
+        self.client = client_from_config_file(config_file)  # Reads default config files or returns a default config
         self.sched = sched.scheduler(time.time, time.sleep)
         self._run()
 
@@ -35,12 +37,12 @@ class Crawler:
         self.sched.enter(Crawler.RERUN_SECONDS, 1, self._run, ())
 
     def get_cksum(self, path):
-        cksum_proc = subprocess.Popen(["cksum", path], stdout=subprocess.PIPE)
+        cksum_proc = subprocess.Popen(["cksum", path.resource], stdout=subprocess.PIPE)
         ec = cksum_proc.wait()
         if ec != 0:
             # Handle error here, or raise exception/error
             pass
-        cksum_out = cksum_proc.stdout.read().split(" ")
+        cksum_out = cksum_proc.stdout.read().split(b" ")
         cksum = cksum_out[0]
         return cksum
 
@@ -82,11 +84,11 @@ class Crawler:
                 # we tie the metadata to versionMetadata
                 scan_result = {
                     "size": stat.st_size,
-                    "checksum": str(cksum),
+                    "checksum": str(hex(int(cksum))).lstrip("0x"),
                     # UTC datetime in ISO format (Note: We need Z to denote UTC Time Zone)
-                    "locationScanned": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    "locationScanned": datetime.utcnow().isoformat()+"Z",
                     "scanStatus": "OK"
-                    }
+                }
 
                 md = self.get_metadata(dataset, dataset_location)
                 if md:
