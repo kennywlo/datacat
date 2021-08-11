@@ -93,6 +93,18 @@ class Client(object):
         """
         return self.mkdir(path, "group", parents, metadata, **kwargs)
 
+    @staticmethod
+    def getdependentid(datasets):
+        """
+        Fetch the identifiers used for dataset dependency.
+        :param ds: the datasets
+        :return: the dependent identifiers (versionPk) of the input datasets
+        """
+        id = []
+        for ds in datasets:
+            id.append(ds.versionPk)
+        return id
+
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,
              **kwargs):
