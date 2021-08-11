@@ -41,27 +41,22 @@ if __name__ == "__main__":
     if client.exists(datacat_path + '/' + filename):
         client.rmds(datacat_path + '/' + filename)
     full_file003= file_path + '/' + filename
+    dependents = client.getdependentid([ds001, ds002])
+    dep_metadata = {"dependencyName": "test_data",
+                    "dependents": str(dependents),
+                    "dependentType": "predecessor"}
+    metadata.update(dep_metadata)
     ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
                         versionMetadata=metadata,
                         resource=full_file003,
                         site='SLAC')
     print("\ncreated dataset: ", filename, "\n")
 
-    did001 = client.get_dependency_id(ds001)
-    did002 = client.get_dependency_id(ds002)
-    did003 = client.get_dependency_id(ds003)
-    vmetadata = { "dependency": did003,
-                  "dependencyName": "test_data",
-                  "dependents": [did001, did002],
-                  "dependentType": "predecessor" }
-    client.mkdependency(datacat_path+'/'+filename, metadata=vmetadata)
-    dependents = client.get_dependents(did003, target="/testpath/**")
-
     # ********** CLIENT DEPENDENCY TESTING BEGINS HERE **********
     # Case 1.1: base case (predecessors) with versionPK value not specified
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents", ignoreShowKeyError=True):
-            print("\n***Dataset*** \nName: %s \nDependents: " %(dataset.name), "\n")
+            print(f"\n***Dataset*** \nName: %s metadata: %s" % (dataset.name, dict(dataset.metadata)), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
 
@@ -82,7 +77,7 @@ if __name__ == "__main__":
     # Case 2.1: predecessor with versionPK value not specified
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessors", ignoreShowKeyError=True):
-            print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+            print("\n***Dataset*** \nName: %s Metadata: %s" %(dataset.name, dict(dataset.metadata)), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 2.1"
 
@@ -103,7 +98,7 @@ if __name__ == "__main__":
     # Case 3.1: successor with versionPK value not specified
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.successors", ignoreShowKeyError=True):
-            print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+            print("\n***Dataset*** \nName: %s Metadata: %s" %(dataset.name, dict(dataset.metadata)), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 3.1 "
 
