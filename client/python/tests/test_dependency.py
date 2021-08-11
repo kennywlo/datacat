@@ -16,14 +16,14 @@ if __name__ == "__main__":
 
     # Case 1.2: base case (predecessors) with one versionPK value specified
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents=[2]"):
+        for dataset in client.search(target='/testpath/testfolder', query="dependents in (2)"):
             print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 1.2"
 
     # Case 1.3: base case (predecessors) with multiple versionPK values specified
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents=[2,4,5]"):
+        for dataset in client.search(target='/testpath/testfolder', query="dependents in (2,4,5)"):
             print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 1.3"
@@ -37,14 +37,14 @@ if __name__ == "__main__":
 
     # Case 2.2: predecessor with one versionPK value specified
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents.predecessors=[2]"):
+        for dataset in client.search(target='/testpath/testfolder', query="dependents.predecessors in (2)"):
             print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 2.2"
 
     # Case 2.3: predecessor with multiple versionPK values specified
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents.predecessors=[2,4,5]"):
+        for dataset in client.search(target='/testpath/testfolder', query="dependents.predecessors in (2,4,5)"):
             print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 2.3"
@@ -58,14 +58,14 @@ if __name__ == "__main__":
 
     # Case 3.2: successor with one versionPK value specified
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents.successors=[2]"):
+        for dataset in client.search(target='/testpath/testfolder', query="dependents.successors in (2)"):
             print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 3.2"
 
     # Case 3.3: successor with multiple versionPK values specified
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents.successors=[2,4,5]"):
+        for dataset in client.search(target='/testpath/testfolder', query="dependents.successors in (2,4,5)"):
             print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 3.3"
