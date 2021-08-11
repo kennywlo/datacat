@@ -93,56 +93,6 @@ class Client(object):
         """
         return self.mkdir(path, "group", parents, metadata, **kwargs)
 
-    def mkdependency(self, name, parents=False, metadata=None, **kwargs):
-        """
-        Make a new Dependency, and update if existing.
-        :param name: Dependency Target name
-        :param parents: Not used.
-        :param metadata: Metadata to add to when creating dependency
-        :param kwargs: Additional attributes to add to the dependency object
-        :return: A :class`requests.Response` object. A user can use Response.content to get the content.
-        The object will be a Dependency
-        """
-        s = str(metadata["dependents"])
-        metadata["dependents"] = s
-        return self.mkdir(name, "dependency", parents, metadata, **kwargs)
-
-    @staticmethod
-    def get_dependency_id(ds):
-        """
-        Fetch the dependency ID.
-        :param ds: the dataset object
-        :return: the version Pk of the dataset
-        """
-        return ds.versionPk
-
-    def get_dataset_by_id(self, did, target=None):
-        """
-        Fetch the dataset of the dependency Id.
-        :param did: the dependency Id
-        :param target: container path if any
-        :return: the dataset
-        """
-        if target is None:
-            target = "/CDMS/**"
-        return self.search(target, versionId=did)
-
-    def get_dependents(self, did, versionId=None, target=None, recursive=False):
-        """
-        :param did: the target dependency Id
-        :param recursive: Yes for all dependents, with False as default
-        :return: the list of its dependents by their dependency Id
-        """
-        if recursive:
-            raise Exception("Unsupported recursive operation")
-        if target is None:
-            target = "/CDMS/**"
-        if versionId is None:
-            # use the current version
-            versionId = -1
-        query = "dep.dependency == " + str(did)
-        return self.search(target, versionId=versionId, query=query, containerFilter="dependency")
-
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,
              **kwargs):

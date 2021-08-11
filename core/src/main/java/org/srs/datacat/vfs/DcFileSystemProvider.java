@@ -531,7 +531,7 @@ public class DcFileSystemProvider {
                                                 boolean ignoreShowKeyError) throws IOException, ParseException{
 
         final DirectoryStream<? extends DatacatNode> targetContainers;
-        if(containerQuery != null || (query != null && query.contains("dependency"))){
+        if(containerQuery != null || (query != null && query.contains("dependents"))){
             targetContainers =
                     searchContainers(pathPatterns, context, containerQuery, null, null);
         } else {

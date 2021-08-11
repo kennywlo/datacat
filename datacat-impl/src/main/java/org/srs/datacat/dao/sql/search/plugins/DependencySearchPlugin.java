@@ -15,7 +15,7 @@ import org.srs.datacat.dao.sql.search.tables.MetajoinedStatement;
  */
 public class DependencySearchPlugin implements DatacatPlugin {
 
-    @Schema(name="DatasetDependency", alias="deps")
+    @Schema(name="DatasetDependency", alias="dependency")
     class Dependency extends Table {
 
         @Schema public Column<Long> dependency;
@@ -27,7 +27,7 @@ public class DependencySearchPlugin implements DatacatPlugin {
 
     };
 
-    private static final String NAMESPACE = "dep";
+    private static final String NAMESPACE = "deps";
     Dependency dependents = new Dependency();
     private boolean joined;
 
@@ -55,7 +55,7 @@ public class DependencySearchPlugin implements DatacatPlugin {
         if(joined){
             return dependents;
         }
-        String metadataPivot = "dependency";
+        String metadataPivot = "dependents";
         DatasetVersions dsv = (DatasetVersions) statement;
         // Column vecColumn = dsv.setupMetadataOuterJoin(metadataPivot, Number.class);
         Column vecColumn = new Column(metadataPivot, null);
