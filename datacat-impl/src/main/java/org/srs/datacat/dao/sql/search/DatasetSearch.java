@@ -210,7 +210,7 @@ public class DatasetSearch {
                 // rewrite dependents to use DependencySearch Plugin
                 if (s.contains("dependents")) {
                     String[] deps = s.split("\\.");
-                    if (deps.length == 0) {
+                    if (deps.length == 1) {
                         // default: predecessors
                         s = "deps.dependency.".concat("predecessors");
                     } else {
@@ -238,7 +238,7 @@ public class DatasetSearch {
                     }
                     if (fIdent.equals("dependency")){
                         // Remember the dependent type
-                        metadataFields.add(s.split("\\.")[2]);
+                        metadataFields.add(s.split("\\.")[1]);
                         continue;
                     } else {
                         retrieve = getColumnFromSelectionScope(dsv, fIdent);
