@@ -55,10 +55,10 @@ public class DependencySearchPlugin implements DatacatPlugin {
         if(joined){
             return dependents;
         }
-        String metadataPivot = "dependents";
+        String metadataPivot = "dependency";
         DatasetVersions dsv = (DatasetVersions) statement;
-        // Column vecColumn = dsv.setupMetadataOuterJoin(metadataPivot, Number.class);
-        Column vecColumn = new Column(metadataPivot, null);
+        // Link Dependency to verMetadataNumber with column "Dependency"
+        Column vecColumn = dsv.setupMetadataOuterJoin(metadataPivot, Number.class);
         dsv.selection(dependents.getColumns()).leftOuterJoin(dependents, vecColumn.eq(dependents.dependency));
         joined = true;
         return dependents;

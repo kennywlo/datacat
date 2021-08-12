@@ -207,6 +207,16 @@ public class DatasetSearch {
         
         if(retrieveFields.isPresent()){
             for(String s: retrieveFields.get()){
+                // rewrite dependents to use DependencySearch Plugin
+                if (s.contains("dependents")) {
+                    String[] deps = s.split("\\.");
+                    if (deps.length == 0) {
+                        // default: predecessors
+                        s = "deps.dependency.".concat("predecessors");
+                    } else {
+                        s = "deps.dependency.".concat(deps[1]);
+                    }
+                }
                 Column retrieve = null;
                 if(sd.inSelectionScope( s )){
                     retrieve = getColumnFromSelectionScope( dsv, s );
@@ -226,8 +236,14 @@ public class DatasetSearch {
                             }
                         }   
                     }
-                    retrieve = getColumnFromSelectionScope( dsv, fIdent);
-                    metadataFields.add(fIdent);
+                    if (fIdent.equals("dependency")){
+                        // Remember the dependent type
+                        metadataFields.add(s.split("\\.")[2]);
+                        continue;
+                    } else {
+                        retrieve = getColumnFromSelectionScope(dsv, fIdent);
+                        metadataFields.add(fIdent);
+                    }
                 } else if(sd.inMetanameScope( s )){
                     String aliased = "\"" + s + "\"";
                     retrieve = getColumnFromAllScope( dsv, aliased);
@@ -267,6 +283,7 @@ public class DatasetSearch {
                 if(retrieve == null && !ignoreShowKeyError){
                     throw new IllegalArgumentException("Unable to find retrieval field: " + s);
                 }
+
                 if (retrieve != null){
                     selectStatement.selection(retrieve);
                 }
