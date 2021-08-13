@@ -210,9 +210,10 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
                     processLocation( rs2, builder.pk, locations);
                 }
                 try {
-                    DatasetContainer dp = (DatasetContainer) getDependents(builder.path, builder.pk, null);
+                    DatasetContainer dp = (DatasetContainer) getDependents(builder.path, builder.pk, "");
                     metadata.putAll(dp.getMetadataMap());
                 } catch (IOException ex) {
+                    // It's Okay, as depdendency info may not have existed
                     assert true;
                 }
                 builder.metadata(metadata);

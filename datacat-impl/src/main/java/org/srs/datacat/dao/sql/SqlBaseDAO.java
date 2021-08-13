@@ -1,6 +1,7 @@
 package org.srs.datacat.dao.sql;
 
 import com.google.common.base.Optional;
+import org.srs.datacat.dao.sql.search.SearchUtils;
 import org.srs.datacat.model.DatasetContainer;
 import org.srs.datacat.model.*;
 import org.srs.datacat.model.dataset.DatasetLocationModel;
@@ -86,7 +87,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     public DatasetContainer getDependents(String path, long dependency, String type) throws IOException{
         try{
-            Map<String, Object> depMap = getDependency(dependency, type);
+            Map<String, Object> depMap = SearchUtils.getDependency(getConnection(), dependency, type);
             String name = (String)depMap.get("dependencyName");
             String acl = (String) depMap.get("acl");
             DatasetDependency.Builder dsDep = new DatasetDependency.Builder();
@@ -98,35 +99,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             return dsDep.build();
         }catch(SQLException ex){
             throw new IOException("Exception occurred during fetching dependency in database");
-        }
-    }
-
-    protected Map<String, Object> getDependency(long dependency, String type) throws SQLException {
-        String sql = getDependencySql();
-        HashMap verMetadata = new HashMap();
-        if (type==null || type.isEmpty()) {
-            type = "predecessor";
-        }
-        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
-            stmt.setLong(1, dependency);
-            stmt.setString(2, type);
-            ResultSet rs = stmt.executeQuery();
-            StringBuilder dependents = new StringBuilder();
-            if (rs.next()) {
-                verMetadata.put("dependency", rs.getLong("dependency"));
-                verMetadata.put("dependentType", type);
-                verMetadata.put("dependentName", rs.getString("dependencyName"));
-                String acl = rs.getString("acl");
-                if (acl != null) {
-                    verMetadata.put("acl", rs.getString("acl"));
-                }
-                dependents.append((Long.valueOf(rs.getLong("dependent")).toString()));
-            }
-            while (rs.next()) {
-                dependents.append(",").append(Long.valueOf(rs.getLong("dependent")).toString());
-            }
-            verMetadata.put("dependents", dependents.toString());
-            return verMetadata;
         }
     }
 
@@ -225,7 +197,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             }
         }
         // fetch the dependency info
-        Map<String, Object> dependents = getDependency(pk, null);
+        Map<String, Object> dependents = SearchUtils.getDependency(getConnection(), pk, "");
         if (!dependents.isEmpty()) {
             metadata.putAll(dependents);
         }
@@ -242,7 +214,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             tableType = "LogicalFolder";
         } else if (builder instanceof DatasetDependency.Builder) {
             tableType = "DatasetDependency";
-            Map<String, Object> deps = getDependency(pk, null);
+            Map<String, Object> deps = SearchUtils.getDependency(getConnection(), pk, "");
             builder.metadata(deps);
             return;
         } else if (builder instanceof DatasetGroup.Builder) {
@@ -812,8 +784,5 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 + "  )";
         return sql;
     }
-    protected String getDependencySql() {
-        return "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency " +
-                "WHERE Dependency = ? and DependentType = ?";
-    }
+
 }

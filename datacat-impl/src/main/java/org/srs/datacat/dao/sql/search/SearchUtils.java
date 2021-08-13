@@ -9,12 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import org.freehep.commons.lang.AST;
 import org.srs.datacat.model.DatacatNode;
@@ -75,7 +70,7 @@ public final class SearchUtils {
         return startOfError.toString();
     }
 
-    public static DatasetModel datasetFactory(ResultSet rs, ModelProvider modelProvider,
+    public static DatasetModel datasetFactory(Connection conn, ResultSet rs, ModelProvider modelProvider,
             List<String> includedMetadata) throws SQLException{
         DatasetModel.Builder builder = modelProvider.getDatasetBuilder();
 
@@ -97,6 +92,12 @@ public final class SearchUtils {
         HashMap<String, Object> metadata = new HashMap<>();
 
         for(String s: includedMetadata){
+            if (s.contains("dependency")){
+                String[] deps = s.split("\\.");
+                Map<String, Object> depmap = SearchUtils.getDependency(conn, versionPk, deps[1]);
+                metadata.putAll(depmap);
+                continue;
+            }
             Object o = rs.getObject(s);
             if(o != null){
                 if(o instanceof Number){
@@ -343,7 +344,7 @@ public final class SearchUtils {
                                     if(rs.isClosed()){
                                         return false;
                                     }
-                                    ds = SearchUtils.datasetFactory(rs, modelProvider, metadataNames);
+                                    ds = SearchUtils.datasetFactory(conn, rs, modelProvider, metadataNames);
                                     return true;
                                 }
                                 return true;
@@ -455,6 +456,42 @@ public final class SearchUtils {
         return stream;
     }
 
+    public static String getDependencySql() {
+        return "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency " +
+                "WHERE Dependency = ? and DependentType = ?";
+    }
+
+    public static Map<String, Object> getDependency(Connection conn, long dependency, String type) throws SQLException {
+        String sql = SearchUtils.getDependencySql();
+        HashMap verMetadata = new HashMap();
+        if (type == null || type.isEmpty()) {
+            type = "predecessor"; // default
+        }
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, dependency);
+            stmt.setString(2, type);
+            ResultSet rs = stmt.executeQuery();
+            StringBuilder dependents = new StringBuilder();
+            if (rs.next()) {
+                verMetadata.put("dependency", rs.getLong("dependency"));
+                verMetadata.put("dependentType", type);
+                verMetadata.put("dependentName", rs.getString("dependencyName"));
+                String acl = rs.getString("acl");
+                if (acl != null) {
+                    verMetadata.put("acl", rs.getString("acl"));
+                }
+                dependents.append((Long.valueOf(rs.getLong("dependent")).toString()));
+            }
+            while (rs.next()) {
+                dependents.append(",").append(Long.valueOf(rs.getLong("dependent")).toString());
+            }
+            if (!dependents.toString().isEmpty()) {
+                verMetadata.put("dependents", dependents.toString());
+            }
+            return verMetadata;
+        }
+    }
+
     public static Class<?> getParamType(Object tRight){
         if(tRight instanceof List){
             List r = ((List) tRight);
@@ -469,3 +506,4 @@ public final class SearchUtils {
         return tRight.getClass();
     }
 }
+

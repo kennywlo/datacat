@@ -212,9 +212,9 @@ public class DatasetSearch {
                     String[] deps = s.split("\\.");
                     if (deps.length == 1) {
                         // default: predecessors
-                        s = "deps.dependency.".concat("predecessors");
+                        s = "deps.dependency.".concat("predecessor");
                     } else {
-                        s = "deps.dependency.".concat(deps[1]);
+                        s = "deps.".concat(s);
                     }
                 }
                 Column retrieve = null;
@@ -237,12 +237,12 @@ public class DatasetSearch {
                         }   
                     }
                     if (fIdent.equals("dependency")){
-                        // Remember the dependent type
-                        metadataFields.add(s.split("\\.")[1]);
+                        // Strip deps. from the dependent info to be kept for later reference
+                        metadataFields.add( s.substring("deps".length()+1) );
                         continue;
                     } else {
                         retrieve = getColumnFromSelectionScope(dsv, fIdent);
-                        metadataFields.add(fIdent);
+                        metadataFields.add( fIdent );
                     }
                 } else if(sd.inMetanameScope( s )){
                     String aliased = "\"" + s + "\"";
