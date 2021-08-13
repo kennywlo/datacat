@@ -214,7 +214,7 @@ public class DatasetSearch {
                         // default: predecessors
                         s = "deps.dependency.".concat("predecessor");
                     } else {
-                        s = "deps.".concat(s);
+                        s = "deps.dependency.".concat(deps[1]);
                     }
                 }
                 Column retrieve = null;
