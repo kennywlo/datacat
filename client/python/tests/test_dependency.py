@@ -16,47 +16,61 @@ if __name__ == "__main__":
     # metadata
     metadata = Metadata()
     metadata['nIsTest'] = 1
+    ds001 = None
+    ds002 = None
 
-    filename = "dataset001.dat"
+    filename = "dataset001_82f24.dat"
     if client.exists(datacat_path + '/' + filename):
-        client.rmds(datacat_path + '/' + filename)
-    full_file001 = file_path + '/' + filename
-    ds001 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+        print("\ndataset already created:", filename)
+
+    else:
+        full_file001 = file_path + '/' + filename
+        ds001 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
                         versionMetadata=metadata,
                         resource=full_file001,
                         site='SLAC')
-    print("\ncreated dataset: ", filename)
 
-    filename = "dataset002.dat"
+        print("\ncreated dataset: ", filename)
+
+
+    filename = "dataset002_92e56.dat"
     if client.exists(datacat_path + '/' + filename):
-        client.rmds(datacat_path + '/' + filename)
-    full_file002 = file_path + '/' + filename
-    ds002 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+        print("\ndataset already created:", filename)
+
+    else:
+        full_file002 = file_path + '/' + filename
+        ds002 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
                         versionMetadata=metadata,
                         resource=full_file002,
                         site='SLAC')
-    print("\ncreated dataset: ", filename)
+        print("\ncreated dataset: ", filename)
 
-    filename = "dataset003.dat"
+
+
+    filename = "dataset003_0c89c.dat"
     if client.exists(datacat_path + '/' + filename):
-        client.rmds(datacat_path + '/' + filename)
-    full_file003= file_path + '/' + filename
-    dependents = client.getdependentid([ds001, ds002])
-    dep_metadata = {"dependencyName": "test_data",
-                    "dependents": str(dependents),
-                    "dependentType": "predecessor"}
-    metadata.update(dep_metadata)
-    ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata,
-                        resource=full_file003,
-                        site='SLAC')
-    print("\ncreated dataset: ", filename, "\n")
+        print("\ndataset already created:", filename)
+    else:
+        full_file003 = file_path + '/' + filename
+        dependents = client.getdependentid([ds001, ds002])
+        dep_metadata = {"dependencyName": "test_data",
+                        "dependents": str(dependents),
+                        "dependentType": "predecessor"}
+        metadata.update(dep_metadata)
+        ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                            versionMetadata=metadata,
+                            resource=full_file003,
+                            site='SLAC')
+        print("\ncreated dataset: ", filename, "\n")
 
     # ********** CLIENT DEPENDENCY TESTING BEGINS HERE **********
     # Case 1.1: base case (predecessors) with versionPK value not specified
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents", ignoreShowKeyError=True):
-            print(f"\n***Dataset*** \nName: %s metadata: %s" % (dataset.name, dict(dataset.metadata)), "\n")
+            try:
+                print(f"\n***Dataset*** \nName: %s metadata: %s" %(dataset.name, dict(dataset.metadata)), "\n")
+            except:
+                print(f"\n***Dataset*** \nName: %s" %(dataset.name), "\n")
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
 
