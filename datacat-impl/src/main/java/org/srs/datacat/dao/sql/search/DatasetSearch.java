@@ -297,6 +297,8 @@ public class DatasetSearch {
                 return "path";
             case "size":
                 return "fileSizeBytes";
+            case "dependent":
+                return "datasetVersion";
             default:
                 return ident;
         }

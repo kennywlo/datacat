@@ -45,8 +45,6 @@ if __name__ == "__main__":
                         site='SLAC')
         print("\ncreated dataset: ", filename)
 
-
-
     filename = "dataset003_0c89c.dat"
     if client.exists(datacat_path + '/' + filename):
         print("\ndataset already created:", filename)
@@ -65,67 +63,110 @@ if __name__ == "__main__":
 
     # ********** CLIENT DEPENDENCY TESTING BEGINS HERE **********
     # Case 1.1: base case (predecessors) with versionPK value not specified
+    print("\n*****Case 1.1*****")
+    print("-----Datasets-----")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents", ignoreShowKeyError=True):
             try:
-                print(f"\n***Dataset*** \nName: %s metadata: %s" %(dataset.name, dict(dataset.metadata)), "\n")
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
 
     # Case 1.2: base case (predecessors) with one versionPK value specified
+    print("\n*****Case 1.2*****")
+    print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents in (2)"):
-            print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+        for dataset in client.search(target='/testpath/testfolder', show="dependents",query='dependent in (4)', ignoreShowKeyError=True):
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
     except:
         assert False, "Error. search unsuccessful. Case 1.2"
 
     # Case 1.3: base case (predecessors) with multiple versionPK values specified
+    print("\n*****Case 1.3*****")
+    print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents in (2,4,5)"):
-            print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+        for dataset in client.search(target='/testpath/testfolder', show="dependents",query='dependent in (4,5)', ignoreShowKeyError=True):
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
     except:
         assert False, "Error. search unsuccessful. Case 1.3"
 
     # Case 2.1: predecessor with versionPK value not specified
+    print("\n*****Case 2.1*****")
+    print("-----Datasets-----")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor", ignoreShowKeyError=True):
-            print("\n***Dataset*** \nName: %s Metadata: %s" %(dataset.name, dict(dataset.metadata)), "\n")
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
     except:
         assert False, "Error. search unsuccessful. Case 2.1"
 
     # Case 2.2: predecessor with one versionPK value specified
+    print("\n*****Case 2.2*****")
+    print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents.predecessor in (2)"):
-            print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",query='dependent in (4)', ignoreShowKeyError=True):
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
     except:
         assert False, "Error. search unsuccessful. Case 2.2"
 
     # Case 2.3: predecessor with multiple versionPK values specified
+    print("\n*****Case 2.3*****")
+    print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents.predecessor in (2,4,5)"):
-            print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",query='dependent in (4,5)', ignoreShowKeyError=True):
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
     except:
-        assert False, "Error. search unsuccessful. Case 2.3"
+        assert False, "Error. search unsuccessful. Case 1.3"
 
     # Case 3.1: successor with versionPK value not specified
+    print("\n*****Case 3.1*****")
+    print("-----Datasets-----")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.successor", ignoreShowKeyError=True):
-            print("\n***Dataset*** \nName: %s Metadata: %s" %(dataset.name, dict(dataset.metadata)), "\n")
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name), "(has no dependents.successor metadata)")
     except:
-        assert False, "Error. search unsuccessful. Case 3.1 "
+        assert False, "Error. search unsuccessful. Case 3.1"
 
     # Case 3.2: successor with one versionPK value specified
+    print("\n*****Case 3.2*****")
+    print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents.successor in (2)"):
-            print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.successor",query='dependent in (4)', ignoreShowKeyError=True):
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name), "(has no dependents.successor metadata)")
     except:
         assert False, "Error. search unsuccessful. Case 3.2"
 
     # Case 3.3: successor with multiple versionPK values specified
+    print("\n*****Case 2.3*****")
+    print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', query="dependents.successor in (2,4,5)"):
-            print("\n***Dataset*** \nName: %s" %(dataset.name), "\n")
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.successor",query='dependent in (4,5)', ignoreShowKeyError=True):
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name), "(has no dependents.successor metadata)")
+        print("\n")
     except:
-        assert False, "Error. search unsuccessful. Case 3.3"
+        assert False, "Error. search unsuccessful. Case 3.3\n"
