@@ -18,6 +18,7 @@ if __name__ == "__main__":
     metadata['nIsTest'] = 1
     ds001 = None
     ds002 = None
+    ds003 = None
 
     filename = "dataset001_82f24.dat"
     if client.exists(datacat_path + '/' + filename):
@@ -31,7 +32,6 @@ if __name__ == "__main__":
                         site='SLAC')
 
         print("\ncreated dataset: ", filename)
-
 
     filename = "dataset002_92e56.dat"
     if client.exists(datacat_path + '/' + filename):
@@ -59,6 +59,22 @@ if __name__ == "__main__":
                             versionMetadata=metadata,
                             resource=full_file003,
                             site='SLAC')
+        print("\ncreated dataset: ", filename)
+
+    filename = "dataset004_d8080.dat"
+    if client.exists(datacat_path + '/' + filename):
+        print("\ndataset already created:", filename)
+    else:
+        full_file004 = file_path + '/' + filename
+        dependents = client.getdependentid([ds003])
+        dep_metadata = {"dependencyName": "test_data",
+                        "dependents": str(dependents),
+                        "dependentType": "successor"}
+        metadata.update(dep_metadata)
+        ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                            versionMetadata=metadata,
+                            resource=full_file004,
+                            site='SLAC')
         print("\ncreated dataset: ", filename, "\n")
 
     # ********** CLIENT DEPENDENCY TESTING BEGINS HERE **********
@@ -70,7 +86,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
+                print(f"Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
 
@@ -82,7 +98,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
+                print(f"Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 1.2"
 
@@ -94,7 +110,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
+                print(f"Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 1.3"
 
@@ -106,7 +122,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
+                print(f"Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 2.1"
 
@@ -118,7 +134,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
+                print(f"Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 2.2"
 
@@ -130,7 +146,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.predecessor metadata)")
+                print(f"Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 1.3"
 
@@ -142,7 +158,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.successor metadata)")
+                print(f"Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 3.1"
 
@@ -154,7 +170,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.successor metadata)")
+                print(f"Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 3.2"
 
@@ -166,7 +182,7 @@ if __name__ == "__main__":
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
-                print(f"Name: %s" %(dataset.name), "(has no dependents.successor metadata)")
+                print(f"Name: %s" %(dataset.name))
         print("\n")
     except:
         assert False, "Error. search unsuccessful. Case 3.3\n"
