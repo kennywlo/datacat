@@ -16,66 +16,71 @@ if __name__ == "__main__":
     # metadata
     metadata = Metadata()
     metadata['nIsTest'] = 1
-    ds001 = None
-    ds002 = None
-    ds003 = None
+
 
     filename = "dataset001_82f24.dat"
     if client.exists(datacat_path + '/' + filename):
-        print("\ndataset already created:", filename)
+        client.rmds(datacat_path + '/' + filename)
 
-    else:
-        full_file001 = file_path + '/' + filename
-        ds001 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata,
-                        resource=full_file001,
-                        site='SLAC')
 
-        print("\ncreated dataset: ", filename)
+    full_file001 = file_path + '/' + filename
+    ds001 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                    versionMetadata=metadata,
+                    resource=full_file001,
+                    site='SLAC')
+    ds001VersionPk = ds001.versionPk
+    print("\ncreated dataset: ", filename)
+
 
     filename = "dataset002_92e56.dat"
     if client.exists(datacat_path + '/' + filename):
-        print("\ndataset already created:", filename)
+        client.rmds(datacat_path + '/' + filename)
 
-    else:
-        full_file002 = file_path + '/' + filename
-        ds002 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata,
-                        resource=full_file002,
-                        site='SLAC')
-        print("\ncreated dataset: ", filename)
+
+    full_file002 = file_path + '/' + filename
+    ds002 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                    versionMetadata=metadata,
+                    resource=full_file002,
+                    site='SLAC')
+    ds002VersionPk = ds002.versionPk
+    print("\ncreated dataset: ", filename)
+
 
     filename = "dataset003_0c89c.dat"
     if client.exists(datacat_path + '/' + filename):
-        print("\ndataset already created:", filename)
-    else:
-        full_file003 = file_path + '/' + filename
-        dependents = client.getdependentid([ds001, ds002])
-        dep_metadata = {"dependencyName": "test_data",
-                        "dependents": str(dependents),
-                        "dependentType": "predecessor"}
-        metadata.update(dep_metadata)
-        ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                            versionMetadata=metadata,
-                            resource=full_file003,
-                            site='SLAC')
-        print("\ncreated dataset: ", filename)
+        client.rmds(datacat_path + '/' + filename)
+
+    full_file003 = file_path + '/' + filename
+    dependents = client.getdependentid([ds001, ds002])
+    dep_metadata = {"dependencyName": "test_data",
+                    "dependents": str(dependents),
+                    "dependentType": "predecessor"}
+    metadata.update(dep_metadata)
+    ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=metadata,
+                        resource=full_file003,
+                        site='SLAC')
+    ds003VersionPk = ds003.versionPk
+    print("\ncreated dataset: ", filename)
+
 
     filename = "dataset004_d8080.dat"
     if client.exists(datacat_path + '/' + filename):
-        print("\ndataset already created:", filename)
-    else:
-        full_file004 = file_path + '/' + filename
-        dependents = client.getdependentid([ds003])
-        dep_metadata = {"dependencyName": "test_data",
-                        "dependents": str(dependents),
-                        "dependentType": "successor"}
-        metadata.update(dep_metadata)
-        ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                            versionMetadata=metadata,
-                            resource=full_file004,
-                            site='SLAC')
-        print("\ncreated dataset: ", filename, "\n")
+        client.rmds(datacat_path + '/' + filename)
+
+    full_file004 = file_path + '/' + filename
+    dependents = client.getdependentid([ds003])
+    dep_metadata = {"dependencyName": "test_data",
+                    "dependents": str(dependents),
+                    "dependentType": "successor"}
+    metadata.update(dep_metadata)
+    ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=metadata,
+                        resource=full_file004,
+                        site='SLAC')
+    print("\ncreated dataset: ", filename, "\n")
+
+
 
     # ********** CLIENT DEPENDENCY TESTING BEGINS HERE **********
     # Case 1.1: base case (predecessors) with versionPK value not specified
@@ -94,7 +99,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents",query='dependent in (4)', ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/testfolder', show="dependents",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -106,7 +111,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents",query='dependent in (4,5)', ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/testfolder', show="dependents",query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -130,7 +135,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",query='dependent in (4)', ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -142,7 +147,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",query='dependent in (4,5)', ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -166,7 +171,7 @@ if __name__ == "__main__":
     print("\n*****Case 3.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.successor",query='dependent in (4)', ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.successor",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -175,10 +180,10 @@ if __name__ == "__main__":
         assert False, "Error. search unsuccessful. Case 3.2"
 
     # Case 3.3: successor with multiple versionPK values specified
-    print("\n*****Case 2.3*****")
+    print("\n*****Case 3.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.successor",query='dependent in (4,5)', ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.successor",query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
