@@ -1,17 +1,14 @@
 
 package org.srs.datacat.dao.sql.search.tables;
 
+import org.srs.datacat.dao.sql.search.SearchUtils;
+import org.zerorm.core.*;
+import org.zerorm.core.interfaces.MaybeHasAlias;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.srs.datacat.dao.sql.search.SearchUtils;
-import org.zerorm.core.Column;
-import org.zerorm.core.Expr;
-import org.zerorm.core.Op;
-import org.zerorm.core.Param;
-import org.zerorm.core.Select;
-import org.zerorm.core.interfaces.MaybeHasAlias;
 
 /**
  *
@@ -45,8 +42,7 @@ public abstract class MetajoinedStatement extends Select {
                 .as( sName );
 
         getMetajoins().put( metaName, mSelect );
-        // FIXME: MySQL doesn't like asExact() which inserts double quotes around metaName
-        selection( new Column( ms.metaValue.getName(), mSelect ).as( metaName ) )
+        selection( new Column( ms.metaValue.getName(), mSelect ).asExact( metaName ) )
                 .leftOuterJoin(mSelect, getMetajoinColumn().eq( ms.datacatKey ) );
         return ms.metaValue;
     }
