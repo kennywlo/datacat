@@ -4,6 +4,21 @@ package org.srs.datacat.dao.sql.search;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import org.freehep.commons.lang.AST;
+import org.freehep.commons.lang.bool.Lexer;
+import org.freehep.commons.lang.bool.Parser;
+import org.freehep.commons.lang.bool.sym;
+import org.srs.datacat.dao.sql.search.MetanameContext.Entry;
+import org.srs.datacat.dao.sql.search.plugins.DatacatPlugin;
+import org.srs.datacat.dao.sql.search.tables.DatasetVersions;
+import org.srs.datacat.model.DatacatNode;
+import org.srs.datacat.model.DatasetModel;
+import org.srs.datacat.model.DatasetView;
+import org.srs.datacat.model.ModelProvider;
+import org.zerorm.core.*;
+import org.zerorm.core.interfaces.MaybeHasAlias;
+import org.zerorm.core.primaries.Case;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -11,34 +26,10 @@ import java.nio.file.DirectoryStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.freehep.commons.lang.AST;
-import org.freehep.commons.lang.bool.Lexer;
-import org.freehep.commons.lang.bool.Parser;
-import org.freehep.commons.lang.bool.sym;
-import org.srs.datacat.model.DatacatNode;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.model.ModelProvider;
-import org.srs.datacat.dao.sql.search.plugins.DatacatPlugin;
-import org.srs.datacat.dao.sql.search.tables.DatasetVersions;
-import org.srs.datacat.dao.sql.search.MetanameContext.Entry;
-import org.srs.datacat.model.DatasetModel;
-import org.zerorm.core.Column;
-import org.zerorm.core.Op;
-import org.zerorm.core.Select;
-import org.zerorm.core.Table;
-import org.zerorm.core.Val;
-import org.zerorm.core.interfaces.MaybeHasAlias;
-import org.zerorm.core.primaries.Case;
 
 /**
  *
@@ -216,6 +207,9 @@ public class DatasetSearch {
                     } else {
                         s = "deps.dependency.".concat(deps[1]);
                     }
+                    // Store the dependent info to be kept for later reference
+                    metadataFields.add( s.substring("deps".length()+1) );
+                    continue;
                 }
                 Column retrieve = null;
                 if(sd.inSelectionScope( s )){
@@ -236,14 +230,8 @@ public class DatasetSearch {
                             }
                         }   
                     }
-                    if (fIdent.equals("dependency")){
-                        // Strip deps. from the dependent info to be kept for later reference
-                        metadataFields.add( s.substring("deps".length()+1) );
-                        continue;
-                    } else {
-                        retrieve = getColumnFromSelectionScope(dsv, fIdent);
-                        metadataFields.add( fIdent );
-                    }
+                    retrieve = getColumnFromSelectionScope(dsv, fIdent);
+                    metadataFields.add( fIdent );
                 } else if(sd.inMetanameScope( s )){
                     String aliased = "\"" + s + "\"";
                     retrieve = getColumnFromAllScope( dsv, aliased);
