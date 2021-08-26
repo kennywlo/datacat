@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import org.srs.datacat.model.DatacatNode;
 import org.srs.datacat.model.DatacatRecord;
-import org.srs.datacat.model.DatasetContainer;
 
 /**
  *
@@ -48,15 +47,6 @@ public interface BaseDAO extends AutoCloseable {
      */
     DatacatNode getObjectInParent(DatacatRecord parent, String name) throws IOException, NoSuchFileException;
 
-    /**
-     * Get the dependents, based on the dependency identifier.
-     * @param path path to the container
-     * @param dependency the identifier
-     * @param type the dependent type
-     * @return the object
-     * throws IOException An exception occurred performing the operation or talking to the data source.
-     */
-    DatasetContainer getDependents(String path, long dependency, String type) throws IOException;
 
     /**
      * Merge metadata of an existing record.

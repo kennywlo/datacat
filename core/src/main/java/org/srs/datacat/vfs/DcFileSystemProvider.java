@@ -358,17 +358,6 @@ public class DcFileSystemProvider {
         }
     }
 
-    private boolean existsDependency(String path, long dependency, String type){
-        try {
-            // file exists
-            DatasetContainer dep = retrieveDependency(path, dependency, type);
-            return !dep.getMetadataMap().isEmpty();
-        } catch(IOException x) {
-            // does not exist or unable to determine if dependency exists
-            return false;
-        }
-    }
-
     private DcFile retrieveFileAttributes(Path path, DcFile parent) throws IOException{
         // LOG: Checking database
         try(BaseDAO dao = daoFactory.newBaseDAO()) {
@@ -700,22 +689,6 @@ public class DcFileSystemProvider {
             childAdded(parent, path, FileType.DIRECTORY);
             DcFile f = buildChild(parent, path, ret);
             getCache().putFile(f);
-        }
-    }
-
-    public DatacatNode createDependency(Path path, CallContext context, DatacatNode request) throws IOException{
-        // if(exists(path)){
-        //     String msg = "A dependency already exists at this location";
-        //    AfsException.FILE_EXISTS.throwError(path, msg);
-        //  }
-        DcFile parent = resolveFile(path.getParent());
-        checkPermission(context, parent, DcPermissions.INSERT);
-        try(ContainerDAO dao =  daoFactory.newContainerDAO()){
-            dao.lock(parent.getPath());
-            String pathname = path.getFileName().toString();
-            DatacatNode dependency = dao.createNode(parent.getObject(), pathname, request);
-            dao.commit();
-            return dependency;
         }
     }
 
