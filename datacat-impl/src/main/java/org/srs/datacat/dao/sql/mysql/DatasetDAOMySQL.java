@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.srs.datacat.dao.sql.SqlDAOFactory;
+import org.srs.datacat.dao.sql.search.SearchUtils;
 import org.srs.datacat.model.DatacatRecord;
 import org.srs.datacat.model.dataset.DatasetLocationModel;
 import org.srs.datacat.model.DatasetModel;
@@ -209,7 +210,12 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
                 while(rs2.next()){
                     processLocation( rs2, builder.pk, locations);
                 }
-                // ToDo: add dependency info here
+
+                // Retrieve the dependency info as part of the metadata, if any
+                Map<String, Object> deps = SearchUtils.getDependency(getConnection(), false, builder, null);
+                if (!deps.isEmpty()) {
+                    metadata.putAll(deps);
+                }
                 builder.metadata(metadata);
                 return new DatasetViewInfo(builder.build(), locations);
             }

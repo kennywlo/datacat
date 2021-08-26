@@ -456,19 +456,28 @@ public final class SearchUtils {
         return stream;
     }
 
-    public static String getDependencySql() {
-        return "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency " +
-                "WHERE Dependency = ? and DependentType = ?";
+    public static String getDependencySql(String by) {
+        String sql =
+                "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency " +
+                "WHERE " + (by.equals("Id") ? "Dependency = ?" : "dependencyName = ?") + " and DependentType = ?";
+        return sql;
     }
 
-    public static Map<String, Object> getDependency(Connection conn, long dependency, String type) throws SQLException {
-        String sql = SearchUtils.getDependencySql();
+    public static Map<String, Object> getDependency(Connection conn, boolean isContainer,
+                                                    org.srs.datacat.shared.DatacatObject.Builder builder, String type)
+            throws SQLException {
+        String sql = SearchUtils.getDependencySql(isContainer ? "Name": "Id");
         HashMap verMetadata = new HashMap();
         if (type == null || type.isEmpty()) {
             type = "predecessor"; // default
         }
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, dependency);
+            if (isContainer){
+                stmt.setString(1, builder.path);
+            }
+            else {
+                stmt.setLong(1, builder.pk);
+            }
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
             StringBuilder dependents = new StringBuilder();

@@ -178,7 +178,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             }
         }
         // fetch the dependency info
-        Map<String, Object> dependents = SearchUtils.getDependency(getConnection(), pk, "");
+        Map<String, Object> dependents = SearchUtils.getDependency(getConnection(), false, builder, "");
         if (!dependents.isEmpty()) {
             metadata.putAll(dependents);
         }
@@ -198,6 +198,15 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         }
 
         Map<String, Object> metadata = getMetadata(pk, tableType, tableType);
+        // fetch the dependency info
+        if (tableType != null && tableType.equals("DatasetGroup")) {
+            Map<String, Object> dependents = SearchUtils.getDependency(getConnection(),
+                    true, builder, "");
+            if (!dependents.isEmpty()) {
+                metadata.putAll(dependents);
+            }
+        }
+
         if (!metadata.isEmpty()) {
             builder.metadata(metadata);
         }
@@ -297,6 +306,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     protected void addGroupMetadata(long datasetGroupPK, Map<String, Object> metaData) throws SQLException {
+        addDatasetDependency(datasetGroupPK, metaData);
         addDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
     }
 
@@ -310,6 +320,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     private void mergeGroupMetadata(long datasetGroupPK, Map<String, Object> metaData) throws SQLException {
+        mergeDependencyMetadata(datasetGroupPK, metaData);
         mergeDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
     }
 
