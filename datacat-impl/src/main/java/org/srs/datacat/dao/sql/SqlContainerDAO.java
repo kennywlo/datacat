@@ -1,6 +1,13 @@
 package org.srs.datacat.dao.sql;
 
 import com.google.common.base.Optional;
+import org.srs.datacat.model.DatasetContainer;
+import org.srs.datacat.model.*;
+import org.srs.datacat.model.container.ContainerStat;
+import org.srs.datacat.model.dataset.DatasetLocationModel;
+import org.srs.datacat.shared.*;
+import org.srs.vfs.PathUtils;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,21 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import org.srs.datacat.model.container.ContainerStat;
-import org.srs.datacat.model.DatacatNode;
-import org.srs.datacat.model.DatacatRecord;
-import org.srs.datacat.model.DatasetContainer;
-import org.srs.datacat.shared.*;
-import org.srs.datacat.model.dataset.DatasetLocationModel;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.model.RecordType;
-import org.srs.vfs.PathUtils;
+import java.util.*;
 
 /**
  *
@@ -240,7 +233,7 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
     public DirectoryStream<DatacatNode> getChildrenStream(DatacatRecord parent,
             Optional<DatasetView> viewPrefetch) throws IOException{
         try {
-            return getChildrenStreamInternal(parent.getPk(), parent.getPath(), viewPrefetch.orNull());
+            return getChildrenStreamInternal(parent, viewPrefetch.orNull());
         } catch(SQLException ex) {
             throw new IOException(ex);
         }
@@ -305,11 +298,13 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
         }
     }
 
-    protected DirectoryStream<DatacatNode> getChildrenStreamInternal(Long parentPk,
-            final String parentPath,
+    protected DirectoryStream<DatacatNode> getChildrenStreamInternal(DatacatRecord parent,
             DatasetView viewPrefetch) throws SQLException, IOException{
-        String sql = getChildrenSql(viewPrefetch);
-        
+
+        Long parentPk = parent.getPk();
+        String parentPath = parent.getPath();
+        String sql = getChildrenSql(parent, viewPrefetch);
+
         final PreparedStatement stmt = getConnection().prepareStatement(sql);
         final PreparedStatement prefetchVer;
         final PreparedStatement prefetchLoc;
@@ -477,23 +472,35 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
         }
         // TODO: Support multiple versions?
     }
-    
-    protected String getChildrenSql(DatasetView viewPrefetch){
-        String sql 
-            = "SELECT objects.type, objects.pk, objects.name, objects.parent, objects.acl FROM ( "
-            + "    SELECT 'F' type, datasetlogicalfolder pk, name, parent, acl "
-            + "      FROM DatasetLogicalFolder "
-            + "  UNION ALL "
-            + "    SELECT 'G' type, datasetGroup pk, name, datasetLogicalFolder parent, acl "
-            + "      FROM DatasetGroup "
-            + (viewPrefetch != null ? "  UNION ALL "
-            + "    SELECT   'D' type, dataset pk, datasetName name, "
-            + "      CASE WHEN datasetlogicalfolder is not null "
-            + "        THEN datasetlogicalfolder else datasetgroup END parent, acl "
-            + "      FROM VerDataset " : " ")
-            + ") objects "
-            + "  WHERE objects.parent = ? "
-            + "  ORDER BY objects.name";
+
+    protected String getChildrenSql(DatacatRecord parent, DatasetView viewPrefetch){
+        String sql;
+        if (parent.getType() == RecordType.GROUP){
+            sql = "SELECT objects.type, objects.pk, objects.name, objects.parent, objects.acl FROM ( "
+                    + "    SELECT 'G' type, datasetGroup pk, name, datasetLogicalFolder parent, acl "
+                    + "      FROM DatasetGroup "
+                    + (viewPrefetch != null ? "  UNION ALL "
+                    + "    SELECT   'D' type, dataset pk, datasetName name, datasetgroup parent, acl "
+                    + "      FROM VerDataset " : " ")
+                    + ") objects "
+                    + "  WHERE objects.parent = ? "
+                    + "  ORDER BY objects.name";
+        } else { // RecordType.FOLDER
+            sql = "SELECT objects.type, objects.pk, objects.name, objects.parent, objects.acl FROM ( "
+                    + "    SELECT 'F' type, datasetlogicalfolder pk, name, parent, acl "
+                    + "      FROM DatasetLogicalFolder "
+                    + "  UNION ALL "
+                    + "    SELECT 'G' type, datasetGroup pk, name, datasetLogicalFolder parent, acl "
+                    + "      FROM DatasetGroup "
+                    + (viewPrefetch != null ? "  UNION ALL "
+                    + "    SELECT   'D' type, dataset pk, datasetName name, "
+                    + "      CASE WHEN datasetlogicalfolder is not null "
+                    + "        THEN datasetlogicalfolder else datasetgroup END parent, acl "
+                    + "      FROM VerDataset " : " ")
+                    + ") objects "
+                    + "  WHERE objects.parent = ? "
+                    + "  ORDER BY objects.name";
+        }
         return sql;
     }
 
