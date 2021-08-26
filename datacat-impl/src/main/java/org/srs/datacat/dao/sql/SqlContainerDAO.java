@@ -59,20 +59,8 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
                 tableName = "DatasetGroup";
                 parentColumn = "DATASETLOGICALFOLDER";
                 break;
-            case DEPENDENCY:
-                builder = new DatasetDependency.Builder(request);
-                tableName = "DatasetDependency";
-                parentColumn = "DEPENDENCY";
-                break;
             default:
                 throw new SQLException("Unknown parent table: " + newType.toString());
-        }
-
-        if(newType == RecordType.DEPENDENCY) {
-            addDatasetDependency(parent.getPk(), request.getMetadataMap());
-            builder.parentPk(parent.getPk());
-            retObject = builder.build();
-            return retObject;
         }
 
         String insertSqlTemplate = "INSERT INTO %s (NAME, %s, DESCRIPTION) VALUES (?,?,?)";
@@ -113,8 +101,6 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
                 case FOLDER:
                     deleteFolder(container.getPk());
                     return;
-                case DEPENDENCY:
-                    deleteDependency(container.getPk());
                 default:
                     break;
             }
@@ -179,9 +165,6 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
                         break;
                     case FOLDER:
                         cs.setFolderCount(count);
-                        break;
-                    case DEPENDENCY:
-                        cs.setDependencyCount(count);
                         break;
                     default:
                         break;
@@ -260,9 +243,6 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
                 break;
             case GROUP:
                 table = "DatasetGroup";
-                break;
-            case DEPENDENCY:
-                table = "DatasetDependency";
                 break;
             default:
                 throw new IOException("Unrecognized container type");
@@ -477,11 +457,8 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
         String sql;
         if (parent.getType() == RecordType.GROUP){
             sql = "SELECT objects.type, objects.pk, objects.name, objects.parent, objects.acl FROM ( "
-                    + "    SELECT 'G' type, datasetGroup pk, name, datasetLogicalFolder parent, acl "
-                    + "      FROM DatasetGroup "
-                    + (viewPrefetch != null ? "  UNION ALL "
                     + "    SELECT   'D' type, dataset pk, datasetName name, datasetgroup parent, acl "
-                    + "      FROM VerDataset " : " ")
+                    + "      FROM VerDataset "
                     + ") objects "
                     + "  WHERE objects.parent = ? "
                     + "  ORDER BY objects.name";

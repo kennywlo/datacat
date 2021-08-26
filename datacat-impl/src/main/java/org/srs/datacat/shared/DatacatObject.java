@@ -1,24 +1,19 @@
 package org.srs.datacat.shared;
 
-import org.srs.datacat.model.RecordType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.srs.datacat.model.DatacatNode;
+import org.srs.datacat.model.DatacatRecord;
+import org.srs.datacat.model.HasMetadata;
+import org.srs.datacat.model.RecordType;
+import org.srs.datacat.shared.DatacatObject.Builder;
+import org.srs.datacat.shared.metadata.MetadataEntry;
+
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.srs.datacat.model.DatacatNode;
-import org.srs.datacat.model.DatacatRecord;
-import org.srs.datacat.model.HasMetadata;
-import org.srs.datacat.shared.DatacatObject.Builder;
-import org.srs.datacat.shared.metadata.MetadataEntry;
 
 /**
  * The generalized base object for most of the database derived objects.
@@ -30,7 +25,6 @@ import org.srs.datacat.shared.metadata.MetadataEntry;
 @JsonSubTypes(value = {
         @JsonSubTypes.Type(LogicalFolder.class),
         @JsonSubTypes.Type(DatasetGroup.class),
-        @JsonSubTypes.Type(DatasetDependency.class),
         @JsonSubTypes.Type(Dataset.class),
         @JsonSubTypes.Type(FlatDataset.class),
         @JsonSubTypes.Type(FullDataset.class),
@@ -262,8 +256,6 @@ public class DatacatObject implements DatacatNode, HasMetadata {
                     return new LogicalFolder(this);
                 case GROUP:
                     return new DatasetGroup(this);
-                case DEPENDENCY:
-                    return new DatasetDependency(this);
                 case DATASET:
                     return new Dataset(this);
                 default:

@@ -85,23 +85,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         return getDatacatObject(parent, name);
     }
 
-    public DatasetContainer getDependents(String path, long dependency, String type) throws IOException{
-        try{
-            Map<String, Object> depMap = SearchUtils.getDependency(getConnection(), dependency, type);
-            String name = (String)depMap.get("dependencyName");
-            String acl = (String) depMap.get("acl");
-            DatasetDependency.Builder dsDep = new DatasetDependency.Builder();
-            dsDep.pk(dependency)
-                    .parentPk(dependency)
-                    .name(name)
-                    .acl(acl);
-            completeObject(dsDep);
-            return dsDep.build();
-        }catch(SQLException ex){
-            throw new IOException("Exception occurred during fetching dependency in database");
-        }
-    }
-
     private DatacatNode getDatacatObject(DatacatRecord parent, String name) throws IOException, NoSuchFileException {
         try {
             return getChild(parent, name);
@@ -153,8 +136,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         } else if (builder instanceof LogicalFolder.Builder) {
             completeContainer((LogicalFolder.Builder) builder,
                     "select description from DatasetLogicalFolder where datasetlogicalfolder = ?");
-            setContainerMetadata(builder);
-        }else if (builder instanceof DatasetDependency.Builder) {
             setContainerMetadata(builder);
         }
     }
@@ -212,11 +193,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         Long pk = builder.pk;
         if (builder instanceof LogicalFolder.Builder) {
             tableType = "LogicalFolder";
-        } else if (builder instanceof DatasetDependency.Builder) {
-            tableType = "DatasetDependency";
-            Map<String, Object> deps = SearchUtils.getDependency(getConnection(), pk, "");
-            builder.metadata(deps);
-            return;
         } else if (builder instanceof DatasetGroup.Builder) {
             tableType = "DatasetGroup";
         }
@@ -302,9 +278,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     break;
                 case GROUP:
                     mergeGroupMetadata(record.getPk(), metaData);
-                    break;
-                case DEPENDENCY:
-                    mergeDependencyMetadata(record.getPk(), metaData);
                     break;
                 case FOLDER:
                     mergeFolderMetadata(record.getPk(), metaData);
@@ -539,8 +512,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 return RecordType.GROUP;
             case "D":
                 return RecordType.DATASET;
-            case "P":
-                return RecordType.DEPENDENCY;
             default:
                 return null;
         }

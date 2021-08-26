@@ -2,53 +2,38 @@
 package org.srs.datacat.rest.resources;
 
 import com.google.common.base.Optional;
+import org.srs.datacat.model.DatacatNode;
+import org.srs.datacat.model.DatasetContainer;
+import org.srs.datacat.model.DatasetView;
+import org.srs.datacat.model.RecordType;
+import org.srs.datacat.model.container.ContainerStat;
+import org.srs.datacat.model.container.DatasetContainerBuilder;
+import org.srs.datacat.model.security.CallContext;
+import org.srs.datacat.rest.BaseResource;
+import org.srs.datacat.rest.FormParamConverter;
+import org.srs.datacat.rest.PATCH;
+import org.srs.datacat.rest.RestException;
+import org.srs.datacat.shared.RequestView;
+import org.srs.datacat.vfs.DcFile;
+import org.srs.datacat.vfs.DcFileSystemProvider;
+import org.srs.datacat.vfs.DcUriUtils;
+import org.srs.datacat.vfs.attribute.ContainerViewProvider;
+import org.srs.datacat.vfs.attribute.DatasetViewProvider;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.NotDirectoryException;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import org.srs.datacat.model.DatacatNode;
-import org.srs.datacat.model.DatasetContainer;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.shared.RequestView;
-import org.srs.datacat.rest.BaseResource;
+
 import static org.srs.datacat.rest.BaseResource.OPTIONAL_EXTENSIONS;
-import org.srs.datacat.rest.FormParamConverter;
-import org.srs.datacat.vfs.DcFile;
-import org.srs.datacat.vfs.DcUriUtils;
-import org.srs.datacat.vfs.attribute.ContainerViewProvider;
-import org.srs.datacat.vfs.attribute.DatasetViewProvider;
-import org.srs.datacat.rest.RestException;
-import org.srs.datacat.model.RecordType;
-import org.srs.datacat.model.container.ContainerStat;
-import org.srs.datacat.model.container.DatasetContainerBuilder;
-import org.srs.datacat.model.security.CallContext;
-import org.srs.datacat.rest.PATCH;
-import org.srs.datacat.vfs.DcFileSystemProvider;
 
 /**
  *
@@ -93,10 +78,7 @@ public class ContainerResource extends BaseResource {
         if(containerType.equalsIgnoreCase("groups")){
             type = RecordType.GROUP;
         }
-        else if(containerType.equalsIgnoreCase("dependencies")){
-            type = RecordType.DEPENDENCY;
-        }
-        
+
         RequestView rv = null;
         try {
              rv = new RequestView(type, matrixParams);
@@ -143,9 +125,6 @@ public class ContainerResource extends BaseResource {
         if(containerType.equalsIgnoreCase( "groups")){
             type = RecordType.GROUP;
         }
-        else if(containerType.equalsIgnoreCase( "dependencies")){
-            type = RecordType.DEPENDENCY;
-        }
 
         DatasetContainerBuilder builder = FormParamConverter.getContainerBuilder( type, formParams );
         java.nio.file.Path parentPath = getProvider().getPath(sParentPath);
@@ -154,10 +133,7 @@ public class ContainerResource extends BaseResource {
 
         try {
             CallContext callContext = buildCallContext();
-            if (type == RecordType.DEPENDENCY)
-                getProvider().createDependency(targetPath, callContext, builder.build());
-            else
-                getProvider().createDirectory(targetPath, callContext, builder.build());
+            getProvider().createDirectory(targetPath, callContext, builder.build());
             return Response.created(DcUriUtils.toFsUri(targetPath.toString())).entity(builder.build()).build();
         } catch (NoSuchFileException ex){
              throw new RestException(ex ,404, "Parent file doesn't exist", ex.getMessage());
@@ -183,10 +159,6 @@ public class ContainerResource extends BaseResource {
         if(containerType.equalsIgnoreCase("groups")){
             type = RecordType.GROUP;
         }
-        else if(containerType.equalsIgnoreCase("dependencies")) {
-            type = RecordType.DEPENDENCY;
-
-        }
 
         DatasetContainerBuilder builder = getProvider().getModelProvider().getContainerBuilder().create(container);
         java.nio.file.Path parentPath = getProvider().getPath(sParentPath);
@@ -195,10 +167,7 @@ public class ContainerResource extends BaseResource {
 
         try {
             CallContext callContext = buildCallContext();
-            if (type == RecordType.DEPENDENCY)
-                getProvider().createDependency(targetPath, callContext, builder.build());
-            else
-                getProvider().createDirectory(targetPath, callContext, container);
+            getProvider().createDirectory(targetPath, callContext, container);
             return Response.created(DcUriUtils.toFsUri(targetPath.toString()))
                     .entity(builder.build()).build();
         } catch (NoSuchFileException ex){

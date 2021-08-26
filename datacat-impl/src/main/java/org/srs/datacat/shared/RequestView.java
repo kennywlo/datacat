@@ -3,13 +3,14 @@ package org.srs.datacat.shared;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.Optional;
+import org.srs.datacat.model.DatasetView;
+import org.srs.datacat.model.RecordType;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.model.RecordType;
 
 /**
  * Class representing a view of a container or dataset.
@@ -84,7 +85,6 @@ public class RequestView extends HashMap<String, String>{
             type = RecordType.FOLDER; // Assume to be folder in this case.
         }
         switch(type){
-            case DEPENDENCY:
             case GROUP:
                 if(params.containsKey("datasets") && params.containsKey("children")){
                     throw new IllegalArgumentException("Groups can only contain datasets as children.");

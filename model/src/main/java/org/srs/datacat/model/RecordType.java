@@ -3,7 +3,6 @@ package org.srs.datacat.model;
 
 import org.srs.datacat.model.DatasetContainer.Folder;
 import org.srs.datacat.model.DatasetContainer.Group;
-import org.srs.datacat.model.DatasetContainer.Dependency;
 import org.srs.datacat.model.dataset.DatasetLocationModel;
 import org.srs.datacat.model.dataset.DatasetVersionModel;
 
@@ -11,10 +10,10 @@ import org.srs.datacat.model.dataset.DatasetVersionModel;
  * The basic type of this DatacatObject.
  */
 public enum RecordType {
-    DATASET, DATASETLOCATION, DATASETVERSION, DEPENDENCY, FOLDER, GROUP;
+    DATASET, DATASETLOCATION, DATASETVERSION, FOLDER, GROUP;
 
     public boolean isContainer(){
-        return this == FOLDER || this == GROUP || this == DEPENDENCY;
+        return this == FOLDER || this == GROUP;
     }
 
     public static RecordType typeOf(DatacatRecord object){
@@ -26,9 +25,6 @@ public enum RecordType {
         }
         if(object instanceof Group){
             return GROUP;
-        }
-        if(object instanceof Dependency){
-            return DEPENDENCY;
         }
         if(object instanceof DatasetVersionModel){
             return DATASETVERSION;
@@ -46,8 +42,6 @@ public enum RecordType {
                 return FOLDER;
             case "group":
                 return GROUP;
-            case "dependency":
-                return DEPENDENCY;
             case "dataset":
             case "dataset#flat":
             case "dataset#full":

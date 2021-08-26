@@ -369,12 +369,6 @@ public class DcFileSystemProvider {
         }
     }
 
-    private DatasetContainer retrieveDependency(String path, long dependency, String type) throws IOException{
-        try(BaseDAO dao = daoFactory.newBaseDAO()) {
-            return dao.getDependents(path, dependency, type);
-        }
-    }
-
     private DcFile retrieveFileAttributes(Path path, DcFile parent) throws IOException{
         // LOG: Checking database
         try(BaseDAO dao = daoFactory.newBaseDAO()) {

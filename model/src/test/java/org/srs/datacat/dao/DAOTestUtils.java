@@ -1,19 +1,7 @@
 package org.srs.datacat.dao;
 
 import com.google.common.base.Optional;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.srs.datacat.model.DatacatRecord;
-import org.srs.datacat.model.DatasetContainer;
-import org.srs.datacat.model.DatasetModel;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.model.RecordType;
+import org.srs.datacat.model.*;
 import org.srs.datacat.model.dataset.DatasetLocationModel;
 import org.srs.datacat.model.dataset.DatasetOption;
 import org.srs.datacat.model.dataset.DatasetVersionModel;
@@ -21,8 +9,12 @@ import org.srs.datacat.model.dataset.DatasetViewInfoModel;
 import org.srs.datacat.test.DbHarness;
 import org.srs.datacat.test.HSqlDbHarness;
 
-import static org.mockito.Mockito.*;
-import org.srs.datacat.model.DatacatNode;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.util.*;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -142,13 +134,4 @@ public class DAOTestUtils {
 
     }
 
-
-    public static DatasetContainer getDependencies(DAOFactory factory, long dependencies,String path, String type) throws IOException{
-        DatasetDAO dao = factory.newDatasetDAO();
-        System.out.println("\nDependency Information for Dataset at location:" + path + ":");
-        System.out.println(dao.getDependents(path,dependencies,type) + "\n");
-
-        DatasetContainer depInfo = dao.getDependents(path,dependencies,type);
-        return depInfo;
-    }
 }

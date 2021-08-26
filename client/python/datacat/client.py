@@ -56,8 +56,6 @@ class Client(object):
             container = Folder(path=path, name=path.split("/")[-1], metadata=metadata, **kwargs)
         elif type.lower() == "group":
             container = Group(path=path, name=path.split("/")[-1], metadata=metadata, **kwargs)
-        elif type.lower() == "dependency":
-            container = Dependency(path=path, name=path.split("/")[-1], metadata=metadata, **kwargs)
         if parents:
             parts = []
             parentpath = os.path.dirname(path)
@@ -213,8 +211,6 @@ class Client(object):
             container = Group(**container)
         elif type == "folder":
             container = Folder(**container)
-        elif type == "dependency":
-            container = Dependency(**container)
 
         resp = self.http_client.patchdir(path, pack(container), type, **kwargs)
         return unpack(resp.content)

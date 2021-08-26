@@ -60,6 +60,7 @@ if __name__ == "__main__":
                   "dependencyName": "test_data",
                   "dependents": [did001, did002],
                   "dependentType": "predecessor" }
-    client.mkdependency(datacat_path+'/'+filename, metadata=vmetadata)
-    dependents = client.get_dependents(did003, target="/testpath/**")
+    client.mkgroup(datacat_path+'/'+filename, metadata=vmetadata)
+    # ToDo: Get dependents from the created group's metadata
+    dependents = ""
     print(dependents)

@@ -3,18 +3,6 @@
 
 package org.srs.datacat.rest.resources;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import javax.sql.DataSource;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import junit.framework.TestCase;
 import org.glassfish.jersey.client.ClientProperties;
@@ -27,7 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.srs.datacat.dao.DAOFactory;
 import org.srs.datacat.dao.DAOTestUtils;
-import org.srs.datacat.dao.DatasetDAO;
 import org.srs.datacat.dao.sql.mysql.DAOFactoryMySQL;
 import org.srs.datacat.dao.sql.search.DatasetSearch;
 import org.srs.datacat.model.DatasetContainer;
@@ -37,13 +24,20 @@ import org.srs.datacat.rest.App;
 import org.srs.datacat.rest.FormParamConverter;
 import org.srs.datacat.rest.JacksonFeature;
 import org.srs.datacat.shared.Dataset;
-import org.srs.datacat.shared.FullDataset;
 import org.srs.datacat.shared.Provider;
 import org.srs.datacat.shared.metadata.MetadataEntry;
 import org.srs.datacat.test.DbHarness;
 import org.srs.datacat.test.HSqlDbHarness;
 import org.srs.datacat.vfs.TestUtils;
 import org.srs.vfs.PathUtils;
+
+import javax.sql.DataSource;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
 
 /**
  *
@@ -722,18 +716,5 @@ public class ContainerResourceTest extends JerseyTest {
 
         mapper = new ObjectMapper();
         result = mapper.readValue(responseEntityString, HashMap.class);
-
-//        Save the field value (VersionPK) for dataset0002
-        long dataset0002PK = Long.parseLong((String.valueOf(result.get("versionPk"))));
-
-        DatasetContainer depInfo = DAOTestUtils.getDependencies(factory, dataset0002PK,"/testpath/folder00000/dataset0002","successor");
-        depInfo.getMetadataMap().get("dependents");
-
-//        Tests to make sure that the proper dependents were returned by getDependents.
-
-        String dependentsReturn = (depInfo.getMetadataMap().get("dependents")).toString();
-
-        TestCase.assertTrue(dependentsReturn.contains(dataset0000PK));
-        TestCase.assertTrue(dependentsReturn.contains(dataset0001PK));
     }
 }

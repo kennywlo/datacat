@@ -69,7 +69,6 @@ class ModelTest(unittest.TestCase):
         print(pack(ds_new))
         ds_new2 = unpack(pack(ds_new), Dataset)
         print(pack(ds_new2))
-        # ToDo: Dependency testing
 
         dependency = [
             {"_type": "dependency", "dependency": 54924979, "name": None, "dependent": 54811843, "dependentType": "predecessor"},
@@ -121,7 +120,6 @@ class ModelTest(unittest.TestCase):
 
 
     def test_build_dependency(self):
-        # ToDo: Dependency testing
 
         vmd1 = {"dependencyName":"test", "dependency":78, "dependents": [21, 12], "dependentType":"predecessor"}
         vmd2 = {"dependencyName":"test", "dependency": 79,"dependents": [321, 234], "dependentType":"successor"}
@@ -145,8 +143,6 @@ class ModelTest(unittest.TestCase):
         print(txt1)
         txt2 = pack(ds2)
         print(txt2)
-
-
 
         assert "test_build_dependency() success"
 

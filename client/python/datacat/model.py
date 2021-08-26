@@ -57,8 +57,6 @@ class Folder(Container):
 class Group(Container):
     pass
 
-class Dependency(Container):
-    pass
 
 class Dataset(DatacatNode):
     REQ_JSON_ALLOWED = "name path dataType fileFormat metadata " \
@@ -309,8 +307,6 @@ def _default_serializer(obj):
                 ret["_type"] = "group"
             if isinstance(obj, Folder):
                 ret["_type"] = "folder"
-            if isinstance(obj, Dependency):
-                ret["_type"] = "dependency"
             return ret
         if isinstance(obj, DatacatRecord):
             ret = {}
@@ -379,8 +375,6 @@ def _default_hook(raw):
             return Folder(**raw)
         elif _type.startswith("group"):
             return Group(**raw)
-        elif _type.startswith("dependency"):
-            return Dependency(**raw)
         elif _type.startswith("location"):
             return DatasetLocation(**raw)
         elif _type.startswith("aclEntry"):
