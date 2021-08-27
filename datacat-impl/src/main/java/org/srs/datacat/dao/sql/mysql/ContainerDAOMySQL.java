@@ -88,7 +88,7 @@ public class ContainerDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.d
             if(newType == RecordType.FOLDER){
                 addFolderMetadata(retObject.getPk(), retObject.getMetadataMap());
             } else {
-                addGroupMetadata(retObject.getPk(), retObject.getMetadataMap());
+                addGroupMetadata(retObject, retObject.getMetadataMap());
             }
         }
         return retObject;

@@ -13,6 +13,7 @@ import java.util.*;
 
 import org.freehep.commons.lang.AST;
 import org.srs.datacat.model.DatacatNode;
+import org.srs.datacat.shared.DatacatObject;
 import org.zerorm.core.Select;
 
 import org.srs.datacat.model.DatasetContainer;
@@ -94,7 +95,8 @@ public final class SearchUtils {
         for(String s: includedMetadata){
             if (s.contains("dependency")){
                 String[] deps = s.split("\\.");
-                Map<String, Object> depmap = SearchUtils.getDependency(conn, versionPk, deps[1]);
+                Map<String, Object> depmap = SearchUtils.getDependency(conn, false,
+                        (DatacatObject.Builder)builder, deps[1]);
                 metadata.putAll(depmap);
                 continue;
             }
@@ -464,18 +466,17 @@ public final class SearchUtils {
     }
 
     public static Map<String, Object> getDependency(Connection conn, boolean isContainer,
-                                                    org.srs.datacat.shared.DatacatObject.Builder builder, String type)
-            throws SQLException {
+                                                    DatacatObject.Builder builder,
+                                                    String type) throws SQLException {
         String sql = SearchUtils.getDependencySql(isContainer ? "Name": "Id");
         HashMap verMetadata = new HashMap();
         if (type == null || type.isEmpty()) {
             type = "predecessor"; // default
         }
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)){
             if (isContainer){
                 stmt.setString(1, builder.path);
-            }
-            else {
+            } else {
                 stmt.setLong(1, builder.pk);
             }
             stmt.setString(2, type);

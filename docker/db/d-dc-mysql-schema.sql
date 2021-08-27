@@ -144,7 +144,7 @@ create index IDX_DSV_DS_and_MasterLoc on DatasetVersion(Dataset, MasterLocation)
 
 create table DatasetDependency (
     DatasetDependency   SERIAL,
-    Dependency      bigint unsigned not null,
+    Dependency      bigint unsigned,
     DependencyName  varchar(255),
     Dependent       bigint unsigned,
     DependentType   varchar(32),
@@ -154,9 +154,11 @@ create table DatasetDependency (
         references DatasetVersion(DatasetVersion) on delete cascade,
     constraint FK_Dependent foreign key (Dependent)
         references DatasetVersion(DatasetVersion) on delete set null,
-    constraint UNQ_DD_Entry unique (Dependency, Dependent, DependentType)
+    constraint UNQ_DD_Entry1 unique (Dependency, Dependent, DependentType),
+    constraint UNQ_DD_Entry2 unique (DependencyName, Dependent, DependentType),
 );
-create index IDX_DD_FIND on DatasetDependency(Dependency, DependentType);
+create index IDX_DD_FIND1 on DatasetDependency(Dependency, DependentType);
+create index IDX_DD_FIND2 on DatasetDependency(DependencyName, DependentType);
 
 
 create table VerDatasetLocation (

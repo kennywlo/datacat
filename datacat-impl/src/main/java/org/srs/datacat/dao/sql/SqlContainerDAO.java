@@ -86,7 +86,7 @@ public class SqlContainerDAO extends SqlBaseDAO implements org.srs.datacat.dao.C
             if(newType == RecordType.FOLDER){
                 addFolderMetadata(retObject.getPk(), retObject.getMetadataMap());
             } else {
-                addGroupMetadata(retObject.getPk(), retObject.getMetadataMap());
+                addGroupMetadata(retObject, retObject.getMetadataMap());
             }
         }
         return retObject;

@@ -301,12 +301,15 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     protected void addDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
-        addDatasetDependency(pk, metaData);
+        metaData.put("dependency", pk);
+        addDatasetDependency(metaData);
         addDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }
 
-    protected void addGroupMetadata(long datasetGroupPK, Map<String, Object> metaData) throws SQLException {
-        addDatasetDependency(datasetGroupPK, metaData);
+    protected void addGroupMetadata(DatasetContainer datasetGroup, Map<String, Object> metaData) throws SQLException {
+        long datasetGroupPK = datasetGroup.getPk();
+        metaData.put("dependencyName", datasetGroup.getName());
+        addDatasetDependency(metaData);
         addDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
     }
 
@@ -337,36 +340,38 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         stmt.setLong(1, dependencyPK);
         stmt.executeUpdate();
         // Add the new dependency
-        addDatasetDependency(dependencyPK, metaData);
+        metaData.put("dependency", dependencyPK);
+        addDatasetDependency(metaData);
 
     }
 
-    protected void addDatasetDependency(long dependencyPk, Map<String, Object> metaData) throws SQLException {
+    protected void addDatasetDependency(Map<String, Object> metaData) throws SQLException {
         if (!(metaData instanceof HashMap)) {
             metaData = new HashMap<>(metaData);
         }
         if (!metaData.containsKey("dependents")) {
             return;
         }
+        long dependency = (Long)metaData.get("dependency");
         String name = (String)metaData.get("dependencyName");
         String dependents = (String)metaData.get("dependents");
         String dependentType = (String)metaData.get("dependentType");
 
         final String dependencySql = "insert into DatasetDependency (Dependency, DependencyName, Dependent," +
-                "                       DependentType)" + " values (?, ?, ?, ?)";
+                " DependentType)" + " values (?, ?, ?, ?)";
         PreparedStatement stmt = getConnection().prepareStatement(dependencySql);
         String[] dependentList = dependents.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
         // store each dependent info from the list
         for (String d : dependentList) {
             long dependent = Long.parseLong(d);
-            stmt.setLong(1, dependencyPk);
+            stmt.setLong(1, dependency);
             stmt.setString(2, name);
             stmt.setLong(3, dependent);
             stmt.setString(4, dependentType);
             stmt.executeUpdate();
         }
         /// create entry in the metadata table for later linking
-        metaData.put("dependency", dependencyPk);
+        metaData.put("dependency", dependency);
         // remove the dependency fields
         metaData.remove("dependencyName");
         metaData.remove("dependents");
