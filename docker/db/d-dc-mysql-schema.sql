@@ -155,7 +155,7 @@ create table DatasetDependency (
     constraint FK_Dependent foreign key (Dependent)
         references DatasetVersion(DatasetVersion) on delete set null,
     constraint UNQ_DD_Entry1 unique (Dependency, Dependent, DependentType),
-    constraint UNQ_DD_Entry2 unique (DependencyName, Dependent, DependentType),
+    constraint UNQ_DD_Entry2 unique (DependencyName, Dependent, DependentType)
 );
 create index IDX_DD_FIND1 on DatasetDependency(Dependency, DependentType);
 create index IDX_DD_FIND2 on DatasetDependency(DependencyName, DependentType);
