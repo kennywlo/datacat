@@ -352,7 +352,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         if (!metaData.containsKey("dependents")) {
             return;
         }
-        long dependency = (Long)metaData.get("dependency");
+        Long dependency = (Long)metaData.get("dependency");
         String name = (String)metaData.get("dependencyName");
         String dependents = (String)metaData.get("dependents");
         String dependentType = (String)metaData.get("dependentType");
@@ -364,7 +364,11 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         // store each dependent info from the list
         for (String d : dependentList) {
             long dependent = Long.parseLong(d);
-            stmt.setLong(1, dependency);
+            if (dependency != null) {
+                stmt.setLong(1, dependency.longValue());
+            } else{
+                stmt.setNull(1, Types.BIGINT);
+            }
             stmt.setString(2, name);
             stmt.setLong(3, dependent);
             stmt.setString(4, dependentType);
