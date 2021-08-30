@@ -124,7 +124,7 @@ public final class SearchUtils {
         return builder.build();
     }
 
-    public static DatasetContainer containerFactory(ResultSet rs, ModelProvider modelProvider,
+    public static DatasetContainer containerFactory(Connection conn, ResultSet rs, ModelProvider modelProvider,
             List<String> includedMetadata) throws SQLException{
         DatasetContainerBuilder builder = modelProvider.getContainerBuilder();
 
@@ -136,6 +136,13 @@ public final class SearchUtils {
 
         HashMap<String, Object> metadata = new HashMap<>();
         for(String s: includedMetadata){
+            if (s.contains("dependency")){
+                String[] deps = s.split("\\.");
+                Map<String, Object> depmap = SearchUtils.getDependency(conn, false,
+                        (DatacatObject.Builder)builder, deps[1]);
+                metadata.putAll(depmap);
+                continue;
+            }
             Object o = rs.getObject(s);
             if(o != null){
                 if(o instanceof Number){
@@ -415,7 +422,7 @@ public final class SearchUtils {
                                     if(rs.isClosed()){
                                         return false;
                                     }
-                                    container = SearchUtils.containerFactory(rs, modelProvider, metadataNames);
+                                    container = SearchUtils.containerFactory(conn, rs, modelProvider, metadataNames);
                                     return true;
                                 }
                                 return true;
