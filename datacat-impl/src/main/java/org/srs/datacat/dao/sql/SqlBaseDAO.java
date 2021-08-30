@@ -374,8 +374,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             stmt.setString(4, dependentType);
             stmt.executeUpdate();
         }
-        /// create entry in the metadata table for later linking
-        metaData.put("dependency", dependency);
         // remove the dependency fields
         metaData.remove("dependencyName");
         metaData.remove("dependents");

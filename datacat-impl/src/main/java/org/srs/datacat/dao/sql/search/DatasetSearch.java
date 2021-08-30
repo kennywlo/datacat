@@ -198,7 +198,6 @@ public class DatasetSearch {
         
         if(retrieveFields.isPresent()){
             for(String s: retrieveFields.get()){
-                // rewrite dependents to use DependencySearch Plugin
                 if (s.contains("dependents")) {
                     String[] deps = s.split("\\.");
                     if (deps.length == 1) {
@@ -286,7 +285,6 @@ public class DatasetSearch {
             case "size":
                 return "fileSizeBytes";
             case "dependents":
-                return "datasetVersion";
             case "dependency":
                 return "datasetVersion";
             default:

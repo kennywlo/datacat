@@ -146,6 +146,9 @@ public class ContainerSearch {
                 return "path";
             case "size":
                 return "fileSizeBytes";
+            case "dependents":
+            case "dependency":
+                return "datasetVersion";
             default:
                 return ident;
         }
@@ -199,6 +202,18 @@ public class ContainerSearch {
 
         if(retrieveFields.isPresent()){
             for(String s: retrieveFields.get()){
+                if (s.contains("dependents")) {
+                    String[] deps = s.split("\\.");
+                    if (deps.length == 1) {
+                        // default: predecessors
+                        s = "deps.dependency.".concat("predecessor");
+                    } else {
+                        s = "deps.dependency.".concat(deps[1]);
+                    }
+                    // Store the dependent info to be kept for later reference
+                    metadataFields.add( s.substring("deps".length()+1) );
+                    continue;
+                }
                 Column retrieve = null;
                 if(sd.inSelectionScope(s)){
                     retrieve = getColumnFromSelectionScope(dsv, s);
