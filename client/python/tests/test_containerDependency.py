@@ -29,8 +29,8 @@ if __name__ == "__main__":
 
     # Dependency Group 1 creation
 
-    depGroup1 = client.mkgroup(containerPath1, metadata=metadata)
-    print("\ncreated depGroup: depGroup1")
+    depGroup1 = client.mkgroup(containerPath1)
+    print("\ncreated depGroup1 as: {}".format(depGroup1))
 
     # Dependency Group 2 creation
 
@@ -67,6 +67,7 @@ if __name__ == "__main__":
 
 
     dependents = client.getdependentid([ds001,ds002])
+    print("\ndependents genereated as: {}".format(dependents))
 
     dep_metadata = {
         "dependents": str(dependents),
@@ -74,9 +75,9 @@ if __name__ == "__main__":
     }
 
     metadata.update(dep_metadata)
-    client.mkgroup(containerPath2, metadata=metadata)
+    depGroup2 = client.mkgroup(containerPath2, metadata=metadata)
 
-    print("\ncreated depGroup: depGroup2")
+    print("\ncreated depGroup2 as: {}".format(depGroup2))
 
 
 
@@ -154,7 +155,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor", query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/depGroup2', show="dependents.predecessor", query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
