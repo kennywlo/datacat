@@ -90,7 +90,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.1*****")
     print("-----Datasets-----")
     try:
-        print(client.path(path='/testpath/depGroup2'))
+        print(client.path(path='/testpath/depGroup2;metadata=true'))
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
 

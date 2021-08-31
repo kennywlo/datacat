@@ -4,6 +4,7 @@ package org.srs.datacat.rest.resources;
 
 import com.google.common.base.Optional;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.NoSuchFileException;
@@ -82,8 +83,22 @@ public class PathResource extends BaseResource {
         String path = "";
         if(pathSegments != null && !pathSegments.isEmpty()){
             for(PathSegment s: pathSegments){
-                path = path + "/" + s.getPath();
-                requestMatrixParams.putAll(s.getMatrixParameters());
+                if (s.getPath().contains(";")){
+                    // FIXME: PathSegment not parsing matrix parameters properly
+                    String[] parts = s.getPath().split(";");
+                    path = path + "/" + parts[0];
+                    for (String part: parts) {
+                        String[] kv = part.split("=");
+                        if (kv.length == 2) {
+                            ArrayList<String> list = new ArrayList<>();
+                            list.add(kv[0]);
+                            requestMatrixParams.put(kv[0], list);
+                        }
+                    }
+                } else {
+                    path = path + "/" + s.getPath();
+                    requestMatrixParams.putAll(s.getMatrixParameters());
+                }
             }   
         } else {
             path = "/";

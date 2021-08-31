@@ -39,7 +39,7 @@ import static org.srs.datacat.rest.BaseResource.OPTIONAL_EXTENSIONS;
  *
  * @author bvan
  */
-@Path("/{containerType: (dependencies|groups|folders|containers)}" +  OPTIONAL_EXTENSIONS)
+@Path("/{containerType: (groups|folders|containers)}" +  OPTIONAL_EXTENSIONS)
 public class ContainerResource extends BaseResource {
     
     private String requestPath;
