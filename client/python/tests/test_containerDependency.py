@@ -16,6 +16,8 @@ if __name__ == "__main__":
 
     # metadata
     metadata = Metadata()
+    ds_metadata = Metadata()
+
 
     try:
         if client.exists(containerPath1):
@@ -30,7 +32,7 @@ if __name__ == "__main__":
     # Dependency Group 1 creation
 
     depGroup1 = client.mkgroup(containerPath1)
-    print("\ncreated depGroup1 as: {}".format(depGroup1))
+    print("\nCreated depGroup1 as:\n{}\nMetadata: {}".format(depGroup1, dict(metadata)))
 
     # Dependency Group 2 creation
 
@@ -45,11 +47,11 @@ if __name__ == "__main__":
 
     full_file001 = file_path + '/' + filename
     ds001 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata,
+                        versionMetadata=ds_metadata,
                         resource=full_file001,
                         site='SLAC')
     ds001VersionPk = ds001.versionPk
-    print("\ncreated dataset: ", filename)
+    print("\nCreated dataset:\n{}\n{}\nMetadata: {}".format(filename, ds001, dict(ds_metadata)))
 
 
     filename = "dataset002_92e56.dat"
@@ -59,15 +61,15 @@ if __name__ == "__main__":
 
     full_file002 = file_path + '/' + filename
     ds002 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata,
+                        versionMetadata=ds_metadata,
                         resource=full_file002,
                         site='SLAC')
     ds002VersionPk = ds002.versionPk
-    print("\ncreated dataset: ", filename)
+    print("\nCreated dataset:\n{}\n{}\nMetadata: {}".format(filename, ds002, dict(ds_metadata)))
 
 
     dependents = client.getdependentid([ds001,ds002])
-    print("\ndependents genereated as: {}".format(dependents))
+    print("\ndependents genereated as:\n{}".format(dependents))
 
     dep_metadata = {
         "dependents": str(dependents),
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     metadata.update(dep_metadata)
     depGroup2 = client.mkgroup(containerPath2, metadata=metadata)
 
-    print("\ncreated depGroup2 as: {}".format(depGroup2))
+    print("\nCreated depGroup2 as:\n{} \nMetadata: {}".format(depGroup2, dict(metadata)))
 
 
 
