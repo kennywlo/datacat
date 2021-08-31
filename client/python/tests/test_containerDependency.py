@@ -90,15 +90,9 @@ if __name__ == "__main__":
     print("\n*****Case 1.1*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup2', show="dependents", ignoreShowKeyError=True):
-            try:
-                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
-            except:
-                print(f"Name: %s" %(dataset.name))
+        print(client.path(path='/testpath/depGroup2'))
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
-
-
 
     # Case 1.2: base case (predecessors) with one versionPK value specified
 
@@ -131,11 +125,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.1*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup2', show="dependents.predecessor", ignoreShowKeyError=True):
-            try:
-                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
-            except:
-                print(f"Name: %s" %(dataset.name))
+        print(client.path(path='/testpath/depGroup2'))
     except:
         assert False, "Error. search unsuccessful. Case 2.1"
 
@@ -170,11 +160,7 @@ if __name__ == "__main__":
     print("\n*****Case 3.1*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup1', show="dependents.successor", ignoreShowKeyError=True):
-            try:
-                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
-            except:
-                print(f"Name: %s" %(dataset.name))
+        print(client.path(path='/testpath/depGroup2'))
     except:
         assert False, "Error. search unsuccessful. Case 3.1"
 
