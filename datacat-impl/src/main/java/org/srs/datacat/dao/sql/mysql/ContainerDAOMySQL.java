@@ -99,6 +99,7 @@ public class ContainerDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.d
             switch(container.getType()){
                 case GROUP:
                     deleteGroup(container.getPk());
+                    deleteDependency(container.getPath());
                     return;
                 case FOLDER:
                     deleteFolder(container.getPk());
@@ -120,9 +121,9 @@ public class ContainerDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.d
         String deleteSql = "delete from DatasetGroup where DatasetGroup=?";
         delete1(deleteSql, groupPk);
     }
-    protected void deleteDependency(long dependencyPk) throws SQLException{
-        String deleteSql = "delete from DatasetDependency where Dependency=?";
-        delete1(deleteSql, dependencyPk);
+    protected void deleteDependency(String dependency) throws SQLException{
+        String deleteSql = "delete from DatasetDependency where DependencyName=?";
+        delete1(deleteSql, dependency);
     }
 
     @Override
