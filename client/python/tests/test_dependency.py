@@ -11,10 +11,15 @@ if __name__ == "__main__":
     # file/datacatalog path
     file_path = os.path.abspath("../../../test/data/")
     datacat_path = '/testpath/testfolder'
+    datacat_path_dependent = '/testpath/dependents'
+    datacat_path_general = '/testpath/general'
 
     # ********** DATASET CREATION STARTS HERE **********
     # metadata
     metadata = Metadata()
+    metadata['nIsTest'] = 1
+
+    dp_metadata = Metadata()
     metadata['nIsTest'] = 1
 
 
@@ -80,7 +85,77 @@ if __name__ == "__main__":
                         site='SLAC')
     print("\ncreated dataset: ", filename, "\n")
 
+    # Creating scenario where dependent datasets and dataset being linked to are in different folders
 
+
+
+    #create folders
+    try:
+        if client.exists(datacat_path_dependent):
+            for dataset in client.search(target=datacat_path_dependent, show="dependents", ignoreShowKeyError=True):
+                client.rmds(datacat_path_dependent + '/' + dataset.name)
+            client.rmdir(datacat_path_dependent)
+
+        if client.exists(datacat_path_general):
+            for dataset in client.search(target=datacat_path_general, show="dependents", ignoreShowKeyError=True):
+                client.rmds(datacat_path_general + '/' + dataset.name)
+            client.rmdir(datacat_path_general)
+
+    except:
+        print("exception caught here")
+
+    client.mkfolder(datacat_path_dependent)
+    client.mkfolder(datacat_path_general)
+
+    # in dependents folder
+    filename = "dataset001_dp_b9253.dat"
+    if client.exists(datacat_path_dependent + '/' + filename):
+        client.rmds(datacat_path_dependent + '/' + filename)
+
+
+    full_file001 = file_path + '/' + filename
+    ds001 = client.mkds(datacat_path_dependent, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=dp_metadata,
+                        resource=full_file001,
+                        site='SLAC')
+    ds001VersionPk_dp = ds001.versionPk
+    print("\ncreated dataset: ", filename)
+
+
+
+    filename = "dataset002_dp_43d4c.dat"
+    if client.exists(datacat_path_dependent + '/' + filename):
+        client.rmds(datacat_path_dependent + '/' + filename)
+
+
+    full_file001 = file_path + '/' + filename
+    ds002 = client.mkds(datacat_path_dependent, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=dp_metadata,
+                        resource=full_file001,
+                        site='SLAC')
+    ds002VersionPk_dp = ds002.versionPk
+    print("\ncreated dataset: ", filename)
+
+
+    # in general folder
+    filename = "dataset001_gr_28e3d.dat"
+    if client.exists(datacat_path_general + '/' + filename):
+        client.rmds(datacat_path_general + '/' + filename)
+
+    dependents = client.getdependentid([ds001, ds002])
+    dep_metadata = {"dependencyName": "test_data",
+                    "dependents": str(dependents),
+                    "dependentType": "predecessor"}
+
+    dp_metadata.update(dep_metadata)
+
+    full_file001 = file_path + '/' + filename
+    ds002 = client.mkds(datacat_path_general, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=dp_metadata,
+                        resource=full_file001,
+                        site='SLAC')
+
+    print("\ncreated dataset: ", filename)
 
     # ********** CLIENT DEPENDENCY TESTING BEGINS HERE **********
     # Case 1.1: base case (predecessors) with versionPK value not specified
@@ -191,3 +266,16 @@ if __name__ == "__main__":
         print("\n")
     except:
         assert False, "Error. search unsuccessful. Case 3.3\n"
+
+
+    # Case 1.3b: Getting datasets from dependents that are in DIFFERENT folders
+    print("\n*****Case 1.3b*****")
+    print("-----Datasets-----")
+    try:
+        for dataset in client.search(target='/testpath/general', show="dependents",query='dependents in ({},{})'.format(ds001VersionPk_dp, ds002VersionPk_dp), ignoreShowKeyError=True):
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name))
+    except:
+        assert False, "Error. search unsuccessful. Case 1.3b"
