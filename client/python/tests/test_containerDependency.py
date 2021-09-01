@@ -90,7 +90,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.1*****")
     print("-----Datasets-----")
     try:
-        print(client.path(path='/testpath/depGroup2;metadata=dependency'))
+        print(client.path(path='/testpath/depGroup2;metadata=dependents'))
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.1*****")
     print("-----Datasets-----")
     try:
-        print(client.path(path='/testpath/depGroup2'))
+        print(client.path(path='/testpath/depGroup2;metadata=dependents.predecessor'))
     except:
         assert False, "Error. search unsuccessful. Case 2.1"
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     print("\n*****Case 3.1*****")
     print("-----Datasets-----")
     try:
-        print(client.path(path='/testpath/depGroup2'))
+        print(client.path(path='/testpath/depGroup2;metadata=dependents.successor'))
     except:
         assert False, "Error. search unsuccessful. Case 3.1"
 

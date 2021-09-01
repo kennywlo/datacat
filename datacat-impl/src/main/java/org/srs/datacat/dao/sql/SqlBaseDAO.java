@@ -308,7 +308,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     protected void addGroupMetadata(DatasetContainer datasetGroup, Map<String, Object> metaData) throws SQLException {
         long datasetGroupPK = datasetGroup.getPk();
-        metaData.put("dependencyName", datasetGroup.getName());
+        metaData.put("dependencyName", datasetGroup.getPath());
         addDatasetDependency(metaData);
         addDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
     }
