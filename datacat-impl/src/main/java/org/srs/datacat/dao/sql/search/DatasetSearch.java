@@ -43,6 +43,7 @@ public class DatasetSearch {
     private Connection conn;
     private Select selectStatement;
     private ModelProvider modelProvider;
+    private Boolean isDependencySearch = false;
     private static final MetainfoSupplier METANAME_DELEGATE = new MetainfoSupplier() {
         @Override
         public MetanameContext get(){
@@ -111,25 +112,25 @@ public class DatasetSearch {
             // In case we want to do something else, go ahead here
             dsv.where(sd.getEvaluatedExpr());
         }
-        
-        SearchUtils.populateParentTempTable(conn, containers);
 
         HashMap<String, MaybeHasAlias> availableSelections = new HashMap<>();
         for(MaybeHasAlias a: dsv.getAvailableSelections()){
             availableSelections.put( a.canonical(), a);
         }
-        
-        Table containerSearch = new Table("ContainerSearch", "cp");
-        
-        this.selectStatement = containerSearch
-            .select( containerSearch.$("ContainerPath"))
-            .join( dsv, 
-                Op.or( 
-                        dsv.getSelection(dsv.ds.datasetlogicalfolder).eq(containerSearch.$("DatasetLogicalFolder")), 
-                        dsv.getSelection(dsv.ds.datasetGroup).eq(containerSearch.$("DatasetGroup"))
+
+        if (this.isDependencySearch){
+            // Handle the search for dependent datasets
+            this.selectStatement = dsv;
+        } else{
+            SearchUtils.populateParentTempTable(conn, containers);
+            Table containerSearch = new Table("ContainerSearch", "cp");
+            this.selectStatement = containerSearch.select( containerSearch.$("ContainerPath") ).join(dsv,
+                Op.or(
+                    dsv.getSelection(dsv.ds.datasetlogicalfolder).eq(containerSearch.$("DatasetLogicalFolder")),
+                    dsv.getSelection(dsv.ds.datasetGroup).eq(containerSearch.$("DatasetGroup"))
                 )
             ).selection(dsv.getColumns());
-        
+        }
         handleSortFields(sd, dsv, sortFields);
         handleRetrieveFields(sd, dsv, retrieveFields, ignoreShowKeyError);
         
@@ -286,6 +287,7 @@ public class DatasetSearch {
                 return "fileSizeBytes";
             case "dependents":
             case "dependency":
+                this.isDependencySearch = true;
                 return "datasetVersion";
             default:
                 return ident;
