@@ -10,10 +10,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.NoSuchFileException;
 
 import java.nio.file.NotDirectoryException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.DefaultValue;
@@ -29,6 +28,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import org.srs.datacat.dao.sql.search.SearchUtils;
 import org.srs.datacat.model.DatacatNode;
 import org.srs.datacat.model.DatasetView;
 import org.srs.datacat.model.dataset.DatasetWithViewModel;
@@ -91,7 +92,7 @@ public class PathResource extends BaseResource {
                         String[] kv = part.split("=");
                         if (kv.length == 2) {
                             ArrayList<String> list = new ArrayList<>();
-                            list.add(kv[0]);
+                            list.add(kv[1]);
                             requestMatrixParams.put(kv[0], list);
                         }
                     }
@@ -178,6 +179,26 @@ public class PathResource extends BaseResource {
                     List<MetadataEntry> entries = null;
                     if(rv.containsKey("metadata") && ret instanceof HasMetadata){
                         entries = MetadataEntry.toList(((HasMetadata) ret).getMetadataMap());
+                        List<String> dep = matrixParams.get("metadata");
+                        if (!dep.isEmpty() && dep.get(0).contains("dependents")){
+                            try {
+                                String dependentType = "predecessor";
+                                if (dep.get(0).contains(".")){
+                                    dependentType = dep.get(0).replace("dependents.", "");
+                                }
+                                DatacatObject.Builder builder = new DatacatObject.Builder();
+                                builder.pk(ret.getPk());
+                                builder.path(ret.getPath());
+                                Map<String, Object> dependents = SearchUtils.getDependency(getConnection(),
+                                        true, builder, dependentType);
+                                if (!dependents.isEmpty()) {
+                                    MetadataEntry e = new MetadataEntry("dependents",
+                                            (String) dependents.get("dependents"));
+                                    entries.add(e);
+                                }
+                            } catch (SQLException ex) {
+                            }
+                        }
                     } else if(rv.containsKey("versionMetadata") && ret instanceof DatasetWithViewModel){
                         entries = MetadataEntry.toList(((DatasetWithViewModel) ret).getViewInfo()
                                 .getVersion().getMetadataMap());
