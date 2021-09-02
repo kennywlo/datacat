@@ -189,13 +189,15 @@ public class PathResource extends BaseResource {
                                 DatacatObject.Builder builder = new DatacatObject.Builder();
                                 builder.pk(ret.getPk());
                                 builder.path(ret.getPath());
-                                Map<String, Object> dependents = SearchUtils.getDependency(getConnection(),
-                                        true, builder, dependentType);
+                                Connection con = getConnection();
+                                Map<String, Object> dependents = SearchUtils.getDependency(con,
+                                    true, builder, dependentType);
                                 if (!dependents.isEmpty()) {
                                     MetadataEntry e = new MetadataEntry("dependents",
                                             (String) dependents.get("dependents"));
                                     entries.add(e);
                                 }
+                                con.close();
                             } catch (SQLException ex) {
                             }
                         }
