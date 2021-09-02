@@ -300,8 +300,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         }
     }
 
-    protected void addDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
+    protected void addDatasetVersionMetadata(Long pk, String path, Map<String, Object> metaData) throws SQLException {
         metaData.put("dependency", pk);
+        metaData.put("dependencyName", path);
         addDatasetDependency(metaData);
         addDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }

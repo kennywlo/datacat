@@ -471,10 +471,12 @@ public class SqlDatasetDAO extends SqlBaseDAO implements org.srs.datacat.dao.Dat
                 builder.metadata(request.getMetadataMap());
             }
             retVersion = builder.build();
+
+            if(!request.getMetadataMap().isEmpty()){
+                addDatasetVersionMetadata(retVersion.getPk(), builder.path, request.getMetadataMap());
+            }
         }
-        if(request.getMetadataMap() != null && !request.getMetadataMap().isEmpty()){
-            addDatasetVersionMetadata(retVersion.getPk(), request.getMetadataMap());
-        }
+
         // Update isLatest
         if(retVersion.isLatest()){
             sql = "UPDATE VerDataset set LatestVersion = ? WHERE Dataset = ?";
