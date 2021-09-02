@@ -79,7 +79,14 @@ public final class SearchUtils {
         builder.pk(rs.getLong("pk"));
         builder.parentPk(rs.getLong("parent"));
         builder.name(name);
-        builder.path(PathUtils.resolve(rs.getString("containerpath"), name));
+
+        try {
+            builder.path(PathUtils.resolve(rs.getString("containerpath"), name));
+        } catch (SQLException e) {
+            // ToDo: set containerpath properly for dependent datasets
+            builder.path(name);
+        }
+
         builder.fileFormat(rs.getString("fileformat"));
         builder.dataType(rs.getString("datatype"));
         builder.created(rs.getTimestamp("created"));
