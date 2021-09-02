@@ -14,6 +14,7 @@ import java.util.*;
 import org.freehep.commons.lang.AST;
 import org.srs.datacat.model.DatacatNode;
 import org.srs.datacat.shared.DatacatObject;
+import org.srs.datacat.shared.Dataset;
 import org.zerorm.core.Select;
 
 import org.srs.datacat.model.DatasetContainer;
@@ -491,7 +492,7 @@ public final class SearchUtils {
             if (isContainer){
                 stmt.setString(1, builder.path);
             } else {
-                stmt.setLong(1, builder.pk);
+                stmt.setLong(1, ((Dataset.Builder)builder).versionPk);
             }
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
