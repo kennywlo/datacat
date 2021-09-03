@@ -463,17 +463,33 @@ public class SqlDatasetDAO extends SqlBaseDAO implements org.srs.datacat.dao.Dat
             builder.versionId(newVersionId);
             builder.latest(isCurrent);
             builder.path(dsRecord.getPath() + ";v=" + newVersionId);
+            HashMap<String, Object> metadataMap = request.getMetadataMap();
+            String dependents="", dependentType="";
+            if(!metadataMap.isEmpty()) {
+                if (metadataMap.get("dependents") != null){
+                    metadataMap.put("dependencyName", builder.path);
+                    dependents = (String)metadataMap.get("dependents");
+                    dependentType = (String)metadataMap.get("dependentType");
+                    metadataMap.remove("dependents");
+                    metadataMap.remove("dependentType");
+                    metadataMap.remove("dependency");
+                }
+            }
             try(ResultSet rs = stmt.getGeneratedKeys()){
                 rs.next();
                 builder.pk(rs.getLong(1));
                 builder.parentPk(dsRecord.getPk());
                 builder.created(rs.getTimestamp(2));
-                builder.metadata(request.getMetadataMap());
+                builder.metadata(metadataMap);
             }
             retVersion = builder.build();
 
             if(!request.getMetadataMap().isEmpty()){
-                addDatasetVersionMetadata(retVersion.getPk(), builder.path, request.getMetadataMap());
+                if (!dependents.isEmpty()) {
+                    metadataMap.put("dependents", dependents);
+                    metadataMap.put("dependentType", dependentType);
+                }
+                addDatasetVersionMetadata(retVersion.getPk(), metadataMap);
             }
         }
 

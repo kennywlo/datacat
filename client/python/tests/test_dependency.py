@@ -66,6 +66,7 @@ if __name__ == "__main__":
                         resource=full_file003,
                         site='SLAC')
     ds003VersionPk = ds003.versionPk
+    ds003Dependency = ds003.versionMetadata["dependencyName"];
     print("\ncreated dataset: ", filename)
 
 
@@ -79,7 +80,7 @@ if __name__ == "__main__":
                     "dependents": str(dependents),
                     "dependentType": "successor"}
     metadata.update(dep_metadata)
-    ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+    ds004 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
                         versionMetadata=metadata,
                         resource=full_file004,
                         site='SLAC')
@@ -155,6 +156,7 @@ if __name__ == "__main__":
                         resource=full_file001,
                         site='SLAC')
 
+    ds002Dependency = ds002.versionMetadata["dependencyName"];
     print("\ncreated dataset: ", filename)
 
     # ********** CLIENT DEPENDENCY TESTING BEGINS HERE **********
@@ -174,7 +176,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency, show="dependents",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -186,7 +188,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents",query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -210,7 +212,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency, show="dependents.predecessor",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -222,7 +224,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency, show="dependents.predecessor",query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -246,7 +248,7 @@ if __name__ == "__main__":
     print("\n*****Case 3.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.successor",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency, show="dependents.successor",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -258,7 +260,7 @@ if __name__ == "__main__":
     print("\n*****Case 3.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.successor",query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency, show="dependents.successor",query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -272,7 +274,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.3b*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/general', show="dependents",query='dependents in ({},{})'.format(ds001VersionPk_dp, ds002VersionPk_dp), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds002Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk_dp, ds002VersionPk_dp), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:

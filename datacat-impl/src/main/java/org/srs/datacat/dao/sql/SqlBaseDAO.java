@@ -300,9 +300,8 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         }
     }
 
-    protected void addDatasetVersionMetadata(Long pk, String path, Map<String, Object> metaData) throws SQLException {
+    protected void addDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
         metaData.put("dependency", pk);
-        metaData.put("dependencyName", path);
         addDatasetDependency(metaData);
         addDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }
@@ -375,8 +374,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             stmt.setString(4, dependentType);
             stmt.executeUpdate();
         }
-        // remove the dependency fields
-        metaData.remove("dependencyName");
+        // remove all dependency fields other than dependencyName, the containerpath
         metaData.remove("dependents");
         metaData.remove("dependentType");
         metaData.remove("dependency");
