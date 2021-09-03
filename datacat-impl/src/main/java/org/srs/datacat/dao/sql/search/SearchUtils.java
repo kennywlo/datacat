@@ -473,6 +473,29 @@ public final class SearchUtils {
         return stream;
     }
 
+    public static boolean checkDependents(Connection conn,
+                                          String dependencyPath,
+                                          String query) throws SQLException {
+        String sql = "SELECT dependent FROM DatasetDependency WHERE dependencyName = ?";
+        String[] dependents = query.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
+        boolean found = false;
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, dependencyPath);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String d = Long.valueOf(rs.getLong("dependent")).toString();
+                if (Arrays.asList(dependents).contains(d)){
+                    found = true;
+                    break;
+                }
+            }
+            if(!rs.next()){
+                rs.close();
+            }
+        }
+        return found;
+    }
+
     public static String getDependencySql(String by) {
         String sql =
                 "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency " +

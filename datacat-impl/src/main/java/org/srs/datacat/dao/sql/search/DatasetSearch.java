@@ -11,10 +11,7 @@ import org.freehep.commons.lang.bool.sym;
 import org.srs.datacat.dao.sql.search.MetanameContext.Entry;
 import org.srs.datacat.dao.sql.search.plugins.DatacatPlugin;
 import org.srs.datacat.dao.sql.search.tables.DatasetVersions;
-import org.srs.datacat.model.DatacatNode;
-import org.srs.datacat.model.DatasetModel;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.model.ModelProvider;
+import org.srs.datacat.model.*;
 import org.zerorm.core.*;
 import org.zerorm.core.interfaces.MaybeHasAlias;
 import org.zerorm.core.primaries.Case;
@@ -77,6 +74,18 @@ public class DatasetSearch {
                     Optional.fromNullable(metaFieldsToRetrieve), 
                     Optional.fromNullable(sortFields),
                     ignoreShowKeyError);
+            if (isDependencySearch){
+                boolean found = false;
+                for(DatacatNode file: containers) {
+                    if (SearchUtils.checkDependents(this.conn, file.getPath(), query)){
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new IOException("Dependents not found in path");
+                }
+            }
             return retrieveDatasets();
         } catch (SQLException ex) {
             throw new IOException("Error retrieving results", ex);
