@@ -81,13 +81,6 @@ public final class SearchUtils {
         builder.parentPk(rs.getLong("parent"));
         builder.name(name);
 
-        try {
-            builder.path(PathUtils.resolve(rs.getString("containerpath"), name));
-        } catch (SQLException e) {
-            // ToDo: set containerpath properly for dependent datasets
-            builder.path(name);
-        }
-
         builder.fileFormat(rs.getString("fileformat"));
         builder.dataType(rs.getString("datatype"));
         builder.created(rs.getTimestamp("created"));
@@ -96,6 +89,14 @@ public final class SearchUtils {
         builder.versionPk(versionPk);
         builder.versionId(rs.getInt("versionid"));
         builder.latest(rs.getBoolean("latest"));
+
+        try {
+            builder.path(PathUtils.resolve(rs.getString("containerpath"), name));
+        } catch (SQLException e) {
+            // Set containerpath for dependents
+            String path = SearchUtils.getDependencyPath(conn, versionPk);
+            builder.path(path);
+        }
 
         ArrayList<DatasetLocationModel> locations = new ArrayList<>();
         HashMap<String, Object> metadata = new HashMap<>();
@@ -471,6 +472,22 @@ public final class SearchUtils {
             }
         };
         return stream;
+    }
+
+    public static String getDependencyPath(Connection conn, long dependent) throws SQLException {
+        String sql = "SELECT dependencyName from DatasetDependency WHERE dependent = ?";
+        String dependencyPath = "";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, dependent);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()){
+                dependencyPath = rs.getString("dependencyName");
+            }
+            if (!rs.next()){
+                rs.close();
+            }
+        }
+        return dependencyPath;
     }
 
     public static boolean checkDependents(Connection conn,
