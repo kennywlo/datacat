@@ -11,8 +11,8 @@ if __name__ == "__main__":
     file_path = os.path.abspath("../../../test/data/")
     datacat_path = '/testpath/testfolder'
 
-    containerPath1 = "/testpath/depGroup1"
-    containerPath2 = "/testpath/depGroup2"
+    containerPathSuc = "/testpath/depGroupSuc"
+    containerPathPre = "/testpath/depGroupPre"
 
     # metadata
     metadata = Metadata()
@@ -20,23 +20,14 @@ if __name__ == "__main__":
 
 
     try:
-        if client.exists(containerPath1):
-            client.rmdir(containerPath1, type="group")
+        if client.exists(containerPathSuc):
+            client.rmdir(containerPathSuc, type="group")
 
-        if client.exists(containerPath2):
-            client.rmdir(containerPath2, type="group")
+        if client.exists(containerPathPre):
+            client.rmdir(containerPathPre, type="group")
 
     except:
         print("exception caught here")
-
-    # Dependency Group 1 creation
-
-    depGroup1 = client.mkgroup(containerPath1)
-    print("\nCreated depGroup1 as:\n{}\nMetadata: {}".format(depGroup1, dict(metadata)))
-
-    # Dependency Group 2 creation
-
-
 
     # ********** DEPENDENCY GROUP DATASETS CREATION STARTS HERE ***************
 
@@ -67,19 +58,55 @@ if __name__ == "__main__":
     ds002VersionPk = ds002.versionPk
     print("\nCreated dataset:\n{}\n{}\nMetadata: {}".format(filename, ds002, dict(ds_metadata)))
 
+    filename = "dataset003_0c89c.dat"
+    if client.exists(datacat_path + '/' + filename):
+        client.rmds(datacat_path + '/' + filename)
 
-    dependents = client.getdependentid([ds001,ds002])
-    print("\ndependents genereated as:\n{}".format(dependents))
 
-    dep_metadata = {
-        "dependents": str(dependents),
+    full_file003 = file_path + '/' + filename
+    ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=ds_metadata,
+                        resource=full_file003,
+                        site='SLAC')
+    ds003VersionPk = ds003.versionPk
+    print("\nCreated dataset:\n{}\n{}\nMetadata: {}".format(filename, ds003, dict(ds_metadata)))
+
+    filename = "dataset004_d8080.dat"
+    if client.exists(datacat_path + '/' + filename):
+        client.rmds(datacat_path + '/' + filename)
+
+
+    full_file004 = file_path + '/' + filename
+    ds004 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=ds_metadata,
+                        resource=full_file004,
+                        site='SLAC')
+    ds004VersionPk = ds004.versionPk
+    print("\nCreated dataset:\n{}\n{}\nMetadata: {}".format(filename, ds004, dict(ds_metadata)))
+
+    dependentsPredecessor = client.getdependentid([ds001,ds002])
+    print("\ndependents genereated as:\n{}".format(dependentsPredecessor))
+
+    dependentsSuccessor = client.getdependentid([ds003,ds004])
+    print("\ndependents genereated as:\n{}".format(dependentsSuccessor))
+
+    dep_metadataPredecessor = {
+        "dependents": str(dependentsPredecessor),
         "dependentType": "predecessor"
     }
 
-    metadata.update(dep_metadata)
-    depGroup2 = client.mkgroup(containerPath2, metadata=metadata)
+    dep_metadataSuccessor = {
+        "dependents": str(dependentsSuccessor),
+        "dependentType": "successor"
+    }
 
-    print("\nCreated depGroup2 as:\n{} \nMetadata: {}".format(depGroup2, dict(metadata)))
+    metadata.update(dep_metadataPredecessor)
+    depGroupPre = client.mkgroup(containerPathPre, metadata=metadata)
+    print("\nCreated depGroupPre as:\n{} \nMetadata: {}".format(depGroupPre, dict(metadata)))
+
+    metadata.update(dep_metadataSuccessor)
+    depGroupSuc = client.mkgroup(containerPathSuc, metadata=metadata)
+    print("\nCreated depGroupSuc as:\n{} \nMetadata: {}".format(depGroupSuc, dict(metadata)))
 
 
 
@@ -90,7 +117,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.1*****")
     print("-----Datasets-----")
     try:
-        print(client.path(path='/testpath/depGroup2;metadata=dependents'))
+        print(client.path(path='/testpath/depGroupPre;metadata=dependents'))
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
 
@@ -99,7 +126,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup2', show="dependents", query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/depGroupPre', show="dependents", query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -112,7 +139,7 @@ if __name__ == "__main__":
     print("\n*****Case 1.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup2', show="dependents", query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/depGroupPre', show="dependents", query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -125,7 +152,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.1*****")
     print("-----Datasets-----")
     try:
-        print(client.path(path='/testpath/depGroup2;metadata=dependents.predecessor'))
+        print(client.path(path='/testpath/depGroupPre;metadata=dependents.predecessor'))
     except:
         assert False, "Error. search unsuccessful. Case 2.1"
 
@@ -134,7 +161,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup2', show="dependents.predecessor", query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/depGroupPre', show="dependents.predecessor", query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -147,7 +174,7 @@ if __name__ == "__main__":
     print("\n*****Case 2.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup2', show="dependents.predecessor", query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/depGroupPre', show="dependents.predecessor", query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -160,7 +187,7 @@ if __name__ == "__main__":
     print("\n*****Case 3.1*****")
     print("-----Datasets-----")
     try:
-        print(client.path(path='/testpath/depGroup2;metadata=dependents.successor'))
+        print(client.path(path='/testpath/depGroupSuc;metadata=dependents.successor'))
     except:
         assert False, "Error. search unsuccessful. Case 3.1"
 
@@ -169,7 +196,7 @@ if __name__ == "__main__":
     print("\n*****Case 3.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup1', show="dependents.successor",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/depGroupSuc', show="dependents.successor",query='dependents in ({})'.format(ds003VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -182,7 +209,7 @@ if __name__ == "__main__":
     print("\n*****Case 3.3*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target='/testpath/depGroup1', show="dependents.successor", query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target='/testpath/depGroupSuc', show="dependents.successor", query='dependents in ({},{})'.format(ds003VersionPk,ds004VersionPk), ignoreShowKeyError=True):
             try:
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
@@ -190,4 +217,3 @@ if __name__ == "__main__":
         print("\n")
     except:
         assert False, "Error. search unsuccessful. Case 3.3\n"
-
