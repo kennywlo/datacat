@@ -104,9 +104,14 @@ public final class SearchUtils {
         for(String s: includedMetadata){
             if (s.contains("dependency")){
                 String[] deps = s.split("\\.");
-                Map<String, Object> depmap = SearchUtils.getDependency(conn, false,
-                        (DatacatObject.Builder)builder, deps[1]);
-                metadata.putAll(depmap);
+                Map<String, Object> retmap;
+                if (deps[0].equals("groups")){
+                    retmap =  SearchUtils.getDependentGroups(conn, (DatacatObject.Builder)builder);
+                } else{ // return dependents
+                    retmap = SearchUtils.getDependents(conn, false,
+                        (DatacatObject.Builder) builder, deps[1]);
+                }
+                metadata.putAll(retmap);
                 continue;
             }
             Object o = rs.getObject(s);
@@ -147,8 +152,8 @@ public final class SearchUtils {
         for(String s: includedMetadata){
             if (s.contains("dependency")){
                 String[] deps = s.split("\\.");
-                Map<String, Object> depmap = SearchUtils.getDependency(conn, false,
-                        (DatacatObject.Builder)builder, deps[1]);
+                Map<String, Object> depmap = SearchUtils.getDependents(conn, false,
+                    (DatacatObject.Builder)builder, deps[1]);
                 metadata.putAll(depmap);
                 continue;
             }
@@ -515,24 +520,19 @@ public final class SearchUtils {
         return found;
     }
 
-    public static String getDependencySql(String by) {
-        String sql =
-                "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency " +
-                "WHERE " + (by.equals("Id") ? "Dependency = ?" : "dependencyName = ?") + " and DependentType = ?";
-        return sql;
-    }
-
-    public static Map<String, Object> getDependency(Connection conn, boolean isContainer,
+    public static Map<String, Object> getDependents(Connection conn, boolean isContainer,
                                                     DatacatObject.Builder builder,
                                                     String type) throws SQLException {
-        String sql = SearchUtils.getDependencySql(isContainer ? "Name": "Id");
+        String sql = "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency WHERE " +
+                (isContainer ? "DependencyGroup" : "dependency") + " = ? and DependentType = ?";
+
         HashMap verMetadata = new HashMap();
         if (type == null || type.isEmpty()) {
             type = "predecessor"; // default
         }
         try (PreparedStatement stmt = conn.prepareStatement(sql)){
             if (isContainer){
-                stmt.setString(1, builder.path);
+                stmt.setLong(1, builder.pk);
             } else {
                 stmt.setLong(1, ((Dataset.Builder)builder).versionPk);
             }
@@ -540,20 +540,34 @@ public final class SearchUtils {
             ResultSet rs = stmt.executeQuery();
             StringBuilder dependents = new StringBuilder();
             if (rs.next()) {
-                verMetadata.put("dependency", rs.getLong("dependency"));
-                verMetadata.put("dependentType", type);
-                verMetadata.put("dependentName", rs.getString("dependencyName"));
-                String acl = rs.getString("acl");
-                if (acl != null) {
-                    verMetadata.put("acl", rs.getString("acl"));
-                }
                 dependents.append((Long.valueOf(rs.getLong("dependent")).toString()));
             }
             while (rs.next()) {
                 dependents.append(",").append(Long.valueOf(rs.getLong("dependent")).toString());
             }
-            if (!dependents.toString().isEmpty()) {
+            if (!dependents.toString().isEmpty()){
                 verMetadata.put("dependents", dependents.toString());
+            }
+            return verMetadata;
+        }
+    }
+
+    public static Map<String, Object> getDependentGroups(Connection conn,
+                                                         DatacatObject.Builder builder) throws SQLException {
+        String sql = "SELECT dependencyName, dependentGroup FROM DatasetDependency WHERE dependent = ?";
+        HashMap verMetadata = new HashMap();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, builder.pk);
+            ResultSet rs = stmt.executeQuery();
+            StringBuilder dependentGroups = new StringBuilder();
+            if (rs.next()) {
+                dependentGroups.append((Long.valueOf(rs.getLong("dependentName")).toString()));
+            }
+            while (rs.next()) {
+                dependentGroups.append(",").append(Long.valueOf(rs.getLong("dependentName")).toString());
+            }
+            if (!dependentGroups.toString().isEmpty()) {
+                verMetadata.put("dependentGroups", dependentGroups.toString());
             }
             return verMetadata;
         }
