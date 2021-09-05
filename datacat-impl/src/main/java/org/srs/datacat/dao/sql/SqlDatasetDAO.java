@@ -489,7 +489,7 @@ public class SqlDatasetDAO extends SqlBaseDAO implements org.srs.datacat.dao.Dat
                     metadataMap.put("dependents", dependents);
                     metadataMap.put("dependentType", dependentType);
                 }
-                addDatasetVersionMetadata(retVersion.getPk(), metadataMap);
+                addDatasetVersionMetadata(retVersion.getPk(), metadataMap, retVersion.getAcl());
             }
         }
 
@@ -733,7 +733,8 @@ public class SqlDatasetDAO extends SqlBaseDAO implements org.srs.datacat.dao.Dat
 
                     String methodName = method.getName();
                     if("getMetadataMap".equals(methodName)){
-                        mergeDatasetVersionMetadata(existing.getPk(), (Map) patchedValue);
+                        // FIXME: set ACL here
+                        mergeDatasetVersionMetadata(existing.getPk(), (Map) patchedValue, null);
                         continue;
                     }
 

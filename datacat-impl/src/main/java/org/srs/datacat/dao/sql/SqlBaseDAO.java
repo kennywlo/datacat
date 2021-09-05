@@ -283,10 +283,12 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         try {
             switch (record.getType()) {
                 case DATASETVERSION:
-                    mergeDatasetVersionMetadata(record.getPk(), metaData);
+                    // FIXME: set ACL here
+                    mergeDatasetVersionMetadata(record.getPk(), metaData, null);
                     break;
                 case GROUP:
-                    mergeGroupMetadata(record.getPk(), metaData);
+                    // FIXME: set ACL here
+                    mergeGroupMetadata(record.getPk(), metaData, null);
                     break;
                 case FOLDER:
                     mergeFolderMetadata(record.getPk(), metaData);
@@ -300,16 +302,17 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         }
     }
 
-    protected void addDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
+    protected void addDatasetVersionMetadata(Long pk, Map<String, Object> metaData, String acl) throws SQLException {
         metaData.put("dependency", pk);
-        addDatasetDependency(metaData);
+        addDatasetDependency(metaData, acl);
         addDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }
 
     protected void addGroupMetadata(DatasetContainer datasetGroup, Map<String, Object> metaData) throws SQLException {
         long datasetGroupPK = datasetGroup.getPk();
         metaData.put("dependencyName", datasetGroup.getPath());
-        addDatasetDependency(metaData);
+        metaData.put("dependencyGroup", datasetGroupPK);
+        addDatasetDependency(metaData, datasetGroup.getAcl());
         addDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
     }
 
@@ -317,13 +320,13 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         addDatacatObjectMetadata(logicalFolderPK, metaData, "LogicalFolder", "LogicalFolder");
     }
 
-    protected void mergeDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
-        mergeDependencyMetadata(pk, metaData);
+    protected void mergeDatasetVersionMetadata(Long pk, Map<String, Object> metaData, String acl) throws SQLException {
+        mergeDependencyMetadata(pk, metaData, acl);
         mergeDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }
 
-    private void mergeGroupMetadata(long datasetGroupPK, Map<String, Object> metaData) throws SQLException {
-        mergeDependencyMetadata(datasetGroupPK, metaData);
+    private void mergeGroupMetadata(long datasetGroupPK, Map<String, Object> metaData, String acl) throws SQLException {
+        mergeDependencyMetadata(datasetGroupPK, metaData, acl);
         mergeDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
     }
 
@@ -331,7 +334,8 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         mergeDatacatObjectMetadata(logicalFolderPK, metaData, "LogicalFolder", "LogicalFolder");
     }
 
-    protected void mergeDependencyMetadata(long dependencyPK, Map<String, Object> metaData) throws SQLException {
+    protected void mergeDependencyMetadata(long dependencyPK, Map<String, Object> metaData, String acl)
+        throws SQLException {
         final String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ?";
         if (!metaData.containsKey("dependents")) {
             return;
@@ -341,11 +345,11 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         stmt.executeUpdate();
         // Add the new dependency
         metaData.put("dependency", dependencyPK);
-        addDatasetDependency(metaData);
+        addDatasetDependency(metaData, acl);
 
     }
 
-    protected void addDatasetDependency(Map<String, Object> metaData) throws SQLException {
+    protected void addDatasetDependency(Map<String, Object> metaData, String acl) throws SQLException {
         if (!(metaData instanceof HashMap)) {
             metaData = new HashMap<>(metaData);
         }
@@ -353,12 +357,13 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             return;
         }
         Long dependency = (Long)metaData.get("dependency");
+        Long dependencyGroup = (Long)metaData.get("dependencyGroup");
         String name = (String)metaData.get("dependencyName");
         String dependents = (String)metaData.get("dependents");
         String dependentType = (String)metaData.get("dependentType");
 
-        final String dependencySql = "insert into DatasetDependency (Dependency, DependencyName, Dependent," +
-                " DependentType)" + " values (?, ?, ?, ?)";
+        final String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
+            "Dependent, DependentType, ACL)" + " values (?, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = getConnection().prepareStatement(dependencySql);
         String[] dependentList = dependents.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
         // store each dependent info from the list
@@ -369,15 +374,22 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             } else{
                 stmt.setNull(1, Types.BIGINT);
             }
-            stmt.setString(2, name);
-            stmt.setLong(3, dependent);
-            stmt.setString(4, dependentType);
+            if (dependencyGroup != null) {
+                stmt.setLong(2, dependencyGroup.longValue());
+            } else{
+                stmt.setNull(2, Types.BIGINT);
+            }
+            stmt.setString(3, name);
+            stmt.setLong(4, dependent);
+            stmt.setString(5, dependentType);
+            stmt.setString(6, acl);
             stmt.executeUpdate();
         }
         // remove all dependency fields other than dependencyName, the containerpath
         metaData.remove("dependents");
         metaData.remove("dependentType");
         metaData.remove("dependency");
+        metaData.remove("dependencyGroup");
     }
 
 //    protected void deleteDatasetVersionMetadata(Long pk, Set<String> metaDataKeys) throws SQLException{

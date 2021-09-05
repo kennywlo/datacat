@@ -77,8 +77,8 @@ public class DatasetSearch {
             if (isDependencySearch){
                 // if no containers, skip the dependency check
                 boolean found = containers.iterator().hasNext()? false: true;
-                for(DatacatNode file: containers) {
-                    if (SearchUtils.checkDependents(this.conn, file.getPath(), query)){
+                for(DatacatNode container: containers) {
+                    if (SearchUtils.checkDependents(this.conn, true, container.getPk(), query)){
                         found = true;
                         break;
                     }

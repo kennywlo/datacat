@@ -491,13 +491,15 @@ public final class SearchUtils {
     }
 
     public static boolean checkDependents(Connection conn,
-                                          String dependencyPath,
+                                          boolean isGroup,
+                                          Long dependency,
                                           String query) throws SQLException {
-        String sql = "SELECT dependent FROM DatasetDependency WHERE dependencyName = ?";
+        String sql =
+            "SELECT dependent FROM DatasetDependency WHERE "+ (isGroup ? "dependencyGroup = ?":"dependency = ?");
         String[] dependents = query.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
         boolean found = false;
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, dependencyPath);
+            stmt.setLong(1, dependency);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 String d = Long.valueOf(rs.getLong("dependent")).toString();
