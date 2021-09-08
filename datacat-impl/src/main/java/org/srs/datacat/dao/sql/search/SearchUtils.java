@@ -15,6 +15,7 @@ import org.freehep.commons.lang.AST;
 import org.srs.datacat.model.DatacatNode;
 import org.srs.datacat.shared.DatacatObject;
 import org.srs.datacat.shared.Dataset;
+import org.srs.datacat.shared.DatasetVersion;
 import org.zerorm.core.Select;
 
 import org.srs.datacat.model.DatasetContainer;
@@ -105,7 +106,7 @@ public final class SearchUtils {
             if (s.contains("dependency")){
                 String[] deps = s.split("\\.");
                 Map<String, Object> retmap;
-                if (deps[0].equals("groups")){
+                if (deps[1].equals("groups")){
                     retmap =  SearchUtils.getDependentGroups(conn, (DatacatObject.Builder)builder);
                 } else{ // return dependents
                     retmap = SearchUtils.getDependents(conn, false,
@@ -534,7 +535,11 @@ public final class SearchUtils {
             if (isContainer){
                 stmt.setLong(1, builder.pk);
             } else {
-                stmt.setLong(1, ((Dataset.Builder)builder).versionPk);
+                if (builder instanceof DatasetVersion.Builder) {
+                    stmt.setLong(1, builder.pk);
+                } else{
+                    stmt.setLong(1, ((Dataset.Builder) builder).versionPk);
+                }
             }
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
