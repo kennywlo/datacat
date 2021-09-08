@@ -544,11 +544,9 @@ public final class SearchUtils {
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
             StringBuilder dependents = new StringBuilder();
-            if (rs.next()) {
-                dependents.append((Long.valueOf(rs.getLong("dependent")).toString()));
-            }
             while (rs.next()) {
-                dependents.append(",").append(Long.valueOf(rs.getLong("dependent")).toString());
+                String sep = dependents.length() == 0 ? "":",";
+                dependents.append(sep).append(Long.valueOf(rs.getLong("dependent")).toString());
             }
             if (!dependents.toString().isEmpty()){
                 verMetadata.put("dependents", dependents.toString());
@@ -559,20 +557,18 @@ public final class SearchUtils {
 
     public static Map<String, Object> getDependentGroups(Connection conn,
                                                          DatacatObject.Builder builder) throws SQLException {
-        String sql = "SELECT dependencyName, dependentGroup FROM DatasetDependency WHERE dependent = ?";
+        String sql = "SELECT dependencyName, dependencyGroup FROM DatasetDependency WHERE dependent = ?";
         HashMap verMetadata = new HashMap();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, builder.pk);
             ResultSet rs = stmt.executeQuery();
-            StringBuilder dependentGroups = new StringBuilder();
-            if (rs.next()) {
-                dependentGroups.append((Long.valueOf(rs.getLong("dependentName")).toString()));
-            }
+            StringBuilder dependencyGroups = new StringBuilder();
             while (rs.next()) {
-                dependentGroups.append(",").append(Long.valueOf(rs.getLong("dependentName")).toString());
+                String sep = dependencyGroups.length() == 0 ? "":",";
+                dependencyGroups.append(sep).append(rs.getString("dependencyName"));
             }
-            if (!dependentGroups.toString().isEmpty()) {
-                verMetadata.put("dependentGroups", dependentGroups.toString());
+            if (!dependencyGroups.toString().isEmpty()) {
+                verMetadata.put("dependencyGroups", dependencyGroups.toString());
             }
             return verMetadata;
         }

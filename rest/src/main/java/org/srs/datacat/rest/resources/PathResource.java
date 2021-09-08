@@ -39,6 +39,7 @@ import org.srs.datacat.model.security.CallContext;
 
 import org.srs.datacat.rest.BaseResource;
 import org.srs.datacat.shared.DatacatObject;
+import org.srs.datacat.shared.FlatDataset;
 import org.srs.datacat.shared.RequestView;
 import static org.srs.datacat.rest.BaseResource.OPTIONAL_EXTENSIONS;
 import org.srs.datacat.shared.BasicStat.StatType;
@@ -85,7 +86,7 @@ public class PathResource extends BaseResource {
         if(pathSegments != null && !pathSegments.isEmpty()){
             for(PathSegment s: pathSegments){
                 if (s.getPath().contains(";")){
-                    // FIXME: PathSegment not parsing matrix parameters properly
+                    // In case ; entered for %3B in URL
                     String[] parts = s.getPath().split(";");
                     path = path + "/" + parts[0];
                     for (String part: parts) {
@@ -98,9 +99,9 @@ public class PathResource extends BaseResource {
                     }
                 } else {
                     path = path + "/" + s.getPath();
-                    requestMatrixParams.putAll(s.getMatrixParameters());
                 }
-            }   
+                requestMatrixParams.putAll(s.getMatrixParameters());
+            }
         } else {
             path = "/";
             for(PathSegment s: ui.getPathSegments()){
@@ -187,22 +188,31 @@ public class PathResource extends BaseResource {
                                     dependentType = dep.get(0).replace("dependents.", "");
                                 }
                                 DatacatObject.Builder builder = new DatacatObject.Builder();
-                                builder.pk(ret.getPk());
+                                if (ret instanceof  FlatDataset) {
+                                    builder.pk(((FlatDataset) ret).getVersionPk());
+                                } else {
+                                    builder.pk(ret.getPk());
+                                }
                                 builder.path(ret.getPath());
-                                Connection con = getConnection();
-                                Map<String, Object> dependents;
+                                Connection conn = getConnection();
+                                Map<String, Object> retmap;
                                 if (dependentType.equals("groups")){
-                                    dependents = SearchUtils.getDependentGroups(con, builder);
+                                     retmap = SearchUtils.getDependentGroups(conn, builder);
+                                     if (!retmap.isEmpty()) {
+                                         MetadataEntry entry = new MetadataEntry("dependencyGroups",
+                                             (String) retmap.get("dependencyGroups"));
+                                         entries.add(entry);
+                                     }
                                 } else{
-                                    dependents = SearchUtils.getDependents(con, true, builder,
+                                    retmap = SearchUtils.getDependents(conn, true, builder,
                                             dependentType);
+                                    if (!retmap.isEmpty()) {
+                                        MetadataEntry entry = new MetadataEntry("dependents",
+                                            (String) retmap.get("dependents"));
+                                        entries.add(entry);
+                                    }
                                 }
-                                if (!dependents.isEmpty()) {
-                                    MetadataEntry e = new MetadataEntry("dependents",
-                                            (String) dependents.get("dependents"));
-                                    entries.add(e);
-                                }
-                                con.close();
+                                conn.close();
                             } catch (SQLException ex) {
                             }
                         }
