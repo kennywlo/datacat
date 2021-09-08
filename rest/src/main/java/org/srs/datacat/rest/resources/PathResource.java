@@ -190,8 +190,13 @@ public class PathResource extends BaseResource {
                                 builder.pk(ret.getPk());
                                 builder.path(ret.getPath());
                                 Connection con = getConnection();
-                                Map<String, Object> dependents = SearchUtils.getDependents(con, true, builder,
-                                    dependentType);
+                                Map<String, Object> dependents;
+                                if (dependentType.equals("groups")){
+                                    dependents = SearchUtils.getDependentGroups(con, builder);
+                                } else{
+                                    dependents = SearchUtils.getDependents(con, true, builder,
+                                            dependentType);
+                                }
                                 if (!dependents.isEmpty()) {
                                     MetadataEntry e = new MetadataEntry("dependents",
                                             (String) dependents.get("dependents"));

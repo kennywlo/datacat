@@ -14,6 +14,9 @@ if __name__ == "__main__":
     containerPathSuc = "/testpath/depGroupSuc"
     containerPathPre = "/testpath/depGroupPre"
 
+    containerPath1 = "/testpath/depGroup1"
+    containerPath2 = "/testpath/depGroup2"
+
     # metadata
     metadata = Metadata()
     ds_metadata = Metadata()
@@ -25,6 +28,12 @@ if __name__ == "__main__":
 
         if client.exists(containerPathPre):
             client.rmdir(containerPathPre, type="group")
+
+        if client.exists(containerPath1):
+            client.rmdir(containerPath1, type="group")
+
+        if client.exists(containerPath2):
+            client.rmdir(containerPath2, type="group")
 
     except:
         print("exception caught here")
@@ -90,6 +99,8 @@ if __name__ == "__main__":
     dependentsSuccessor = client.getdependentid([ds003,ds004])
     print("\ndependents genereated as:\n{}".format(dependentsSuccessor))
 
+    dependentsSameDatasetDifferentGroups = client.getdependentid([ds001,ds002])
+
     dep_metadataPredecessor = {
         "dependents": str(dependentsPredecessor),
         "dependentType": "predecessor"
@@ -100,6 +111,11 @@ if __name__ == "__main__":
         "dependentType": "successor"
     }
 
+    dep_metadataSameDatasetDifferentGroups = {
+        "dependents": str(dependentsSameDatasetDifferentGroups),
+        "dependentType": "predecessor"
+    }
+
     metadata.update(dep_metadataPredecessor)
     depGroupPre = client.mkgroup(containerPathPre, metadata=metadata)
     print("\nCreated depGroupPre as:\n{} \nMetadata: {}".format(depGroupPre, dict(metadata)))
@@ -107,6 +123,14 @@ if __name__ == "__main__":
     metadata.update(dep_metadataSuccessor)
     depGroupSuc = client.mkgroup(containerPathSuc, metadata=metadata)
     print("\nCreated depGroupSuc as:\n{} \nMetadata: {}".format(depGroupSuc, dict(metadata)))
+
+    metadata.update(dep_metadataSameDatasetDifferentGroups)
+    depGroup1 = client.mkgroup(containerPath1, metadata=metadata)
+    print("\nCreated depGroup1 as:\n{} \nMetadata: {}".format(dep_metadataSameDatasetDifferentGroups, dict(metadata)))
+
+    metadata.update(dep_metadataSameDatasetDifferentGroups)
+    depGroup2 = client.mkgroup(containerPath2, metadata=metadata)
+    print("\nCreated depGroup2 as:\n{} \nMetadata: {}".format(dep_metadataSameDatasetDifferentGroups, dict(metadata)))
 
 
 
@@ -217,3 +241,12 @@ if __name__ == "__main__":
         print("\n")
     except:
         assert False, "Error. search unsuccessful. Case 3.3\n"
+
+    # Case 4: test dependents.groups  which should return the Groups associated with a dependent dataset.
+    print("\n*****Case 4*****")
+
+    print("-----Datasets-----")
+    try:
+        print(client.path(path='/testpath/testFolder/dataset001_82f24.dat;metadata=dependents.groups'))
+    except:
+        assert False, "Error. search unsuccessful. Case 4"
