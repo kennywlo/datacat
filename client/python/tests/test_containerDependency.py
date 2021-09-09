@@ -247,6 +247,6 @@ if __name__ == "__main__":
 
     print("-----Datasets-----")
     try:
-        print(client.path(path='/testpath/testFolder/dataset001_82f24.dat;metadata=dependents.groups', versionId=0))
+        print(client.path(path='/testpath/testfolder/dataset001_82f24.dat;metadata=dependents.groups', versionId=0))
     except:
         assert False, "Error. search unsuccessful. Case 4"

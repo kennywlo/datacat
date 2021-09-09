@@ -364,7 +364,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
         final String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
             "Dependent, DependentType, ACL)" + " values (?, ?, ?, ?, ?, ?)";
-        PreparedStatement stmt = getConnection().prepareStatement(dependencySql);
+        PreparedStatement stmt = this.conn.prepareStatement(dependencySql);
         String[] dependentList = dependents.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
         // store each dependent info from the list
         for (String d : dependentList) {
@@ -384,6 +384,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             stmt.setString(5, dependentType);
             stmt.setString(6, acl);
             stmt.executeUpdate();
+            this.conn.commit();
         }
         // remove all dependency fields other than dependencyName, the containerpath
         metaData.remove("dependents");
