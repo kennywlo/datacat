@@ -524,23 +524,21 @@ public final class SearchUtils {
     public static Map<String, Object> getDependents(Connection conn, boolean isContainer,
                                                     DatacatObject.Builder builder,
                                                     String type) throws SQLException {
-        String sql = "SELECT dependency, dependencyName, dependent, dependentType, acl FROM DatasetDependency WHERE " +
-                (isContainer ? "DependencyGroup" : "dependency") + " = ? and DependentType = ?";
+        String sql = "SELECT dependencyName, dependent FROM DatasetDependency WHERE " +
+                (isContainer ? "dependencyGroup" : "dependency") + " = ? and dependentType = ?";
 
-        HashMap verMetadata = new HashMap();
+        HashMap<String, Object> verMetadata = new HashMap();
         if (type == null || type.isEmpty()) {
             type = "predecessor"; // default
         }
         try (PreparedStatement stmt = conn.prepareStatement(sql)){
-            if (isContainer){
-                stmt.setLong(1, builder.pk);
+            Long dependentid;
+            if (isContainer || builder instanceof DatasetVersion.Builder){
+                dependentid = builder.pk;
             } else {
-                if (builder instanceof DatasetVersion.Builder) {
-                    stmt.setLong(1, builder.pk);
-                } else{
-                    stmt.setLong(1, ((Dataset.Builder) builder).versionPk);
-                }
+                dependentid = ((Dataset.Builder) builder).versionPk;
             }
+            stmt.setLong(1, dependentid);
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
             StringBuilder dependents = new StringBuilder();
@@ -548,17 +546,40 @@ public final class SearchUtils {
                 String sep = dependents.length() == 0 ? "":",";
                 dependents.append(sep).append(Long.valueOf(rs.getLong("dependent")).toString());
             }
-            if (!dependents.toString().isEmpty()){
+            // Locate more dependents by the symmetry of predecessor/successor relation
+            if (Arrays.asList("predecessor", "successor").contains(type)){
+                String moreDependents = SearchUtils.getDependentsByRelation(conn, dependentid,
+                    type.equals("predecessor") ? "successor":"predecessor");
+                dependents.append(moreDependents);
+            }
+            if (!dependents.toString().equals("")) {
                 verMetadata.put("dependents", dependents.toString());
             }
             return verMetadata;
         }
     }
 
+    public static String getDependentsByRelation(Connection conn, Long dependent, String type) throws SQLException {
+        String sql = "SELECT dependency, dependencyName FROM DatasetDependency WHERE dependent = ? " +
+            "AND (dependentType = ? AND dependency IS NOT NULL)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, dependent);
+            stmt.setString(2, type);
+            ResultSet rs = stmt.executeQuery();
+            StringBuilder dependents = new StringBuilder();
+            while (rs.next()) {
+                String sep = dependents.length() == 0 ? "":",";
+                dependents.append(sep).append(rs.getString("dependency"));
+            }
+            return dependents.toString();
+        }
+    }
+
     public static Map<String, Object> getDependentGroups(Connection conn,
                                                          DatacatObject.Builder builder) throws SQLException {
-        String sql = "SELECT dependencyName, dependencyGroup FROM DatasetDependency WHERE dependent = ?";
-        HashMap verMetadata = new HashMap();
+        String sql = "SELECT dependencyName, dependencyGroup FROM DatasetDependency WHERE dependent = ? " +
+            "AND dependencyGroup IS NOT NULL";
+        HashMap<String, Object> verMetadata = new HashMap();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, builder.pk);
             ResultSet rs = stmt.executeQuery();
@@ -567,7 +588,7 @@ public final class SearchUtils {
                 String sep = dependencyGroups.length() == 0 ? "":",";
                 dependencyGroups.append(sep).append(rs.getString("dependencyName"));
             }
-            if (!dependencyGroups.toString().isEmpty()) {
+            if (!dependencyGroups.toString().equals("")){
                 verMetadata.put("dependencyGroups", dependencyGroups.toString());
             }
             return verMetadata;
