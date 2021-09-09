@@ -265,13 +265,11 @@ if __name__ == "__main__":
                 print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
             except:
                 print(f"Name: %s" %(dataset.name))
-        print("\n")
     except:
         assert False, "Error. search unsuccessful. Case 3.3\n"
 
-
-    # Case 1.3b: Getting datasets from dependents that are in DIFFERENT folders
-    print("\n*****Case 1.3b*****")
+    # Case 4: Getting datasets from dependents that are in DIFFERENT folders
+    print("\n*****Case 4*****")
     print("-----Datasets-----")
     try:
         for dataset in client.search(target=ds002Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk_dp, ds002VersionPk_dp), ignoreShowKeyError=True):
@@ -280,4 +278,4 @@ if __name__ == "__main__":
             except:
                 print(f"Name: %s" %(dataset.name))
     except:
-        assert False, "Error. search unsuccessful. Case 1.3b"
+        assert False, "Error. search unsuccessful. Case 3"
