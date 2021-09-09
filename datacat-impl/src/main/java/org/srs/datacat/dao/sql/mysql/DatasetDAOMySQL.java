@@ -497,7 +497,7 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
                     metadataMap.put("dependents", dependents);
                     metadataMap.put("dependentType", dependentType);
                 }
-                addDatasetVersionMetadata(retVersion.getPk(), metadataMap, retVersion.getAcl());
+                addDatasetVersionMetadata(retVersion.getPk(), metadataMap);
             }
         }
 
@@ -754,8 +754,7 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
 
                     String methodName = method.getName();
                     if("getMetadataMap".equals(methodName)){
-                        // FIXME: Set ACL here
-                        mergeDatasetVersionMetadata(existing.getPk(), (Map) patchedValue, null);
+                        mergeDatasetVersionMetadata(existing.getPk(), (Map) patchedValue);
                         continue;
                     }
 

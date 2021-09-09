@@ -550,7 +550,9 @@ public final class SearchUtils {
             if (Arrays.asList("predecessor", "successor").contains(type)){
                 String moreDependents = SearchUtils.getDependentsByRelation(conn, dependentid,
                     type.equals("predecessor") ? "successor":"predecessor");
-                dependents.append(moreDependents);
+                if (!moreDependents.isEmpty()) {
+                    dependents.append(",").append(moreDependents);
+                }
             }
             if (!dependents.toString().equals("")) {
                 verMetadata.put("dependents", dependents.toString());
@@ -569,7 +571,7 @@ public final class SearchUtils {
             StringBuilder dependents = new StringBuilder();
             while (rs.next()) {
                 String sep = dependents.length() == 0 ? "":",";
-                dependents.append(sep).append(rs.getString("dependency"));
+                dependents.append(sep).append(Long.valueOf(rs.getLong("dependency")).toString());
             }
             return dependents.toString();
         }

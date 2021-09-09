@@ -149,7 +149,6 @@ create table DatasetDependency (
     DependencyName  varchar(255),
     Dependent       bigint unsigned,
     DependentType   varchar(32),
-    ACL             varchar(1000),
     constraint PK_DatasetDependency primary key (DatasetDependency),
     constraint FK_Dependency foreign key (Dependency)
         references DatasetVersion (DatasetVersion)
