@@ -551,7 +551,8 @@ public final class SearchUtils {
                 String moreDependents = SearchUtils.getDependentsByRelation(conn, dependentid,
                     type.equals("predecessor") ? "successor":"predecessor");
                 if (!moreDependents.isEmpty()) {
-                    dependents.append(",").append(moreDependents);
+                    String sep = dependents.length()==0 ? "":",";
+                    dependents.append(sep).append(moreDependents);
                 }
             }
             if (!dependents.toString().equals("")) {
