@@ -146,7 +146,7 @@ if __name__ == "__main__":
     # **************************************************************
 
     # Case 1.1: base case (predecessors) with versionPK value not specified
-    # Retrieves specified predecessor datasets linked to the group
+    # Retrieves all predecessor datasets linked to the group
     print("\n*****Case 1.1*****")
     print("-----Datasets-----")
     try:
