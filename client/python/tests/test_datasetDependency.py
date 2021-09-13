@@ -178,28 +178,41 @@ if __name__ == "__main__":
     print("\n*****Case 1.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target=ds003Dependency,query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency,show="dependents", query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
-            print(f"path: %s" %(dataset.path))
-            print(f"versionPK: %s \n" %(dataset.versionPk))
+            print(f"Path: %s" %(dataset.path))
+            print(f"VersionPK: %s" %(dataset.versionPk))
+            try:
+                print(f"Metadata: %s" %(dict(dataset.metadata)))
+            except:
+                pass
+            finally:
+                print()
+
 
     except:
         assert False, "Error. search unsuccessful. Case 1.2"
 
     # Test 1.3: Return multiple dependents by specifying the dependents versionPK and its parents dataset path
-    print("\n*****Case 1.3*****")
+    print("*****Case 1.3*****")
     print("-----Datasets-----")
     try:
         for dataset in client.search(target=ds003Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
-            print(f"path: %s" %(dataset.path))
-            print(f"versionPK: %s \n" %(dataset.versionPk))
+            print(f"Path: %s" %(dataset.path))
+            print(f"VersionPK: %s" %(dataset.versionPk))
+            try:
+                print(f"Metadata: %s" %(dict(dataset.metadata)))
+            except:
+                pass
+            finally:
+                print()
     except:
         assert False, "Error. search unsuccessful. Case 1.3"
 
     # (Case 2) .predecessors
-    # Test 1.1: Print all datasets found within a path alongside their predecessor dependency metadata.
-    print("\n*****Case 2.1*****")
+    # Test 2.1: Print all datasets found within a path alongside their predecessor dependency metadata.
+    print("*****Case 2.1*****")
     print("-----Datasets-----")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor", ignoreShowKeyError=True):
@@ -214,28 +227,40 @@ if __name__ == "__main__":
     print("\n*****Case 2.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target=ds003Dependency,query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency,show="dependents",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
-            print(f"path: %s" %(dataset.path))
-            print(f"versionPK: %s \n" %(dataset.versionPk))
+            print(f"Path: %s" %(dataset.path))
+            print(f"VersionPK: %s" %(dataset.versionPk))
+            try:
+                print(f"Metadata: %s" %(dict(dataset.metadata)))
+            except:
+                pass
+            finally:
+                print()
     except:
         assert False, "Error. search unsuccessful. Case 2.2"
 
     # Test 2.3: Return multiple dependents by specifying the dependents versionPK and its parents dataset path
-    print("\n*****Case 2.3*****")
+    print("*****Case 2.3*****")
     print("-----Datasets-----")
     try:
         versionPkLoopValue = ds001VersionPk
         for dataset in client.search(target=ds003Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
-            print(f"path: %s" %(dataset.path))
-            print(f"versionPK: %s \n" %(dataset.versionPk))
+            print(f"Path: %s" %(dataset.path))
+            print(f"VersionPK: %s" %(dataset.versionPk))
+            try:
+                print(f"Metadata: %s" %(dict(dataset.metadata)))
+            except:
+                pass
+            finally:
+                print()
     except:
         assert False, "Error. search unsuccessful. Case 2.3"
 
     # (Case 3) .successor
     # Test 3.1: Print all datasets found within a path alongside their predecessor dependency metadata.
-    print("\n*****Case 3.1*****")
+    print("*****Case 3.1*****")
     print("-----Datasets-----")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.successor", ignoreShowKeyError=True):
@@ -250,32 +275,50 @@ if __name__ == "__main__":
     print("\n*****Case 3.2*****")
     print("-----Datasets-----")
     try:
-        for dataset in client.search(target=ds003Dependency,query='dependents in ({})'.format(ds003VersionPk), ignoreShowKeyError=True):
+        for dataset in client.search(target=ds003Dependency,show="dependents", query='dependents in ({})'.format(ds003VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
-            print(f"path: %s" %(dataset.path))
-            print(f"versionPK: %s \n" %(dataset.versionPk))
+            print(f"Path: %s" %(dataset.path))
+            print(f"VersionPK: %s" %(dataset.versionPk))
+            try:
+                print(f"Metadata: %s" %(dict(dataset.metadata)))
+            except:
+                pass
+            finally:
+                print()
     except:
         assert False, "Error. search unsuccessful. Case 3.2"
 
     # Test 3.3: Return multiple dependents by specifying the dependents versionPK and its parents dataset path
-    print("\n*****Case 3.3*****")
+    print("*****Case 3.3*****")
     print("-----Datasets-----")
     try:
         versionPkLoopValue = ds001VersionPk
         for dataset in client.search(target=ds003Dependency, show="dependents",query='dependents in ({},{})'.format(ds002VersionPk, ds003VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
-            print(f"path: %s" %(dataset.path))
-            print(f"versionPK: %s \n" %(dataset.versionPk))
+            print(f"Path: %s" %(dataset.path))
+            print(f"VersionPK: %s" %(dataset.versionPk))
+            try:
+                print(f"Metadata: %s" %(dict(dataset.metadata)))
+            except:
+                pass
+            finally:
+                print()
     except:
         assert False, "Error. search unsuccessful. Case 3.3"
 
     # Case 4: Getting datasets from dependents that are in DIFFERENT folders
-    print("\n*****Case 4*****")
+    print("*****Case 4*****")
     print("-----Datasets-----")
     try:
         for dataset in client.search(target=ds002Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk_dp, ds002VersionPk_dp), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
-            print(f"path: %s" %(dataset.path))
-            print(f"versionPK: %s \n" %(dataset.versionPk))
+            print(f"Path: %s" %(dataset.path))
+            print(f"VersionPK: %s" %(dataset.versionPk))
+            try:
+                print(f"Metadata: %s" %(dict(dataset.metadata)))
+            except:
+                pass
+            finally:
+                print()
     except:
         assert False, "Error. search unsuccessful. Case 4"
