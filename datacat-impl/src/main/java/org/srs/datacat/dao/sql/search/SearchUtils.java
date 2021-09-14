@@ -109,8 +109,8 @@ public final class SearchUtils {
                 if (deps[1].equals("groups")){
                     retmap =  SearchUtils.getDependentGroups(conn, (DatacatObject.Builder)builder);
                 } else{ // return dependents
-                    retmap = SearchUtils.getDependents(conn, false,
-                        (DatacatObject.Builder) builder, deps[1]);
+                    retmap = SearchUtils.getDependentsByType(conn, false, (DatacatObject.Builder) builder,
+                        deps[1]);
                 }
                 metadata.putAll(retmap);
                 continue;
@@ -153,7 +153,7 @@ public final class SearchUtils {
         for(String s: includedMetadata){
             if (s.contains("dependency")){
                 String[] deps = s.split("\\.");
-                Map<String, Object> depmap = SearchUtils.getDependents(conn, false,
+                Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, false,
                     (DatacatObject.Builder)builder, deps[1]);
                 metadata.putAll(depmap);
                 continue;
@@ -522,15 +522,30 @@ public final class SearchUtils {
     }
 
     public static Map<String, Object> getDependents(Connection conn, boolean isContainer,
+                                                    DatacatObject.Builder builder) throws SQLException {
+        Long dependency;
+        if (isContainer || builder instanceof DatasetVersion.Builder){
+            dependency = builder.pk;
+        } else {
+            dependency = ((Dataset.Builder) builder).versionPk;
+        }
+        String[] dependentTypes = SearchUtils.getDependentTypes(conn, isContainer, dependency);
+        Map<String, Object> metadata = new HashMap<>();
+        for (String type: dependentTypes) {
+            metadata.putAll(SearchUtils.getDependentsByType(conn, isContainer, builder, type));
+        }
+        return metadata;
+    }
+
+    public static Map<String, Object> getDependentsByType(Connection conn, boolean isContainer,
                                                     DatacatObject.Builder builder,
                                                     String type) throws SQLException {
+        if (type.isEmpty() || type.equals("*")) {
+            return SearchUtils.getDependents(conn, isContainer, builder);
+        }
         String sql = "SELECT dependencyName, dependent FROM DatasetDependency WHERE " +
                 (isContainer ? "dependencyGroup" : "dependency") + " = ? and dependentType = ?";
-
-        HashMap<String, Object> verMetadata = new HashMap();
-        if (type == null || type.isEmpty()) {
-            type = "predecessor"; // default
-        }
+        HashMap<String, Object> metadata = new HashMap();
         try (PreparedStatement stmt = conn.prepareStatement(sql)){
             Long dependentid;
             if (isContainer || builder instanceof DatasetVersion.Builder){
@@ -556,9 +571,9 @@ public final class SearchUtils {
                 }
             }
             if (!dependents.toString().equals("")) {
-                verMetadata.put("dependents", dependents.toString());
+                metadata.put(type, dependents.toString());
             }
-            return verMetadata;
+            return metadata;
         }
     }
 
@@ -575,6 +590,21 @@ public final class SearchUtils {
                 dependents.append(sep).append(Long.valueOf(rs.getLong("dependency")).toString());
             }
             return dependents.toString();
+        }
+    }
+
+    public static String[] getDependentTypes(Connection conn, boolean isContainer,
+                                             Long dependency) throws SQLException {
+        String sql = "SELECT dependentType FROM DatasetDependency WHERE " +
+            (isContainer ? "dependency":"dependencyGroup") + " = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, dependency);
+            ResultSet rs = stmt.executeQuery();
+            List<String> dependentTypes = new ArrayList<String>();
+            while (rs.next()) {
+                dependentTypes.add(rs.getString("dependentType"));
+            }
+            return dependentTypes.toArray(new String[dependentTypes.size()]);
         }
     }
 

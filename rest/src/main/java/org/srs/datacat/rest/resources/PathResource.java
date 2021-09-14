@@ -183,7 +183,7 @@ public class PathResource extends BaseResource {
                         List<String> dep = matrixParams.get("metadata");
                         if (!dep.isEmpty() && dep.get(0).contains("dependents")){
                             try {
-                                String dependentType = "predecessor";
+                                String dependentType = "*";
                                 if (dep.get(0).contains(".")){
                                     dependentType = dep.get(0).replace("dependents.", "");
                                 }
@@ -204,12 +204,12 @@ public class PathResource extends BaseResource {
                                          entries.add(entry);
                                      }
                                 } else{
-                                    retmap = SearchUtils.getDependents(conn, true, builder,
-                                            dependentType);
+                                    retmap = SearchUtils.getDependentsByType(conn, true, builder, dependentType);
                                     if (!retmap.isEmpty()) {
-                                        MetadataEntry entry = new MetadataEntry("dependents",
-                                            (String) retmap.get("dependents"));
-                                        entries.add(entry);
+                                        for (String type: retmap.keySet()) {
+                                            MetadataEntry entry = new MetadataEntry(type, (String) retmap.get(type));
+                                            entries.add(entry);
+                                        }
                                     }
                                 }
                                 conn.close();
