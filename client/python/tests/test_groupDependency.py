@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # Case 1.1: base case (predecessors) with versionPK value not specified
     # Retrieves all predecessor datasets linked to the group
     print("\n*****Case 1.1*****")
-    print("-----Datasets-----")
+    print("-----Group with dependents-----")
     try:
         print(client.path(path='/testpath/depGroupPre;metadata=dependents'))
     except:
@@ -161,23 +161,27 @@ if __name__ == "__main__":
     try:
         for dataset in client.search(target='/testpath/depGroupPre', show="dependents", query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
+            print(f"Path: %s" %(dataset.path))
+            print()
     except:
         assert False, "Error. search unsuccessful. Case 1.2"
 
     # Case 1.3: base case (predecessors) with multiple versionPK values specified
     # Retrieves all predecessor datasets linked to the group
-    print("\n*****Case 1.3*****")
+    print("*****Case 1.3*****")
     print("-----Datasets-----")
     try:
         for dataset in client.search(target='/testpath/depGroupPre', show="dependents", query='dependents in ({},{})'.format(ds001VersionPk,ds002VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
+            print(f"Path: %s" %(dataset.path))
+            print()
     except:
         assert False, "Error. search unsuccessful. Case 1.3"
 
     # Case 2.1: predecessor with versionPK value not specified
     # Retrieves all predecessor datasets linked to the group
-    print("\n*****Case 2.1*****")
-    print("-----Datasets-----")
+    print("*****Case 2.1*****")
+    print("-----Group with dependents-----")
     try:
         print(client.path(path='/testpath/depGroupPre;metadata=dependents.predecessor'))
     except:
@@ -190,23 +194,27 @@ if __name__ == "__main__":
     try:
         for dataset in client.search(target='/testpath/depGroupPre', show="dependents.predecessor", query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
+            print(f"Path: %s" %(dataset.path))
+            print()
     except:
         assert False, "Error. search unsuccessful. Case 2.2"
 
     # Case 2.3: predecessor with multiple versionPK values specified
     # Retrieves specified predecessor datasets linked to the group
-    print("\n*****Case 2.3*****")
+    print("*****Case 2.3*****")
     print("-----Datasets-----")
     try:
         for dataset in client.search(target='/testpath/depGroupPre', show="dependents.predecessor", query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
+            print(f"Path: %s" %(dataset.path))
+            print()
     except:
         assert False, "Error. search unsuccessful. Case 2.3"
 
     # Case 3.1: successor with versionPK value not specified
     # Retrieves all successor datasets linked to the group
-    print("\n*****Case 3.1*****")
-    print("-----Datasets-----")
+    print("*****Case 3.1*****")
+    print("-----Group with dependents-----")
     try:
         print(client.path(path='/testpath/depGroupSuc;metadata=dependents.successor'))
     except:
@@ -219,24 +227,28 @@ if __name__ == "__main__":
     try:
         for dataset in client.search(target='/testpath/depGroupSuc', show="dependents.successor",query='dependents in ({})'.format(ds003VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
+            print(f"Path: %s" %(dataset.path))
+            print()
     except:
         assert False, "Error. search unsuccessful. Case 3.2"
 
     # Case 3.3: successor with multiple versionPK values specified
     # Retrieves specified successor datasets linked to the group
-    print("\n*****Case 3.3*****")
+    print("*****Case 3.3*****")
     print("-----Datasets-----")
     try:
         for dataset in client.search(target='/testpath/depGroupSuc', show="dependents.successor", query='dependents in ({},{})'.format(ds003VersionPk,ds004VersionPk), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
+            print(f"Path: %s" %(dataset.path))
+            print()
     except:
         assert False, "Error. search unsuccessful. Case 3.3\n"
 
     # Case 4: test dependents.groups  which should return the Groups associated with a dependent dataset.
     # Retrieves specified datasets and returns what groups are linked to it
-    print("\n*****Case 4*****")
+    print("*****Case 4*****")
 
-    print("-----Datasets-----")
+    print("-----Groups-----")
     try:
         print(client.path(path='/testpath/testFolder/dataset001_82f24.dat;metadata=dependents.groups', versionId=0))
     except:
