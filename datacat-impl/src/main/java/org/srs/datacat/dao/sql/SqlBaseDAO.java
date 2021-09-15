@@ -351,6 +351,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             metaData = new HashMap<>(metaData);
         }
         if (!metaData.containsKey("dependents")) {
+            metaData.remove("dependency");
             return;
         }
         Long dependency = (Long)metaData.get("dependency");

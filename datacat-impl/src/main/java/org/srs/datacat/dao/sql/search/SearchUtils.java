@@ -604,7 +604,33 @@ public final class SearchUtils {
             while (rs.next()) {
                 dependentTypes.add(rs.getString("dependentType"));
             }
+            if (!dependentTypes.contains("successor")) {
+                if (SearchUtils.hasDependentTypeByRelation(conn, dependency, "successor")) {
+                    dependentTypes.add("successor");
+                }
+            }
+            if (!dependentTypes.contains("predecessor")){
+                if (SearchUtils.hasDependentTypeByRelation(conn, dependency, "predecessor")) {
+                    dependentTypes.add("predecessor");
+                }
+            }
             return dependentTypes.toArray(new String[dependentTypes.size()]);
+        }
+    }
+
+    public static boolean hasDependentTypeByRelation(Connection conn, Long dependent, String type)
+        throws SQLException {
+        String sql = "SELECT dependentType FROM DatasetDependency WHERE dependent = ? " +
+            "AND (dependentType = ? AND dependency IS NOT NULL)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, dependent);
+            stmt.setString(2, type);
+            ResultSet rs = stmt.executeQuery();
+            List<String> types = new ArrayList<String>();
+            while (rs.next()) {
+                types.add(rs.getString("dependentType"));
+            }
+            return !types.isEmpty();
         }
     }
 
