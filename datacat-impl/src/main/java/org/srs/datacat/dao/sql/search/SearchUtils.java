@@ -521,34 +521,34 @@ public final class SearchUtils {
         return found;
     }
 
-    public static Map<String, Object> getDependents(Connection conn, boolean isContainer,
+    public static Map<String, Object> getDependents(Connection conn, boolean isGroup,
                                                     DatacatObject.Builder builder) throws SQLException {
         Long dependency;
-        if (isContainer || builder instanceof DatasetVersion.Builder){
+        if (isGroup || builder instanceof DatasetVersion.Builder){
             dependency = builder.pk;
         } else {
             dependency = ((Dataset.Builder) builder).versionPk;
         }
-        String[] dependentTypes = SearchUtils.getDependentTypes(conn, isContainer, dependency);
+        String[] dependentTypes = SearchUtils.getDependentTypes(conn, isGroup, dependency);
         Map<String, Object> metadata = new HashMap<>();
         for (String type: dependentTypes) {
-            metadata.putAll(SearchUtils.getDependentsByType(conn, isContainer, builder, type));
+            metadata.putAll(SearchUtils.getDependentsByType(conn, isGroup, builder, type));
         }
         return metadata;
     }
 
-    public static Map<String, Object> getDependentsByType(Connection conn, boolean isContainer,
+    public static Map<String, Object> getDependentsByType(Connection conn, boolean isGroup,
                                                     DatacatObject.Builder builder,
                                                     String type) throws SQLException {
         if (type.isEmpty() || type.equals("*")) {
-            return SearchUtils.getDependents(conn, isContainer, builder);
+            return SearchUtils.getDependents(conn, isGroup, builder);
         }
         String sql = "SELECT dependencyName, dependent FROM DatasetDependency WHERE " +
-                (isContainer ? "dependencyGroup" : "dependency") + " = ? and dependentType = ?";
+                (isGroup ? "dependencyGroup" : "dependency") + " = ? and dependentType = ?";
         HashMap<String, Object> metadata = new HashMap();
         try (PreparedStatement stmt = conn.prepareStatement(sql)){
             Long dependentid;
-            if (isContainer || builder instanceof DatasetVersion.Builder){
+            if (isGroup || builder instanceof DatasetVersion.Builder){
                 dependentid = builder.pk;
             } else {
                 dependentid = ((Dataset.Builder) builder).versionPk;
@@ -593,10 +593,10 @@ public final class SearchUtils {
         }
     }
 
-    public static String[] getDependentTypes(Connection conn, boolean isContainer,
+    public static String[] getDependentTypes(Connection conn, boolean isGroup,
                                              Long dependency) throws SQLException {
         String sql = "SELECT dependentType FROM DatasetDependency WHERE " +
-            (isContainer ? "dependency":"dependencyGroup") + " = ?";
+            (isGroup ? "dependencyGroup":"dependency") + " = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, dependency);
             ResultSet rs = stmt.executeQuery();
