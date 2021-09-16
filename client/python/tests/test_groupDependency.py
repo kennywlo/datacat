@@ -17,6 +17,8 @@ if __name__ == "__main__":
     containerPath1 = "/testpath/depGroup1"
     containerPath2 = "/testpath/depGroup2"
 
+    containerPathCustom = "/testpath/customDependents"
+
     # metadata
     metadata = Metadata()
     ds_metadata = Metadata()
@@ -34,6 +36,9 @@ if __name__ == "__main__":
 
         if client.exists(containerPath2):
             client.rmdir(containerPath2, type="group")
+
+        if client.exists(containerPathCustom):
+            client.rmdir(containerPathCustom, type="group")
 
     except:
         print("exception caught here")
@@ -99,14 +104,18 @@ if __name__ == "__main__":
 
     # Putting together a list to be used as predecessor dependents
     dependentsPredecessor = client.getdependentid([ds001,ds002])
-    print("\ndependents genereated as:\n{}".format(dependentsPredecessor))
+    print("\nPredecessor dependents genereated as:\n{}".format(dependentsPredecessor))
 
     # Putting together a list to be used as successor dependents
     dependentsSuccessor = client.getdependentid([ds003,ds004])
-    print("\ndependents genereated as:\n{}".format(dependentsSuccessor))
+    print("\nSuccessor dependents genereated as:\n{}".format(dependentsSuccessor))
 
     # Putting together a list of dependents that are located in multiple groups
     dependentsSameDatasetDifferentGroups = client.getdependentid([ds001,ds002])
+
+    # Putting together a list to be used as predecessor dependents
+    customDependents = client.getdependentid([ds001,ds002,ds003,ds004])
+    print("\nCustom dependents genereated as:\n{}".format(customDependents))
 
     # adding the datasets with their new dependentType to a groups metadata (predecessor)
     dep_metadataPredecessor = {
@@ -126,6 +135,12 @@ if __name__ == "__main__":
         "dependentType": "predecessor"
     }
 
+    # adding the datasets with their new dependentType to a groups metadata (custom)
+    dep_metadataCustomDependents = {
+        "dependents": str(customDependents),
+        "dependentType": "simulation_XXX"
+    }
+
     metadata.update(dep_metadataPredecessor)
     depGroupPre = client.mkgroup(containerPathPre, metadata=metadata)
     print("\nCreated depGroupPre as:\n{} \nMetadata: {}".format(depGroupPre, dict(metadata)))
@@ -141,6 +156,10 @@ if __name__ == "__main__":
     metadata.update(dep_metadataSameDatasetDifferentGroups)
     depGroup2 = client.mkgroup(containerPath2, metadata=metadata)
     print("\nCreated depGroup2 as:\n{} \nMetadata: {}".format(dep_metadataSameDatasetDifferentGroups, dict(metadata)))
+
+    metadata.update(dep_metadataCustomDependents)
+    depGroupCustom = client.mkgroup(containerPathCustom, metadata=metadata)
+    print("\nCreated depGroupCustom as:\n{} \nMetadata: {}".format(dep_metadataCustomDependents, dict(metadata)))
 
     # ********** CONTAINER DEPENDENCY TESTING BEGINS HERE **********
     # **************************************************************
@@ -247,9 +266,18 @@ if __name__ == "__main__":
     # Case 4: test dependents.groups  which should return the Groups associated with a dependent dataset.
     # Retrieves specified datasets and returns what groups are linked to it
     print("*****Case 4*****")
-
     print("-----Groups-----")
     try:
         print(client.path(path='/testpath/testFolder/dataset001_82f24.dat;metadata=dependents.groups', versionId=0))
+        print()
     except:
-        assert False, "Error. search unsuccessful. Case 4"
+        assert False, "Error. search unsuccessful. Case 4\n"
+
+    # Case 5: testing the custom field for datasets.
+    # Retrieves all successor datasets linked to the group
+    print("*****Case 5*****")
+    print("-----Group with Custom Field-----")
+    try:
+        print(client.path(path='/testpath/customDependents;metadata=dependents.simulation_XXX'))
+    except:
+        assert False, "Error. search unsuccessful. Case 5"
