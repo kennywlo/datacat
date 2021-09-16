@@ -602,7 +602,10 @@ public final class SearchUtils {
             ResultSet rs = stmt.executeQuery();
             List<String> dependentTypes = new ArrayList<String>();
             while (rs.next()) {
-                dependentTypes.add(rs.getString("dependentType"));
+                String dt = rs.getString("dependentType");
+                if (!dependentTypes.contains(dt)) {
+                    dependentTypes.add(dt);
+                }
             }
             if (!dependentTypes.contains("successor")) {
                 if (SearchUtils.isDependentTypeByRelation(conn, dependency, "successor")) {
@@ -628,7 +631,10 @@ public final class SearchUtils {
             ResultSet rs = stmt.executeQuery();
             List<String> types = new ArrayList<String>();
             while (rs.next()) {
-                types.add(rs.getString("dependentType"));
+                String dt = rs.getString("dependentType");
+                if (!types.contains(dt)){
+                    types.add(dt);
+                }
             }
             return !types.isEmpty();
         }
