@@ -612,27 +612,23 @@ public final class SearchUtils {
                     dependentTypes.add(dt);
                 }
             }
-            if (!dependentTypes.contains("successor")) {
-                if (SearchUtils.isDependentTypeByRelation(conn, dependency, "successor")) {
-                    dependentTypes.add("predecessor");
-                }
-            }
-            if (!dependentTypes.contains("predecessor")){
-                if (SearchUtils.isDependentTypeByRelation(conn, dependency, "predecessor")) {
-                    dependentTypes.add("successor");
+            // Check other types by reciprocal relation
+            String[] moreDependentTypes = SearchUtils.getDependentTypeByRelation(conn, dependency);
+            for (String dt: moreDependentTypes) {
+                if (!dependentTypes.contains(dt)){
+                    dependentTypes.add(dt);
                 }
             }
             return dependentTypes.toArray(new String[dependentTypes.size()]);
         }
     }
 
-    public static boolean isDependentTypeByRelation(Connection conn, Long dependent, String type)
+    public static String [] getDependentTypeByRelation(Connection conn, Long dependent)
         throws SQLException {
         String sql = "SELECT dependentType FROM DatasetDependency WHERE dependent = ? " +
-            "AND (dependentType = ? AND dependency IS NOT NULL)";
+            "AND dependency IS NOT NULL";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, dependent);
-            stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
             List<String> types = new ArrayList<String>();
             while (rs.next()) {
@@ -641,7 +637,7 @@ public final class SearchUtils {
                     types.add(dt);
                 }
             }
-            return !types.isEmpty();
+            return types.toArray(new String[types.size()]);
         }
     }
 
