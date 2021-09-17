@@ -561,15 +561,20 @@ public final class SearchUtils {
                 String sep = dependents.length() == 0 ? "":",";
                 dependents.append(sep).append(Long.valueOf(rs.getLong("dependent")).toString());
             }
+            String moreDependents;
             // Locate more dependents by the symmetry of predecessor/successor relation
             if (Arrays.asList("predecessor", "successor").contains(type)){
-                String moreDependents = SearchUtils.getDependentsByRelation(conn, dependentid,
+                moreDependents = SearchUtils.getDependentsByRelation(conn, dependentid,
                     type.equals("predecessor") ? "successor":"predecessor");
-                if (!moreDependents.isEmpty()) {
-                    String sep = dependents.length()==0 ? "":",";
-                    dependents.append(sep).append(moreDependents);
-                }
+            } else{
+                // for all other types check the reciprocal relation
+                moreDependents = SearchUtils.getDependentsByRelation(conn, dependentid, type);
             }
+            if (!moreDependents.isEmpty()) {
+                String sep = dependents.length()==0 ? "":",";
+                dependents.append(sep).append(moreDependents);
+            }
+
             if (!dependents.toString().equals("")) {
                 metadata.put(type, dependents.toString());
             }
