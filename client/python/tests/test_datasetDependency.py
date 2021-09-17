@@ -12,9 +12,16 @@ if __name__ == "__main__":
     file_path = os.path.abspath("../../../test/data/")
     datacat_path = '/testpath/testfolder'
 
+    # **************************************************
+    # **************************************************
     # ********** DATASET CREATION STARTS HERE **********
+    # **************************************************
+    # **************************************************
 
-    # ********** For predecessor testing **********
+    # *********************************************
+    # ********** for PREDECESSOR testing **********
+    # *********************************************
+
     # initializing metadata
     metadata = Metadata()
     metadata['nIsTest'] = 1
@@ -68,7 +75,10 @@ if __name__ == "__main__":
     ds003Dependency = ds003.versionMetadata["dependencyName"];
     print("\ncreated dataset: ", filename, "(For Predecessor Testing) (VersionPK = ", ds003VersionPk,")")
 
-    # ********** For successor testing **********
+    # *******************************************
+    # ********** For SUCCESSOR testing **********
+    # *******************************************
+
     # reinitialization of metadata
     metadata = Metadata()
     metadata['nIsTest'] = 1
@@ -119,8 +129,13 @@ if __name__ == "__main__":
     ds006Dependency = ds006.versionMetadata["dependencyName"];
     print("\ncreated dataset: ", filename, "(For Successor Testing) (VersionPK = ", ds006VersionPk,")")
 
-    # ********** For different folder testing **********
-    # Creating scenario where dependent datasets and dataset being linked to are in different folders
+    # **************************************************
+    # ********** For DIFFERENT FOLDER testing **********
+    # **************************************************
+    # Different folder means that we expects datasets to be in different datacat folders but still linked by dependency
+
+    metadata = Metadata()
+    metadata['nIsTest'] = 1
 
     # Create 2 folders
     datacat_path_dependent = '/testpath/dependents'
@@ -155,7 +170,7 @@ if __name__ == "__main__":
                         resource=full_file001,
                         site='SLAC')
     ds001VersionPk_dp = ds001.versionPk
-    print("\ncreated dataset: ", filename)
+    print("\ncreated dataset: ", filename, "(For Different Folder Testing) (VersionPK = ", ds001VersionPk_dp,")")
 
 
     filename = "dataset002_dp_43d4c.dat"
@@ -169,7 +184,7 @@ if __name__ == "__main__":
                         resource=full_file001,
                         site='SLAC')
     ds002VersionPk_dp = ds002.versionPk
-    print("\ncreated dataset: ", filename)
+    print("\ncreated dataset: ", filename, "(For Different Folder Testing) (VersionPK = ", ds002VersionPk_dp,")")
 
 
     # in general folder
@@ -190,10 +205,59 @@ if __name__ == "__main__":
                         resource=full_file001,
                         site='SLAC')
 
-    ds002Dependency = ds002.versionMetadata["dependencyName"];
-    print("\ncreated dataset: ", filename)
+    ds002Dependency = ds002.versionMetadata["dependencyName"]
+    ds001GeneralVersionPk = ds002.versionPk
+    print("\ncreated dataset: ", filename, "(For Different Folder Testing) (VersionPK = ", ds001GeneralVersionPk,")")
 
+    # ***************************************************
+    # ********** For CUSTOM DEPENDENCY FIELD testing **********
+    # ***************************************************
+
+    metadata = Metadata()
+    metadata['nIsTest'] = 1
+
+    filename = "customDependency01.dat"
+    # Creation of dataset customDependencyFile01
+    if client.exists(datacat_path + "/" +filename):
+        client.rmds(datacat_path + "/" +filename)
+    # Use the client to create the dataset - DOES not initialize dependency metadata
+    full_file_path = file_path + "/" + filename
+    dsCustom001 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                              versionMetadata=metadata,
+                              resource=full_file_path,
+                              site='SLAC')
+    dsCustom001VersionPk = dsCustom001.versionPk
+    print("\ncreated dataset: ", filename, "(For Custom Dependency Testing) (VersionPK = ", dsCustom001VersionPk,
+          ")")
+
+    filename = "customDependency02.dat"
+    # Creation of dataset customDependencyFile02
+    if client.exists(datacat_path + "/" + filename):
+        client.rmds(datacat_path + "/" + filename)
+
+    dependents = client.getdependentid([dsCustom001])
+    dep_metadata = {"dependencyName": "test_data",
+                    "dependents": str(dependents),
+                    "dependentType": "analysis__XXX"}
+
+    dp_metadata.update(dep_metadata)
+
+    # Use the client to create the dataset - DOES initialize dependency metadata
+    full_file_path02 = file_path + "/" + filename
+    dsCustomField002 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                                   versionMetadata=dep_metadata,
+                                   resource=full_file_path02,
+                                   site='SLAC')
+    dsCustom2VersionPk = dsCustomField002.versionPk
+    dsCustom2Dependency = dsCustomField002.versionMetadata["dependencyName"];
+    print("\ncreated dataset: ", filename, "(For Custom Dependency Testing) (VersionPK = ", dsCustom2VersionPk,
+          ")")
+
+    # ***********************************************************
+    # ***********************************************************
     # ********** CLIENT DEPENDENCY TESTING BEGINS HERE **********
+    # ***********************************************************
+    # ***********************************************************
 
     # (Case 1) base case (predecessors)
     # Test 1.1: Print all datasets found within a path alongside their predecessor dependency metadata.
@@ -208,7 +272,7 @@ if __name__ == "__main__":
     except:
         assert False, "Error. search unsuccessful. Case 1.1"
 
-    # Test 1.2: Return a single dependent by specifying the dependents versionPK and its parents dataset path
+    # Test 1.2: Return a single dependent by specifying the dependents versionPK and its parents dependency
     # --- Now the we know what datasets have what predecessor metadata, we can
     # retrieve specific dependents linked to a dataset by using the query parameter. ---
     print("\n*****Case 1.2*****")
@@ -229,7 +293,7 @@ if __name__ == "__main__":
     except:
         assert False, "Error. search unsuccessful. Case 1.2"
 
-    # Test 1.3: Return multiple dependents by specifying the dependents versionPK and its parents dataset path
+    # Test 1.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
     print("*****Case 1.3*****")
     print("-----Datasets-----")
     try:
@@ -259,7 +323,7 @@ if __name__ == "__main__":
     except:
         assert False, "Error. search unsuccessful. Case 2.1"
 
-    # Test 2.2: Return a single dependent by specifying the dependents versionPK and its parents dataset path
+    # Test 2.2: Return a single dependent by specifying the dependents versionPK and its parents dependency
     print("\n*****Case 2.2*****")
     print("-----Datasets-----")
     try:
@@ -276,7 +340,7 @@ if __name__ == "__main__":
     except:
         assert False, "Error. search unsuccessful. Case 2.2"
 
-    # Test 2.3: Return multiple dependents by specifying the dependents versionPK and its parents dataset path
+    # Test 2.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
     print("*****Case 2.3*****")
     print("-----Datasets-----")
     try:
@@ -307,7 +371,7 @@ if __name__ == "__main__":
     except:
         assert False, "Error. search unsuccessful. Case 3.1"
 
-    # Test 3.2: Return a single dependent by specifying the dependents versionPK and its parents dataset path
+    # Test 3.2: Return a single dependent by specifying the dependents versionPK and its parents dependency
     print("\n*****Case 3.2*****")
     print("-----Datasets-----")
     try:
@@ -324,7 +388,7 @@ if __name__ == "__main__":
     except:
         assert False, "Error. search unsuccessful. Case 3.2"
 
-    # Test 3.3: Return multiple dependents by specifying the dependents versionPK and its parents dataset path
+    # Test 3.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
     print("*****Case 3.3*****")
     print("-----Datasets-----")
     try:
@@ -342,7 +406,7 @@ if __name__ == "__main__":
     except:
         assert False, "Error. search unsuccessful. Case 3.3"
 
-    # Case 4: Getting datasets from dependents that are in DIFFERENT folders
+    # Case 4: Returning a dataset located in a DIFFERENT folders but linked through a dependency
     print("*****Case 4*****")
     print("-----Datasets-----")
     try:
@@ -358,3 +422,38 @@ if __name__ == "__main__":
                 print()
     except:
         assert False, "Error. search unsuccessful. Case 4"
+
+    # (Case 5) Custom Dependency
+    # Test 5.1 Print all datasets found within a path alongside their custom dependency metadata.
+    print("*****Case 5.1*****")
+    print("-----Datasets-----")
+    try:
+        for dataset in client.search(target='/testpath/testfolder', show="dependents.analysis__XXX", ignoreShowKeyError=True):
+            try:
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+            except:
+                print(f"Name: %s" %(dataset.name))
+    except:
+        assert False, "Error. search unsuccessful. Case 3.1"
+
+    # Test 5.2: Return a single CUSTOM dependent by specifying the dependents versionPK and its parents dependency
+    print("\n*****Case 5.2*****")
+    print("-----Datasets-----")
+    try:
+        for dataset in client.search(target=dsCustom2Dependency,show="dependents", query='dependents in ({})'.format(
+                dsCustom001VersionPk), ignoreShowKeyError=True):
+            print(f"Dataset Name: %s" %(dataset.name))
+            print(f"VersionPK: %s" %(dataset.versionPk))
+            print(f"Dependency Container: %s" %(dataset.path))
+            try:
+                print(f"Metadata: %s" %(dict(dataset.metadata)))
+            except:
+                pass
+
+    except:
+        assert False, "Error. search unsuccessful. Case 3.2"
+
+
+
+
+
