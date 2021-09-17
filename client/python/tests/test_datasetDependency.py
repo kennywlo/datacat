@@ -36,9 +36,9 @@ if __name__ == "__main__":
     # use the client to create dataset001 - DOES NOT initialize dependency metadata
     full_file001 = file_path + '/' + filename
     ds001 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                    versionMetadata=metadata,
-                    resource=full_file001,
-                    site='SLAC')
+                        versionMetadata=metadata,
+                        resource=full_file001,
+                        site='SLAC')
     ds001VersionPk = ds001.versionPk
     print("\ncreated dataset: ", filename, "(For Predecessor Testing) (VersionPK = ", ds001VersionPk,")")
 
@@ -49,9 +49,9 @@ if __name__ == "__main__":
     # use the client to create dataset002 - DOES NOT initialize dependency metadata
     full_file002 = file_path + '/' + filename
     ds002 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                    versionMetadata=metadata,
-                    resource=full_file002,
-                    site='SLAC')
+                        versionMetadata=metadata,
+                        resource=full_file002,
+                        site='SLAC')
     ds002VersionPk = ds002.versionPk
     print("\ncreated dataset: ", filename, "(For Predecessor Testing) (VersionPK = ", ds002VersionPk,")")
 
@@ -262,7 +262,10 @@ if __name__ == "__main__":
     # (Case 1) base case (predecessors)
     # Test 1.1: Print all datasets found within a path alongside their predecessor dependency metadata.
     print("\n*****Case 1.1*****")
-    print("-----Datasets-----")
+    print("-----------------------------------------------------------------------")
+    print("Returns all datasets from the specified Target")
+    print("Shows which ones contain dependents of the base case type (predecessor)")
+    print("-----------------------------------------------------------------------")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents", ignoreShowKeyError=True):
             try:
@@ -276,7 +279,9 @@ if __name__ == "__main__":
     # --- Now the we know what datasets have what predecessor metadata, we can
     # retrieve specific dependents linked to a dataset by using the query parameter. ---
     print("\n*****Case 1.2*****")
-    print("-----Datasets-----")
+    print("-------------------------------------------------------------")
+    print("Returning datasets specified by a versionPks and a dependency")
+    print("-------------------------------------------------------------")
     try:
         for dataset in client.search(target=ds003Dependency,show="dependents", query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             print(f"Dataset Name: %s" %(dataset.name))
@@ -288,14 +293,15 @@ if __name__ == "__main__":
                 pass
             finally:
                 print()
-
-
     except:
         assert False, "Error. search unsuccessful. Case 1.2"
 
     # Test 1.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
     print("*****Case 1.3*****")
-    print("-----Datasets-----")
+    print("---------------------------------------------------------------------------")
+    print("Returning datasets specified by multiple versionPks and a single dependency")
+    print("Here we are returning 2 datasets ")
+    print("---------------------------------------------------------------------------")
     try:
         for dataset in client.search(target=ds003Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
             print(f"Dataset Name: %s" %(dataset.name))
@@ -313,7 +319,10 @@ if __name__ == "__main__":
     # (Case 2) .predecessors
     # Test 2.1: Print all datasets found within a path alongside their predecessor dependency metadata.
     print("*****Case 2.1*****")
-    print("-----Datasets-----")
+    print("------------------------------------------------------------")
+    print("Returns all datasets from the specified Target")
+    print("Shows which ones contain dependents of type predecessor")
+    print("------------------------------------------------------------")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor", ignoreShowKeyError=True):
             try:
@@ -325,7 +334,9 @@ if __name__ == "__main__":
 
     # Test 2.2: Return a single dependent by specifying the dependents versionPK and its parents dependency
     print("\n*****Case 2.2*****")
-    print("-----Datasets-----")
+    print("-------------------------------------------------------------")
+    print("Returning datasets specified by a versionPks and a dependency")
+    print("-------------------------------------------------------------")
     try:
         for dataset in client.search(target=ds003Dependency,show="dependents",query='dependents in ({})'.format(ds001VersionPk), ignoreShowKeyError=True):
             print(f"Dataset Name: %s" %(dataset.name))
@@ -342,7 +353,10 @@ if __name__ == "__main__":
 
     # Test 2.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
     print("*****Case 2.3*****")
-    print("-----Datasets-----")
+    print("---------------------------------------------------------------------------")
+    print("Returning datasets specified by multiple versionPks and a single dependency")
+    print("Here we are returning 2 datasets ")
+    print("---------------------------------------------------------------------------")
     try:
         versionPkLoopValue = ds001VersionPk
         for dataset in client.search(target=ds003Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk, ds002VersionPk), ignoreShowKeyError=True):
@@ -361,7 +375,10 @@ if __name__ == "__main__":
     # (Case 3) .successor
     # Test 3.1: Print all datasets found within a path alongside their predecessor dependency metadata.
     print("*****Case 3.1*****")
-    print("-----Datasets-----")
+    print("------------------------------------------------------------")
+    print("Returns all datasets from the specified Target")
+    print("Shows which ones contain dependents of type successor")
+    print("------------------------------------------------------------")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.successor", ignoreShowKeyError=True):
             try:
@@ -373,7 +390,9 @@ if __name__ == "__main__":
 
     # Test 3.2: Return a single dependent by specifying the dependents versionPK and its parents dependency
     print("\n*****Case 3.2*****")
-    print("-----Datasets-----")
+    print("-------------------------------------------------------------")
+    print("Returning datasets specified by a versionPks and a dependency")
+    print("-------------------------------------------------------------")
     try:
         for dataset in client.search(target=ds006Dependency,show="dependents", query='dependents in ({})'.format(ds004VersionPk), ignoreShowKeyError=True):
             print(f"Dataset Name: %s" %(dataset.name))
@@ -390,7 +409,10 @@ if __name__ == "__main__":
 
     # Test 3.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
     print("*****Case 3.3*****")
-    print("-----Datasets-----")
+    print("---------------------------------------------------------------------------")
+    print("Returning datasets specified by multiple versionPks and a single dependency")
+    print("Here we are returning 2 datasets ")
+    print("---------------------------------------------------------------------------")
     try:
         versionPkLoopValue = ds001VersionPk
         for dataset in client.search(target=ds006Dependency, show="dependents",query='dependents in ({},{})'.format(ds004VersionPk, ds005VersionPk), ignoreShowKeyError=True):
@@ -408,7 +430,10 @@ if __name__ == "__main__":
 
     # Case 4: Returning a dataset located in a DIFFERENT folders but linked through a dependency
     print("*****Case 4*****")
-    print("-----Datasets-----")
+    print("---------------------------------------------------------------------------------------")
+    print("Returning datasets specified by a versionPk and dependency")
+    print("The dataset being returned is located in a different folder than that of the dependency")
+    print("---------------------------------------------------------------------------------------")
     try:
         for dataset in client.search(target=ds002Dependency, show="dependents",query='dependents in ({},{})'.format(ds001VersionPk_dp, ds002VersionPk_dp), ignoreShowKeyError=True):
             print(f"Name: %s" %(dataset.name))
@@ -426,7 +451,10 @@ if __name__ == "__main__":
     # (Case 5) Custom Dependency
     # Test 5.1 Print all datasets found within a path alongside their custom dependency metadata.
     print("*****Case 5.1*****")
-    print("-----Datasets-----")
+    print("------------------------------------------------------------")
+    print("Returns all datasets from the specified Target")
+    print("Shows which ones contain dependents of type analysis__XXX")
+    print("------------------------------------------------------------")
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.analysis__XXX", ignoreShowKeyError=True):
             try:
@@ -434,11 +462,13 @@ if __name__ == "__main__":
             except:
                 print(f"Name: %s" %(dataset.name))
     except:
-        assert False, "Error. search unsuccessful. Case 3.1"
+        assert False, "Error. search unsuccessful. Case 5.1"
 
     # Test 5.2: Return a single CUSTOM dependent by specifying the dependents versionPK and its parents dependency
     print("\n*****Case 5.2*****")
-    print("-----Datasets-----")
+    print("------------------------------------------------------------")
+    print("Returning datasets specified by a versionPk and dependency")
+    print("------------------------------------------------------------")
     try:
         for dataset in client.search(target=dsCustom2Dependency,show="dependents", query='dependents in ({})'.format(
                 dsCustom001VersionPk), ignoreShowKeyError=True):
@@ -451,9 +481,4 @@ if __name__ == "__main__":
                 pass
 
     except:
-        assert False, "Error. search unsuccessful. Case 3.2"
-
-
-
-
-
+        assert False, "Error. search unsuccessful. Case 5.2"
