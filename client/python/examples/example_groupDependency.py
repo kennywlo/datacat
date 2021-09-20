@@ -19,31 +19,31 @@ def main():
 
     # *****************************************************
     # *****************************************************
-    # ********** DEPENDENCY CREATION BEGINS HERE **********
+    # ******* GROUP DEPENDENCY CREATION BEGINS HERE *******
     # *****************************************************
     # *****************************************************
 
-    datacat_path = '/testpath/testfolder'                # Directory we are working in
-    filename = "dataset003_0c89c.dat"                    # Name of dataset to be created
-    metadata = Metadata()                                # Metadata <-- Dependencies will always go in metadata
-    full_file003 = file_path + '/' + filename            # ../../../test/data/ + filename
+    # adding the datasets with their dependentType to a groups metadata (predecessor)
+    metadata = Metadata()
+    dep_metadataPredecessor = {
+        "dependents": str(dataset001.versionPk),
+        "dependentType": "predecessor"
+    }
+    metadata.update(dep_metadataPredecessor)
 
-    # Check to make sure the dataset doesnt already exist at the provided path
-    if client.exists(datacat_path + '/' + filename):
-        client.rmds(datacat_path + '/' + filename)
+    # Declare the path you wish to have your new group at
+    container_path_predecessor = "/testpath/dependencyGroup"
 
-    # Add a "dependency" to dataset003
-    # (Dependencies will always be a part of the metadata)
-    dependency_metadata = {"dependents": str(dataset001.versionPk),         # VersionPKs of the dependent datasets
-                           "dependentType": "predecessor"}                  # [predecessor], [successor], [custom]
-    metadata.update(dependency_metadata)
+    # Check to see if group already exists at the path, if it does... delete old group
+    try:
+        if client.exists(container_path_predecessor):
+            client.rmdir(container_path_predecessor, type="group")
+    except:
+        print("exception caught here")
 
-    # Use the client to create dataset003 along with is newly defined dependency (in metadata)
-    ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata,
-                        resource=full_file003,
-                        site='SLAC')
-    print("created dataset: ", filename, "(VersionPK = ", ds003.versionPk,")")
+    # Use the client to create the new group alongside its new dependency metadata
+    dep_group_predecessor = client.mkgroup(container_path_predecessor, metadata=metadata)
+    print("\nCreated New Group as:\n{} \nMetadata: {}".format(dep_group_predecessor, dict(metadata)))
 
     # ********************************************
     # ********************************************
@@ -51,34 +51,28 @@ def main():
     # ********************************************
     # ********************************************
 
-    # Identify datasets containing dependency of type "predecessor" at a given target
+    # Retrieves all predecessor datasets linked to the group
     print("\nSearch Example 1:")
-    print("-----------------------------------------------------------------------")
-    print("Identifying datasets containing dependency of type predecessor")
-    print("-----------------------------------------------------------------------")
+    print("--------------------------------------------------------------------------------------")
+    print("Return the group found at the provided path alongside its dependents of specified type")
+    print("--------------------------------------------------------------------------------------")
     try:
-        for dataset in client.search(target='/testpath/testfolder', show="dependents.predecessor",
-                                     ignoreShowKeyError=True):
-            try:
-                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
-            except:
-                print(f"Name: %s" %(dataset.name))
+        print(client.path(path='/testpath/dependencyGroup;metadata=dependents.predecessor'))
     except:
         assert False, "Error. search unsuccessful. Search Example 1"
 
-    # --- Now the we know what datasets have what dependency metadata, we can
-    #     retrieve specific dependents, (datasets), by specifying the "dependency"
-    #     as well as the "versionPk" of the dataset we wish to retrieve. ---
+    # Return specified dependents (datasets)
     print("\nSearch Example 2:")
-    print("----------------------------------------------------------------------")
-    print("Returning dependent dataset specified by a versionPk and a dependency")
-    print("----------------------------------------------------------------------")
-    try:
-        # retrieve the dependency of the dataset that created the dependency
-        ds003_dependency = ds003.versionMetadata["dependencyName"];
+    print("-----------------------------------------------------------------------")
+    print("Return the dependent specified by the target and query parameter")
+    print("-----------------------------------------------------------------------")
 
-        for dataset in client.search(target=ds003_dependency,show="dependents", query='dependents in ({})'.format(
-                dataset001.versionPk), ignoreShowKeyError=True):
+    # -- Through this client call we are able to specify the path of a "group" which contains a dependency.
+    #    If we know the exact dependent we want back we can retrieve it by providing its versionPk to the
+    #    query -- (query='dependents in ({})'.format(dataset001.versionPk))
+
+    try:
+        for dataset in client.search(target='/testpath/dependencyGroup', show="dependents.predecessor", query='dependents in ({})'.format(dataset001.versionPk), ignoreShowKeyError=True):
             print(f"Dataset Name: %s" %(dataset.name))
             print(f"VersionPK: %s" %(dataset.versionPk))
             print(f"Dependency Path: %s" %(dataset.path))
@@ -93,12 +87,11 @@ def main():
 
     # End of example
 
-
 def create_datasets():
     # ----------------------------
     # ---creation of dataset001---
     # ----------------------------
-    datacat_path01 = '/testpath/testfolder'                 # Directory we are working in
+    datacat_path01 = '/testpath/testfolder'                # Directory we are working in
     filename01 = "dataset001_82f24.dat"                    # Name of dataset to be created
     metadata01 = Metadata()                                # Metadata
     full_file001 = file_path + '/' + filename01            # ../../../test/data/ + filename
@@ -137,7 +130,9 @@ def create_datasets():
 
     return [ds001, ds002]
 
-
 if __name__ == "__main__":
     main()
+
+
+
 
