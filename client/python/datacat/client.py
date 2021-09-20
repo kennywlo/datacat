@@ -95,13 +95,18 @@ class Client(object):
     def getdependentid(datasets):
         """
         Fetch the identifiers used for dataset dependency.
-        :param ds: the datasets
+        :param ds: one or more datasets
         :return: the dependent identifiers (versionPk) of the input datasets
         """
-        id = []
+        if datasets is None:
+            return None
+        if isinstance(datasets, Dataset):
+            return datasets.versionPk
+        ids = []
         for ds in datasets:
-            id.append(ds.versionPk)
-        return id
+            if hasattr(ds, "versionPk"):
+                ids.append(ds.versionPk)
+        return ids
 
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,

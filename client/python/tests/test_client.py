@@ -52,15 +52,3 @@ if __name__ == "__main__":
                     resource=full_file003,
                     site='SLAC')
     print(vars(ds003))
-
-    did001 = client.get_dependency_id(ds001)
-    did002 = client.get_dependency_id(ds002)
-    did003 = client.get_dependency_id(ds003)
-    vmetadata = { "dependency": did003,
-                  "dependencyName": "test_data",
-                  "dependents": [did001, did002],
-                  "dependentType": "predecessor" }
-    client.mkgroup(datacat_path+'/'+filename, metadata=vmetadata)
-    # ToDo: Get dependents from the created group's metadata
-    dependents = ""
-    print(dependents)
