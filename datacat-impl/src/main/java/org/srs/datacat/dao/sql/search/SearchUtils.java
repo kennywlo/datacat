@@ -115,13 +115,18 @@ public final class SearchUtils {
                 metadata.putAll(retmap);
                 continue;
             }
-            Object o = rs.getObject(s);
-            if(o != null){
-                if(o instanceof Number){
-                    BigDecimal v = rs.getBigDecimal(s);
-                    o = v.scale() == 0 ? v.toBigIntegerExact() : v;
+            try {
+                Object o = rs.getObject(s);
+                if (o != null) {
+                    if (o instanceof Number) {
+                        BigDecimal v = rs.getBigDecimal(s);
+                        o = v.scale() == 0 ? v.toBigIntegerExact() : v;
+                    }
+                    metadata.put(s, o);
                 }
-                metadata.put(s, o);
+            } catch (SQLException ex) {
+                // case of column not found
+                continue;
             }
         }
 
