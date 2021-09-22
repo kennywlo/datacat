@@ -630,8 +630,7 @@ public final class SearchUtils {
 
     public static String [] getDependentTypeByRelation(Connection conn, Long dependent)
         throws SQLException {
-        String sql = "SELECT dependentType FROM DatasetDependency WHERE dependent = ? " +
-            "AND dependency IS NOT NULL";
+        String sql = "SELECT dependentType FROM DatasetDependency WHERE dependent = ? ";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, dependent);
             ResultSet rs = stmt.executeQuery();

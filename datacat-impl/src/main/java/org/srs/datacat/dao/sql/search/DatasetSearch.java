@@ -212,8 +212,8 @@ public class DatasetSearch {
                 if (s.contains("dependents")) {
                     String[] deps = s.split("\\.");
                     if (deps.length == 1) {
-                        // default: predecessors
-                        s = "deps.dependency.".concat("predecessor");
+                        // default: All
+                        s = "deps.dependency.".concat("*");
                     } else {
                         s = "deps.dependency.".concat(deps[1]);
                     }
