@@ -6,14 +6,9 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-try:
-    # Py2
-    _integer = long
-    unicode = unicode
-except NameError:
-    # Py3
-    _integer = int
-    unicode = str
+# Py3
+_integer = int
+unicode = str
 
 
 class DatacatRecord(object):
