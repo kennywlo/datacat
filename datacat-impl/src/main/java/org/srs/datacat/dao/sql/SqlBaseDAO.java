@@ -343,8 +343,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
         stmt.setLong(1, dependencyPK);
         stmt.executeUpdate();
-        // Add the new dependency
-        metaData.put("dependency", dependencyPK);
+        // Add dependency if no dependencyGroup
+        if (!metaData.containsKey("dependencyGroup")) {
+            metaData.put("dependency", dependencyPK);
+        }
         addDatasetDependency(metaData);
 
     }

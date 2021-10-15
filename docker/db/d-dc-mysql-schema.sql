@@ -159,7 +159,8 @@ create table DatasetDependency (
     constraint FK_Dependent foreign key (Dependent)
         references DatasetVersion (DatasetVersion)
         on delete set null,
-    constraint VAL_DD_XOR_NULL_DSV_DSG check (Dependency IS NOT null OR DependencyGroup IS NOT null),
+    constraint VAL_DD_AND_NULL_DSG check (Dependency IS NOT null AND DependencyGroup IS null),
+    constraint VAL_DSG_AND_NULL_DD check (Dependency IS null AND DependencyGroup IS NOT null),
     constraint UNQ_DD_Entry1 unique (Dependency, Dependent, DependentType),
     constraint UNQ_DD_Entry2 unique (DependencyGroup, Dependent, DependentType)
 );
