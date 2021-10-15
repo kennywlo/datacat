@@ -285,7 +285,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     mergeDatasetVersionMetadata(record.getPk(), metaData);
                     break;
                 case GROUP:
-                    mergeGroupMetadata(record.getPk(), metaData);
+                    mergeGroupMetadata(record, metaData);
                     break;
                 case FOLDER:
                     mergeFolderMetadata(record.getPk(), metaData);
@@ -322,7 +322,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         mergeDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }
 
-    private void mergeGroupMetadata(long datasetGroupPK, Map<String, Object> metaData) throws SQLException {
+    private void mergeGroupMetadata(DatacatRecord datasetGroup, Map<String, Object> metaData) throws SQLException {
+        long datasetGroupPK = datasetGroup.getPk();
+        metaData.put("dependencyName", datasetGroup.getPath());
+        metaData.put("dependencyGroup", datasetGroupPK);
         mergeDependencyMetadata(datasetGroupPK, metaData);
         mergeDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
     }
