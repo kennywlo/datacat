@@ -40,8 +40,6 @@ def main():
     ds001VersionPk = ds001.versionPk
     print("\ncreated dataset: ", filename, "(For Utility Testing) (VersionPK = ", ds001VersionPk,")")
 
-    # Printing the dependency relations before patch
-    print_dependency_before(client)
 
     # creation of dataset002
     filename = "dataset002_92e56.dat"
@@ -55,6 +53,37 @@ def main():
                         site='SLAC')
     ds002VersionPk = ds002.versionPk
     print("\ncreated dataset: ", filename, "(For Utility Testing) (VersionPK = ", ds002VersionPk,")")
+
+    # **************************************************
+    # **************************************************
+    # ********** DIRECTORY CREATION STARTS HERE ********
+    # **************************************************
+    # **************************************************
+
+
+    # Declare the path you wish to have your new group at
+    container_path_predecessor = "/testpath/dependencyGroup"
+
+    # Check to see if group already exists at the path, if it does... delete old group
+    try:
+        if client.exists(container_path_predecessor):
+            client.rmdir(container_path_predecessor, type="group")
+    except:
+        print("exception caught here")
+
+    # Use the client to create the new group alongside its new dependency metadata
+    group = client.mkgroup(container_path_predecessor,metadata=metadata)
+    print("\nCreated New Group as:\n{}".format(group))
+
+
+    # **************************************************
+    # **************************************************
+    # ********** DATASET PATCHING STARTS HERE **********
+    # **************************************************
+    # **************************************************
+
+    # Printing the dependency relations before patch
+    print_dependency_before(client)
 
     # Retrieving Dataset to patch
     datasetToPatch = client.path(path="/testpath/testfolder/dataset002_92e56.dat")
@@ -70,6 +99,25 @@ def main():
 
     # Printing the dependency relations after patch
     print_dependency_after(client)
+
+    # **************************************************
+    # **************************************************
+    # ********** DIRECTORY PATCHING STARTS HERE ********
+    # **************************************************
+    # **************************************************
+    metadata = Metadata()
+
+    dep_metadataPredecessor = {
+    "dependents": str(ds001VersionPk),
+    "dependentType": "predecessor"
+    }
+
+    metadata.update(dep_metadataPredecessor)
+    group.metadata.update(dep_metadataPredecessor)
+
+    returnedGroup = client.patchdir(path=container_path_predecessor, container=group, type="group")
+    print(returnedGroup)
+
 
 
 def print_dependency_before(client):
