@@ -108,6 +108,35 @@ class Client(object):
                 ids.append(ds.versionPk)
         return ids
 
+    @staticmethod
+    def create_dependency(group, type, datasets=None, groups=None):
+        # TODO: create a new group dependency, with datasets and/or groups as dependents
+        dep = None
+        return dep
+
+    @staticmethod
+    def get_dependency(group, type):
+        # TODO: retrieve Dependency and put in in Dependency object
+        metadata = {}
+        dep = Dependency()
+        return dep
+
+    @staticmethod
+    def get_dependents(dependency, type, max=100):
+        # TODO: retrieve dependents, of type Dataset, up to max at a time
+        dependents, dependentGroups = None, None
+        return dependents, dependentGroups
+
+    @staticmethod
+    def add_dependents(dependency, type, datasets=None, groups=None):
+        # TODO: add datasets or groups to existing dependency
+        return True
+
+    @staticmethod
+    def remove_dependents(dependency, type, datasets=None, groups=None):
+        # TODO: remove datasets or groups from existing dependency
+        return True
+
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,
              **kwargs):

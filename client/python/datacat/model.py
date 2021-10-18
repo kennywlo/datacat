@@ -53,6 +53,22 @@ class Group(Container):
     pass
 
 
+class Dependency(DatacatRecord):
+    def __init__(self, name=None, dependents=None, dependent_groups=None, dependent_type=None, **kwargs):
+        super(Dependency, self).__init__(**kwargs)
+        if name:
+            self.name = name
+        if dependents:
+            self.dependents = dependents
+        if dependent_groups:
+            self.dependent_groups = dependent_groups
+        if dependent_type:
+            self.dependent_type = dependent_type
+        for k, v in kwargs.items():
+            if k != "_type" and not hasattr(self, k) and v is not None:
+                self.__dict__[k] = v
+
+
 class Dataset(DatacatNode):
     REQ_JSON_ALLOWED = "name path dataType fileFormat metadata " \
         "versionId processInstance taskName versionMetadata locations".split(" ")
