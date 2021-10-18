@@ -146,9 +146,10 @@ create table DatasetDependency (
     DatasetDependency   SERIAL,
     Dependency      bigint unsigned,
     DependencyGroup bigint unsigned,
-    DependencyName  varchar(255),
+    DependencyName  varchar(255) not null,
     Dependent       bigint unsigned,
-    DependentType   varchar(32),
+    DependentGroup  bigint unsigned,
+    DependentType   varchar(32) not null,
     constraint PK_DatasetDependency primary key (DatasetDependency),
     constraint FK_Dependency foreign key (Dependency)
         references DatasetVersion (DatasetVersion)
@@ -159,10 +160,17 @@ create table DatasetDependency (
     constraint FK_Dependent foreign key (Dependent)
         references DatasetVersion (DatasetVersion)
         on delete set null,
+    constraint FK_DependentGroup foreign key (DependentGroup)
+        references DatasetGroup (DatasetGroup)
+        on delete set null,
     constraint VAL_DD_AND_NULL_DSG check (Dependency IS NOT null AND DependencyGroup IS null),
     constraint VAL_DSG_AND_NULL_DD check (Dependency IS null AND DependencyGroup IS NOT null),
+    constraint VAL_D_AND_NULL_DG check (Dependent IS NOT null AND DependentGroup IS null),
+    constraint VAL_DG_AND_NULL_D check (Dependent IS null AND DependentGroup IS NOT null),
     constraint UNQ_DD_Entry1 unique (Dependency, Dependent, DependentType),
-    constraint UNQ_DD_Entry2 unique (DependencyGroup, Dependent, DependentType)
+    constraint UNQ_DD_Entry2 unique (DependencyGroup, Dependent, DependentType),
+    constraint UNQ_DD_Entry3 unique (Dependency, DependentGroup, DependentType),
+    constraint UNQ_DD_Entry4 unique (DependencyGroup, DependentGroup, DependentType)
 );
 create index IDX_DD_FIND1 on DatasetDependency(Dependency, DependentType);
 create index IDX_DD_FIND2 on DatasetDependency(DependencyGroup, DependentType);
