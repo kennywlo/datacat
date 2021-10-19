@@ -56,6 +56,8 @@ class Group(Container):
 class Dependency(DatacatRecord):
     def __init__(self, name=None, dependents=None, dependent_groups=None, dependent_type=None, **kwargs):
         super(Dependency, self).__init__(**kwargs)
+        self.max_depth = 1
+        self.i_next_dependent = 0
         if name:
             self.name = name
         if dependents:
