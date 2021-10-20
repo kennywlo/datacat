@@ -86,16 +86,16 @@ def main():
     print_dependency_before(client)
 
     # Retrieving Dataset to patch
-    datasetToPatch = client.path(path="/testpath/testfolder/dataset002_92e56.dat")
+    datasetToPatch = client.path(path="/testpath/testfolder/dataset002_92e56.dat;v=current")
 
     # Creating the dependency information
     dependency_metadata = {"dependents": str(ds001.versionPk),         # VersionPKs of the dependent datasets
-                           "dependentType": "predecessor"}                  # [predecessor], [successor], [custom]
+                      "dependentType": "predecessor"}                  # [predecessor], [successor], [custom]
     # Updating the metadata
-    ds002.versionMetadata.update(dependency_metadata)
+    datasetToPatch.versionMetadata.update(dependency_metadata)
 
     # Patching the updated metadata
-    ds002_return = client.patchds(path="/testpath/testfolder/dataset002_92e56.dat", dataset=ds002)
+    ds002_return = client.patchds(path="/testpath/testfolder/dataset002_92e56.dat", dataset=datasetToPatch)
 
     # Printing the dependency relations after patch
     print_dependency_after(client)

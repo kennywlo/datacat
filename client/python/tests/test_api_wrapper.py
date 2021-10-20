@@ -3,15 +3,17 @@ from datacat import client_from_config, config_from_file
 from datacat.model import Metadata
 
 
-# datacat
-config_file ='./config_srs.ini'
-config = config_from_file(config_file)
-client = client_from_config(config)
+if __name__ == "__main__":
+
+    # datacat
+    config_file ='./config_srs.ini'
+    config = config_from_file(config_file)
+    client = client_from_config(config)
 
 # file/datacatalog path
-file_path = os.path.abspath("../../../test/data/")
+    file_path = os.path.abspath("../../../test/data/")
 
-def main():
+
     print("****** API WRAPPER TEST BEGIN ******\n")
     create_datasets()
 
@@ -72,5 +74,3 @@ def create_datasets():
     return [ds001, ds002]
 
 
-if __name__ == "__main__":
-    main()
