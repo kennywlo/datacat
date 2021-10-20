@@ -19,8 +19,7 @@ class Client(object):
             raise ValueError("Client has no API URL configured")
         self.http_client = HttpClient(url, auth_strategy, **kwargs)
         self.url = url
-        # the dependency cache
-        dependency_cache = {}
+        self.dependency_cache = {}
 
     @checked_error
     def path(self, path, versionId=None, site=None, stat=None):
@@ -93,11 +92,11 @@ class Client(object):
         """
         return self.mkdir(path, "group", parents, metadata, **kwargs)
 
-    @staticmethod
-    def getdependentid(datasets):
+    @checked_error
+    def get_dependent_id(self, datasets):
         """
         Fetch the identifiers used for dataset dependency.
-        :param ds: one or more datasets
+        :param datasets: one or more datasets
         :return: the dependent identifiers (versionPk) of the input datasets
         """
         if datasets is None:
@@ -110,18 +109,19 @@ class Client(object):
                 ids.append(ds.versionPk)
         return ids
 
-    @staticmethod
-    def create_dependency(dep_container, dep_type, dep_datasets=None, dep_groups=None):
-        # TODO: create a new group dependency, with datasets and/or groups as dependents
+    @checked_error
+    def create_dependency(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
+        # TODO: create a new dependency, with datasets and/or groups as dependents
+        #       with dep_container either a Dataset or a Group
         return True
 
-    @staticmethod
-    def delete_dependency(dep_container):
+    @checked_error
+    def delete_dependency(self, dep_container):
         # TODO: delete the group dependency
         return True
 
-    @staticmethod
-    def get_dependents(dep_container, dep_type, max_depth=1, chunk_size=100):
+    @checked_error
+    def get_dependents(self, dep_container, dep_type, max_depth=1, chunk_size=100):
         # TODO: retrieve dependents, of type Dataset, up to max at a time
         #       can be called repeatedly to retrieve all the dependents
         n = 0
@@ -129,18 +129,18 @@ class Client(object):
         # add to Client.dependency_cache here
         return n, dependents
 
-    @staticmethod
-    def get_next_dependents(dep_container):
+    @checked_error
+    def get_next_dependents(self, dep_container):
         dependents = []
         return dependents
 
-    @staticmethod
-    def add_dependents(dep_container, dep_type, dep_datasets=None, dep_groups=None):
+    @checked_error
+    def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
         # TODO: add datasets or groups to existing dependency
         return True
 
-    @staticmethod
-    def remove_dependents(dep_container, dep_type, dep_datasets=None, dep_groups=None):
+    @checked_error
+    def remove_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
         # TODO: remove datasets or groups from existing dependency
         return True
 
