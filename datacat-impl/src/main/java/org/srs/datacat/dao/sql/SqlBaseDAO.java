@@ -317,7 +317,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         addDatacatObjectMetadata(logicalFolderPK, metaData, "LogicalFolder", "LogicalFolder");
     }
 
-    protected void mergeDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
+    protected void mergeDatasetVersionMetadata(DatacatRecord ds, Map<String, Object> metaData) throws SQLException {
+        long pk = ds.getPk();
+        metaData.put("dependencyName", ds.getPath());
         mergeDependencyMetadata(pk, metaData);
         mergeDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
     }

@@ -753,7 +753,7 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
 
                     String methodName = method.getName();
                     if("getMetadataMap".equals(methodName)){
-                        mergeDatasetVersionMetadata(existing.getPk(), (Map) patchedValue);
+                        mergeDatasetVersionMetadata(existing, (Map) patchedValue);
                         continue;
                     }
 

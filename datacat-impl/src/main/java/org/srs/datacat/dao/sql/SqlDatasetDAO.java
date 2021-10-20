@@ -733,7 +733,7 @@ public class SqlDatasetDAO extends SqlBaseDAO implements org.srs.datacat.dao.Dat
 
                     String methodName = method.getName();
                     if("getMetadataMap".equals(methodName)){
-                        mergeDatasetVersionMetadata(existing.getPk(), (Map) patchedValue);
+                        mergeDatasetVersionMetadata(existing, (Map) patchedValue);
                         continue;
                     }
 
