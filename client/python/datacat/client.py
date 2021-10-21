@@ -113,6 +113,32 @@ class Client(object):
     def create_dependency(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
         if isinstance(dep_container, Dataset):
             # TODO: create a dataset dependency and store in cache
+
+            # retreive dataset with or without versionPk
+            if hasattr(dep_container, 'versionPk'):
+                ds_path = dep_container.path + ";v={}".format(dep_container.versionId)
+                datasetToPatch = self.path(path=ds_path)
+            else:
+                ds_path = dep_container.path + ";v=current"
+                datasetToPatch = self.path(path=ds_path)
+
+            # check if versionMetadata field presents
+
+
+            if dep_datasets is not None:
+                if isinstance(dep_datasets, Dataset):
+                    dependency_metadata = {"dependents": str(dep_datasets.versionPk),
+                                            "dependentType": dep_type}
+                    datasetToPatch.versionMetadata.update(dependency_metadata)
+
+                    self.patchds(path=dep_container.path, dataset=datasetToPatch)
+                else:
+                    raise ValueError("Unrecognized dependent dataset object")
+            else:
+                assert False, "Dependent dataset not given"
+
+
+
             return True
         elif isinstance(dep_container, Group):
             # TODO: create a group dependency and store in cache

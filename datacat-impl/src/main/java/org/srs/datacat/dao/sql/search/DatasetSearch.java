@@ -40,7 +40,7 @@ public class DatasetSearch {
     private Connection conn;
     private Select selectStatement;
     private ModelProvider modelProvider;
-    private Boolean isDependencySearch = false;
+    private String dependentSearch = "";
     private static final MetainfoSupplier METANAME_DELEGATE = new MetainfoSupplier() {
         @Override
         public MetanameContext get(){
@@ -74,11 +74,13 @@ public class DatasetSearch {
                     Optional.fromNullable(metaFieldsToRetrieve), 
                     Optional.fromNullable(sortFields),
                     ignoreShowKeyError);
-            if (isDependencySearch){
+            if (!dependentSearch.isEmpty()){
                 // if no containers, skip the dependency check
                 boolean found = containers.iterator().hasNext()? false: true;
                 for(DatacatNode container: containers) {
-                    if (SearchUtils.checkDependents(this.conn, true, container.getPk(), query)){
+                    String dependent = dependentSearch.equals("dependents")? "dependent": "dependentGroup";
+                    if (SearchUtils.checkDependents(this.conn, "dependencyGroup", dependent,
+                        container.getPk(), query)){
                         found = true;
                         break;
                     }
@@ -128,7 +130,7 @@ public class DatasetSearch {
             availableSelections.put( a.canonical(), a);
         }
 
-        if (this.isDependencySearch){
+        if (!this.dependentSearch.isEmpty()){
             // Handle the search for dependent datasets
             this.selectStatement = dsv;
         } else{
@@ -296,9 +298,11 @@ public class DatasetSearch {
             case "size":
                 return "fileSizeBytes";
             case "dependents":
-            case "dependency":
-                this.isDependencySearch = true;
+                this.dependentSearch = ident;
                 return "datasetVersion";
+            case "dependentGroups":
+                this.dependentSearch = ident;
+                return "datasetGroup";
             default:
                 return ident;
         }

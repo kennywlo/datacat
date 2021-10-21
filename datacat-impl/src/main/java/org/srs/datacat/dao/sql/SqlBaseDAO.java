@@ -178,8 +178,14 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             }
         }
         // fetch the dependency info
-        Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), false, builder);
+        Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency",
+            "dependent", builder);
+        Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(), "dependency",
+            "dependentGroup", builder);
         if (!dependents.isEmpty()) {
+            if (!dependents2.isEmpty()){
+                dependents.putAll(dependents2);
+            }
             metadata.putAll(dependents);
         }
 
@@ -200,8 +206,14 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         Map<String, Object> metadata = getMetadata(pk, tableType, tableType);
         // fetch the dependency info
         if (tableType != null && tableType.equals("DatasetGroup")) {
-            Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), true, builder);
+            Map<String, Object> dependents = SearchUtils.getDependents(getConnection(),
+                "dependencyGroup", "dependent", builder);
             if (!dependents.isEmpty()) {
+                metadata.putAll(dependents);
+            }
+            dependents = SearchUtils.getDependents(getConnection(),
+                "dependencyGroup", "dependentGroup", builder);
+            if (!dependents.isEmpty()){
                 metadata.putAll(dependents);
             }
         }
@@ -357,41 +369,73 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         if (!(metaData instanceof HashMap)) {
             metaData = new HashMap<>(metaData);
         }
-        if (!metaData.containsKey("dependents")) {
+        if (!metaData.containsKey("dependents") && !metaData.containsKey("dependentGroups")) {
+            // do nothing as no dependents to add
             metaData.remove("dependency");
+            metaData.remove("dependencyGroup");
             return;
         }
         Long dependency = (Long)metaData.get("dependency");
         Long dependencyGroup = (Long)metaData.get("dependencyGroup");
         String name = (String)metaData.get("dependencyName");
         String dependents = (String)metaData.get("dependents");
+        String dependentGroups = (String)metaData.get("dependentGroups");
         String dependentType = (String)metaData.get("dependentType");
 
-        final String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
-            "Dependent, DependentType)" + " values (?, ?, ?, ?, ?)";
-        PreparedStatement stmt = this.conn.prepareStatement(dependencySql);
-        String[] dependentList = dependents.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
-        // store each dependent info from the list
-        for (String d : dependentList) {
-            long dependent = Long.parseLong(d);
-            if (dependency != null) {
-                stmt.setLong(1, dependency.longValue());
-            } else{
-                stmt.setNull(1, Types.BIGINT);
+        // handle dataset dependents
+        if (dependents != null && !dependents.isEmpty()) {
+            String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
+                "Dependent, DependentType)" + " values (?, ?, ?, ?, ?)";
+            PreparedStatement stmt = this.conn.prepareStatement(dependencySql);
+            String[] dependentList = dependents.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
+            // store each dependent info from the list
+            for (String d : dependentList) {
+                long dependent = Long.parseLong(d);
+                if (dependency != null) {
+                    stmt.setLong(1, dependency.longValue());
+                } else{
+                    stmt.setNull(1, Types.BIGINT);
+                }
+                if (dependencyGroup != null) {
+                    stmt.setLong(2, dependencyGroup.longValue());
+                } else{
+                    stmt.setNull(2, Types.BIGINT);
+                }
+                stmt.setString(3, name);
+                stmt.setLong(4, dependent);
+                stmt.setString(5, dependentType);
+                stmt.executeUpdate();
             }
-            if (dependencyGroup != null) {
-                stmt.setLong(2, dependencyGroup.longValue());
-            } else{
-                stmt.setNull(2, Types.BIGINT);
-            }
-            stmt.setString(3, name);
-            stmt.setLong(4, dependent);
-            stmt.setString(5, dependentType);
-            stmt.executeUpdate();
-            this.conn.commit();
         }
-        // remove all dependency fields other than dependencyName, the containerpath
+        // handle group dependents
+        if (dependentGroups != null && !dependentGroups.isEmpty()) {
+            String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
+                "DependentGroup, DependentType)" + " values (?, ?, ?, ?, ?)";
+            PreparedStatement stmt = this.conn.prepareStatement(dependencySql);
+            String[] dependentList = dependentGroups.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
+            // store each dependent info from the list
+            for (String d : dependentList) {
+                long dependentGroup = Long.parseLong(d);
+                if (dependency != null) {
+                    stmt.setLong(1, dependency.longValue());
+                } else{
+                    stmt.setNull(1, Types.BIGINT);
+                }
+                if (dependencyGroup != null) {
+                    stmt.setLong(2, dependencyGroup.longValue());
+                } else{
+                    stmt.setNull(2, Types.BIGINT);
+                }
+                stmt.setString(3, name);
+                stmt.setLong(4, dependentGroup);
+                stmt.setString(5, dependentType);
+                stmt.executeUpdate();
+            }
+        }
+        this.conn.commit();
+        // remove all dependency fields other than dependencyName, a.k.a. the dependency path
         metaData.remove("dependents");
+        metaData.remove("dependentGroups");
         metaData.remove("dependentType");
         metaData.remove("dependency");
         metaData.remove("dependencyGroup");

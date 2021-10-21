@@ -212,7 +212,13 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
                 }
 
                 // Retrieve the dependency info as part of the metadata, if any
-                Map<String, Object> deps = SearchUtils.getDependents(getConnection(), false, builder);
+                Map<String, Object> deps = SearchUtils.getDependents(getConnection(),
+                    "dependency", "dependent", builder);
+                if (!deps.isEmpty()) {
+                    metadata.putAll(deps);
+                }
+                deps = SearchUtils.getDependents(getConnection(),
+                    "dependency", "dependentGroup", builder);
                 if (!deps.isEmpty()) {
                     metadata.putAll(deps);
                 }

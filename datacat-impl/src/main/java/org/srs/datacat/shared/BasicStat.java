@@ -11,7 +11,7 @@ import org.srs.datacat.model.container.ContainerStat;
  * Basic stat info for a group or a folder.
  *
  * @author bvan
- * @author klo
+ *
  */
 @JsonTypeName(value="stat")
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "_type", defaultImpl = BasicStat.class)

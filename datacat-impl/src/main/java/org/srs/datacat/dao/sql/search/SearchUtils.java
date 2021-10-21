@@ -101,16 +101,30 @@ public final class SearchUtils {
 
         ArrayList<DatasetLocationModel> locations = new ArrayList<>();
         HashMap<String, Object> metadata = new HashMap<>();
-
         for(String s: includedMetadata){
             if (s.contains("dependency")){
                 String[] deps = s.split("\\.");
-                Map<String, Object> retmap;
+                Map<String, Object> retmap, retmap2;
                 if (deps[1].equals("groups")){
-                    retmap =  SearchUtils.getDependentGroups(conn, (DatacatObject.Builder)builder);
+                    retmap =  SearchUtils.getDependencyGroups(conn, (DatacatObject.Builder)builder);
                 } else{ // return dependents
-                    retmap = SearchUtils.getDependentsByType(conn, false, (DatacatObject.Builder) builder,
-                        deps[1]);
+                    retmap = SearchUtils.getDependentsByType(conn, "dependency", "dependent",
+                        (DatacatObject.Builder) builder, deps[1]);
+                    retmap2 = SearchUtils.getDependentsByType(conn, "dependency", "dependentGroup",
+                        (DatacatObject.Builder) builder, deps[1]);
+                    if (!retmap2.isEmpty()){
+                        retmap.putAll(retmap2);
+                    }
+                    retmap2 = SearchUtils.getDependentsByType(conn, "dependencyGroup", "dependent",
+                        (DatacatObject.Builder) builder, deps[1]);
+                    if (!retmap2.isEmpty()){
+                        retmap.putAll(retmap2);
+                    }
+                    retmap2 = SearchUtils.getDependentsByType(conn, "dependencyGroup", "dependentGroup",
+                        (DatacatObject.Builder) builder, deps[1]);
+                    if (!retmap2.isEmpty()){
+                        retmap.putAll(retmap2);
+                    }
                 }
                 metadata.putAll(retmap);
                 continue;
@@ -158,8 +172,11 @@ public final class SearchUtils {
         for(String s: includedMetadata){
             if (s.contains("dependency")){
                 String[] deps = s.split("\\.");
-                Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, false,
-                    (DatacatObject.Builder)builder, deps[1]);
+                Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, "dependency",
+                    "dependent", (DatacatObject.Builder)builder, deps[1]);
+                metadata.putAll(depmap);
+                depmap = SearchUtils.getDependentsByType(conn, "dependency",
+                    "dependentGroup", (DatacatObject.Builder)builder, deps[1]);
                 metadata.putAll(depmap);
                 continue;
             }
@@ -502,18 +519,18 @@ public final class SearchUtils {
     }
 
     public static boolean checkDependents(Connection conn,
-                                          boolean isGroup,
+                                          String dependencyContainer,
+                                          String dependent,
                                           Long dependency,
                                           String query) throws SQLException {
-        String sql =
-            "SELECT dependent FROM DatasetDependency WHERE "+ (isGroup ? "dependencyGroup = ?":"dependency = ?");
+        String sql = "SELECT " + dependent + " FROM DatasetDependency WHERE "+ dependencyContainer + " = ?";
         String[] dependents = query.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
         boolean found = false;
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, dependency);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                String d = Long.valueOf(rs.getLong("dependent")).toString();
+                String d = Long.valueOf(rs.getLong(dependent)).toString();
                 if (Arrays.asList(dependents).contains(d)){
                     found = true;
                     break;
@@ -526,34 +543,38 @@ public final class SearchUtils {
         return found;
     }
 
-    public static Map<String, Object> getDependents(Connection conn, boolean isGroup,
+    public static Map<String, Object> getDependents(Connection conn, String dependencyContainer, String dependent,
                                                     DatacatObject.Builder builder) throws SQLException {
         Long dependency;
-        if (isGroup || builder instanceof DatasetVersion.Builder){
+        if (dependencyContainer.equals("dependencyGroup") || builder instanceof DatasetVersion.Builder){
             dependency = builder.pk;
         } else {
             dependency = ((Dataset.Builder) builder).versionPk;
         }
-        String[] dependentTypes = SearchUtils.getDependentTypes(conn, isGroup, dependency);
+        String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
         Map<String, Object> metadata = new HashMap<>();
         for (String type: dependentTypes) {
-            metadata.putAll(SearchUtils.getDependentsByType(conn, isGroup, builder, type));
+            Map<String, Object> dependents = SearchUtils.getDependentsByType(conn, dependencyContainer, dependent,
+                builder, type);
+            if (!dependents.isEmpty()) {
+                metadata.putAll(dependents);
+            }
         }
         return metadata;
     }
 
-    public static Map<String, Object> getDependentsByType(Connection conn, boolean isGroup,
-                                                    DatacatObject.Builder builder,
-                                                    String type) throws SQLException {
+    public static Map<String, Object> getDependentsByType(Connection conn, String dependencyContainer,
+                                                          String dependent,  DatacatObject.Builder builder,
+                                                          String type) throws SQLException {
         if (type.isEmpty() || type.equals("*")) {
-            return SearchUtils.getDependents(conn, isGroup, builder);
+            return SearchUtils.getDependents(conn, dependencyContainer, dependent, builder);
         }
-        String sql = "SELECT dependencyName, dependent FROM DatasetDependency WHERE " +
-                (isGroup ? "dependencyGroup" : "dependency") + " = ? and dependentType = ?";
+        String sql = "SELECT dependencyName, " + dependent + " FROM DatasetDependency WHERE " +
+            dependencyContainer + " = ? AND (dependentType = ? AND " + dependent + " IS NOT NULL)";
         HashMap<String, Object> metadata = new HashMap();
         try (PreparedStatement stmt = conn.prepareStatement(sql)){
             Long dependentid;
-            if (isGroup || builder instanceof DatasetVersion.Builder){
+            if (dependencyContainer.equals("dependencyGroup") || builder instanceof DatasetVersion.Builder){
                 dependentid = builder.pk;
             } else {
                 dependentid = ((Dataset.Builder) builder).versionPk;
@@ -561,56 +582,64 @@ public final class SearchUtils {
             stmt.setLong(1, dependentid);
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
-            StringBuilder dependents = new StringBuilder();
+            ArrayList<Long> dependents = new ArrayList<>();
             while (rs.next()) {
-                String sep = dependents.length() == 0 ? "":",";
-                dependents.append(sep).append(Long.valueOf(rs.getLong("dependent")).toString());
+                dependents.add(rs.getLong(dependent));
             }
-            String moreDependents;
-            // Locate more dependents by the symmetry of predecessor/successor relation
-            if (Arrays.asList("predecessor", "successor").contains(type)){
-                moreDependents = SearchUtils.getDependentsByRelation(conn, dependentid,
-                    type.equals("predecessor") ? "successor":"predecessor");
-            } else{
-                // for all other types check the reciprocal relation
-                moreDependents = SearchUtils.getDependentsByRelation(conn, dependentid, type);
+            // locate more dependents by the reciprocal nature of the relation
+            if (Arrays.asList("predecessor", "successor").contains(type)) {
+                Long[] moreDependents = SearchUtils.getReciprocalDependents(conn, dependencyContainer, dependent,
+                    dependentid, type.equals("predecessor") ? "successor" : "predecessor");
+                for (Long d: moreDependents) {
+                    if (!dependents.contains(d)){
+                        dependents.add(d);
+                    }
+                }
             }
-            if (!moreDependents.isEmpty()) {
-                String sep = dependents.length()==0 ? "":",";
-                dependents.append(sep).append(moreDependents);
-            }
-
-            if (!dependents.toString().equals("")) {
-                metadata.put(type, dependents.toString());
+            if (!dependents.isEmpty()) {
+                String dependentTag = type + ".";
+                if (dependent.equals("dependentGroup")){
+                    dependentTag += "group";
+                } else{
+                    dependentTag += "dataset";
+                }
+                StringBuilder dependentsAsStr= new StringBuilder();
+                for (Long d: dependents){
+                    dependentsAsStr.append(d.toString()).append(",");
+                }
+                if (dependentsAsStr.length()>0) {
+                    // remove last ,
+                    dependentsAsStr.deleteCharAt(dependentsAsStr.length()-1);
+                }
+                metadata.put(dependentTag, dependentsAsStr.toString());
             }
             return metadata;
         }
     }
 
-    public static String getDependentsByRelation(Connection conn, Long dependent, String type) throws SQLException {
-        String sql = "SELECT dependency, dependencyName FROM DatasetDependency WHERE dependent = ? " +
-            "AND (dependentType = ? AND dependency IS NOT NULL)";
+    public static Long[] getReciprocalDependents(Connection conn, String dependencyContainer, String dependent,
+                                                 Long dependentid, String type) throws SQLException {
+        String sql = "SELECT " + dependencyContainer + ", dependencyName FROM DatasetDependency WHERE " +
+            dependent + " = ? " + "AND dependentType = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, dependent);
+            stmt.setLong(1, dependentid);
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
-            StringBuilder dependents = new StringBuilder();
+            ArrayList<Long> dependents = new ArrayList<>();
             while (rs.next()) {
-                String sep = dependents.length() == 0 ? "":",";
-                dependents.append(sep).append(Long.valueOf(rs.getLong("dependency")).toString());
+                dependents.add(rs.getLong(dependencyContainer));
             }
-            return dependents.toString();
+            return dependents.toArray(new Long[0]);
         }
     }
 
-    public static String[] getDependentTypes(Connection conn, boolean isGroup,
+    public static String[] getDependentTypes(Connection conn, String dependencyContainer,
                                              Long dependency) throws SQLException {
-        String sql = "SELECT dependentType FROM DatasetDependency WHERE " +
-            (isGroup ? "dependencyGroup":"dependency") + " = ?";
+        String sql = "SELECT dependentType FROM DatasetDependency WHERE " + dependencyContainer + " = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, dependency);
             ResultSet rs = stmt.executeQuery();
-            List<String> dependentTypes = new ArrayList<String>();
+            List<String> dependentTypes = new ArrayList<>();
             while (rs.next()) {
                 String dt = rs.getString("dependentType");
                 if (!dependentTypes.contains(dt)) {
@@ -618,7 +647,13 @@ public final class SearchUtils {
                 }
             }
             // Check other types by reciprocal relation
-            String[] moreDependentTypes = SearchUtils.getDependentTypeByRelation(conn, dependency);
+            String[] moreDependentTypes = SearchUtils.getDependentTypeReciprocal(conn, "dependent", dependency);
+            for (String dt: moreDependentTypes) {
+                if (!dependentTypes.contains(dt)){
+                    dependentTypes.add(dt);
+                }
+            }
+            moreDependentTypes = SearchUtils.getDependentTypeReciprocal(conn, "dependentGroup", dependency);
             for (String dt: moreDependentTypes) {
                 if (!dependentTypes.contains(dt)){
                     dependentTypes.add(dt);
@@ -628,11 +663,11 @@ public final class SearchUtils {
         }
     }
 
-    public static String [] getDependentTypeByRelation(Connection conn, Long dependent)
+    public static String [] getDependentTypeReciprocal(Connection conn, String dependent, Long dependentid)
         throws SQLException {
-        String sql = "SELECT dependentType FROM DatasetDependency WHERE dependent = ? ";
+        String sql = "SELECT dependentType FROM DatasetDependency WHERE " + dependent + " = ? ";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, dependent);
+            stmt.setLong(1, dependentid);
             ResultSet rs = stmt.executeQuery();
             List<String> types = new ArrayList<String>();
             while (rs.next()) {
@@ -645,7 +680,7 @@ public final class SearchUtils {
         }
     }
 
-    public static Map<String, Object> getDependentGroups(Connection conn,
+    public static Map<String, Object> getDependencyGroups(Connection conn,
                                                          DatacatObject.Builder builder) throws SQLException {
         String sql = "SELECT dependencyName, dependencyGroup FROM DatasetDependency WHERE dependent = ? " +
             "AND dependencyGroup IS NOT NULL";

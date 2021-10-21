@@ -195,17 +195,23 @@ public class PathResource extends BaseResource {
                                 }
                                 builder.path(ret.getPath());
                                 Connection conn = getConnection();
-                                Map<String, Object> retmap;
+                                Map<String, Object> retmap, retmap2;
                                 if (dependentType.equals("groups")){
-                                     retmap = SearchUtils.getDependentGroups(conn, builder);
+                                     retmap = SearchUtils.getDependencyGroups(conn, builder);
                                      if (!retmap.isEmpty()) {
                                          MetadataEntry entry = new MetadataEntry("dependencyGroups",
                                              (String) retmap.get("dependencyGroups"));
                                          entries.add(entry);
                                      }
                                 } else{
-                                    retmap = SearchUtils.getDependentsByType(conn, true, builder, dependentType);
+                                    retmap = SearchUtils.getDependentsByType(conn, "dependencyGroup",
+                                        "dependent", builder, dependentType);
+                                    retmap2 =SearchUtils.getDependentsByType(conn, "dependencyGroup",
+                                        "dependentGroup", builder, dependentType);
                                     if (!retmap.isEmpty()) {
+                                        if (!retmap2.isEmpty()){
+                                            retmap.putAll(retmap2);
+                                        }
                                         for (String type: retmap.keySet()) {
                                             MetadataEntry entry = new MetadataEntry(type, (String) retmap.get(type));
                                             entries.add(entry);
