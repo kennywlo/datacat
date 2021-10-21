@@ -282,7 +282,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         try {
             switch (record.getType()) {
                 case DATASETVERSION:
-                    mergeDatasetVersionMetadata(record.getPk(), metaData);
+                    mergeDatasetVersionMetadata(record, metaData);
                     break;
                 case GROUP:
                     mergeGroupMetadata(record, metaData);
