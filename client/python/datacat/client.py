@@ -110,31 +110,40 @@ class Client(object):
         return ids
 
     @checked_error
-    def create_dependency(self, dep_container_path, version, dep_type, dep_datasets=None, dep_groups=None):
+    def create_dependency(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
         """
         Creates a new dependency .
-        :param dep_container_path: Path to the parent of the dependency
-        :param version: Desired version for the parent.
+        :param dep_container: Container for the parent of the dependency
         :param dep_type: Type of dependency to create.
         :param dep_datasets: The datasets we wish to use as children of the dependency
         :param dep_groups: The datasets we wish to use as children of the dependency
         """
-        ds_path = dep_container_path + ";v={}".format(version)
-        datasetToPatch = self.path(path=ds_path)
+        if isinstance(dep_container, Dataset):
 
-        if dep_datasets is not None:
-            if isinstance(dep_datasets, Dataset):
-                dependency_metadata = {"dependents": str(dep_datasets.versionPk),
-                                       "dependentType": dep_type}
+            if dep_datasets is not None:
+                if all(isinstance(x, Dataset) for x in dep_datasets):
+                    dependents = self.get_dependent_id(dep_datasets)
+                    dependency_metadata = {"dependents": str(dependents),
+                                           "dependentType": dep_type}
 
-                datasetToPatch.versionMetadata.update(dependency_metadata)
-                self.patchds(path=datasetToPatch.path, dataset=datasetToPatch)
+                    dep_container.versionMetadata.update(dependency_metadata)
+                    self.patchds(path=dep_container.path, dataset=dep_container)
 
+                else:
+                    raise ValueError("Unrecognized dependent dataset object")
             else:
-                raise ValueError("Unrecognized dependent dataset object")
+                assert False, "Dependent dataset not given"
+            return True
+
+        elif isinstance(dep_container, Group):
+
+            return True
         else:
-            assert False, "Dependent dataset not given"
-        return True
+            raise ValueError("Unrecognized dependency container")
+
+
+
+
 
     @checked_error
     def delete_dependency(self, dep_container):

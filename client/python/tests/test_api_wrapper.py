@@ -3,14 +3,14 @@ from datacat import client_from_config, config_from_file
 from datacat.model import Metadata
 
 
-
-
 def main():
 
     created_datasets = create_datasets()
     dataset001 = created_datasets[0]
     dataset002 = created_datasets[1]
     dataset003 = created_datasets[2]
+
+    dependents = [dataset002, dataset003]
 
     print("****** API WRAPPER TEST BEGIN ******\n")
 
@@ -20,8 +20,10 @@ def main():
     # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> create dependency metadata
     try:
         createdBefore = client.path(path=dataset001.path + ";v=current")
-        create_dependency = client.create_dependency(dep_container_path=dataset001.path, version="current", dep_type="predecessor",
-                                                     dep_datasets=dataset002)
+        dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
+
+        create_dependency = client.create_dependency(dep_container=dataset_to_Patch, dep_type="predecessor",
+                                                     dep_datasets=dependents)
         if(create_dependency):
             createdAfter = client.path(path=dataset001.path + ";v=current")
             print("Dependency Creation Successful: ")
