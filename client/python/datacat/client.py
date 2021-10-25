@@ -110,41 +110,31 @@ class Client(object):
         return ids
 
     @checked_error
-    def create_dependency(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
-        if isinstance(dep_container, Dataset):
-            # TODO: create a dataset dependency and store in cache
+    def create_dependency(self, dep_container_path, version, dep_type, dep_datasets=None, dep_groups=None):
+        """
+        Creates a new dependency .
+        :param dep_container_path: Path to the parent of the dependency
+        :param version: Desired version for the parent.
+        :param dep_type: Type of dependency to create.
+        :param dep_datasets: The datasets we wish to use as children of the dependency
+        :param dep_groups: The datasets we wish to use as children of the dependency
+        """
+        ds_path = dep_container_path + ";v={}".format(version)
+        datasetToPatch = self.path(path=ds_path)
 
-            # retreive dataset with or without versionPk
-            if hasattr(dep_container, 'versionPk'):
-                ds_path = dep_container.path + ";v={}".format(dep_container.versionId)
-                datasetToPatch = self.path(path=ds_path)
+        if dep_datasets is not None:
+            if isinstance(dep_datasets, Dataset):
+                dependency_metadata = {"dependents": str(dep_datasets.versionPk),
+                                       "dependentType": dep_type}
+
+                datasetToPatch.versionMetadata.update(dependency_metadata)
+                self.patchds(path=datasetToPatch.path, dataset=datasetToPatch)
+
             else:
-                ds_path = dep_container.path + ";v=current"
-                datasetToPatch = self.path(path=ds_path)
-
-            # check if versionMetadata field presents
-
-
-            if dep_datasets is not None:
-                if isinstance(dep_datasets, Dataset):
-                    dependency_metadata = {"dependents": str(dep_datasets.versionPk),
-                                            "dependentType": dep_type}
-                    datasetToPatch.versionMetadata.update(dependency_metadata)
-
-                    self.patchds(path=dep_container.path, dataset=datasetToPatch)
-                else:
-                    raise ValueError("Unrecognized dependent dataset object")
-            else:
-                assert False, "Dependent dataset not given"
-
-
-
-            return True
-        elif isinstance(dep_container, Group):
-            # TODO: create a group dependency and store in cache
-            return True
+                raise ValueError("Unrecognized dependent dataset object")
         else:
-            raise ValueError("Unrecognized dependency container")
+            assert False, "Dependent dataset not given"
+        return True
 
     @checked_error
     def delete_dependency(self, dep_container):

@@ -2,15 +2,41 @@ import os, sys
 from datacat import client_from_config, config_from_file
 from datacat.model import Metadata
 
-if __name__ == "__main__":
 
-    # datacat
-    config_file ='./config_srs.ini'
-    config = config_from_file(config_file)
-    client = client_from_config(config)
 
-    # file/datacatalog path
-    file_path = os.path.abspath("../../../test/data/")
+
+def main():
+
+    created_datasets = create_datasets()
+    dataset001 = created_datasets[0]
+    dataset002 = created_datasets[1]
+    dataset003 = created_datasets[2]
+
+    print("****** API WRAPPER TEST BEGIN ******\n")
+
+    # ============= create_dependency() testing starts here =============
+    # ===================================================================
+
+    # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> create dependency metadata
+    try:
+        createdBefore = client.path(path=dataset001.path + ";v=current")
+        create_dependency = client.create_dependency(dep_container_path=dataset001.path, version="current", dep_type="predecessor",
+                                                     dep_datasets=dataset002)
+        if(create_dependency):
+            createdAfter = client.path(path=dataset001.path + ";v=current")
+            print("Dependency Creation Successful: ")
+            print("OLD METADATA OUTPUT:", createdBefore.versionMetadata)
+            print("UPDATED METADATA OUTPUT:", createdAfter.versionMetadata)
+    except:
+        assert False, "dependency creation unsuccessful"
+
+    # Case 1.2 (dataset without versionPk) dataset doesn't have dependency metadata -> create dependency metadata
+    # Case 1.3 (dataset without metadata field) dataset doesn't have dependency metadata -> create dependency metadata
+    # Case 2. dataset has dependency metadata -> update dependency metadata
+
+
+
+def create_datasets():
 
     print("****** DATASETS CREATION BEGIN ******\n")
     # ----------------------------
@@ -75,43 +101,21 @@ if __name__ == "__main__":
     ds003_version_pk = ds003.versionPk
     print("created dataset: ", filename03, "(VersionPK = ", ds003_version_pk, ")")
 
+    return [ds001, ds002, ds003]
 
 
-    print("****** API WRAPPER TEST BEGIN ******\n")
+if __name__ == "__main__":
 
-    dataset001 = ds001
-    dataset002 = ds002
-    dataset003 = ds003
+    # datacat
+    config_file ='./config_srs.ini'
+    config = config_from_file(config_file)
+    client = client_from_config(config)
 
-    # ============= craete_dependency() testing starts here =============
+    # file/datacatalog path
+    file_path = os.path.abspath("../../../test/data/")
 
-    # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> create dependency metadata
-    try:
-        create_dependency = client.create_dependency(dep_container=dataset001, dep_type="predecessor", dep_datasets=dataset002)
-        if(create_dependency):
+    main()
 
-            created = client.path(path=dataset001.path + ";v={}".format(dataset001.versionId))
-            print("dependency creation successful", created.versionMetadata)
-    except:
-        assert False, "dependency creation unsuccessful"
-
-    # Case 1.2 (dataset without versionPk) dataset doesn't have dependency metadata -> create dependency metadata
-    try:
-        ds003_no_versionPk = client.path(path=dataset003.path)
-        # create_dependency = client.create_dependency(dep_container=ds003_no_versionPk, dep_type="successor",dep_datasets=dataset001)
-
-    except:
-        assert False, "something went wrong"
-
-    # Case 1.3 (dataset without metadata field) dataset doesn't have dependency metadata -> create dependency metadata
-
-
-    # Case 2. dataset has dependency metadata -> update dependency metadata
-
-    try:
-        create_dependency = client.create_dependency()
-    except:
-        print("This is place holder")
 
     # Case 3.x Group container tests
 
