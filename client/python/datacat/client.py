@@ -110,13 +110,51 @@ class Client(object):
         return ids
 
     @checked_error
-    def create_dependency(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
+    def get_dependents(self, dep_container, dep_type, max_depth=1, chunk_size=100):
         """
-        Creates a new dependency .
-        :param dep_container: Container for the parent of the dependency
-        :param dep_type: Type of dependency to create.
-        :param dep_datasets: The datasets we wish to use as children of the dependency
-        :param dep_groups: The datasets we wish to use as children of the dependency
+        Retrieve dependents up to chunk_size at a time, subject to max_depth
+        :param dep_container: Parent container object you wish to get dependents from.
+        :param dep_type: Type of dependents to get
+        :param max_depth: Depth of dependency chain
+        :param chunk_size: Total amount of dependents retrieved
+        :return: List of dependents object attached to parent container
+        """
+
+        dependents = []
+        if isinstance(dep_container, Dataset):
+            # TODO: get dependents from the dataset dependency, to be cached
+            return dependents
+        elif isinstance(dep_container, Group):
+            # TODO: get dependents from the group dependency, to be cached
+            return dependents
+        else:
+            raise ValueError("Unrecognized dependency container")
+
+    @checked_error
+    def get_next_dependents(self, dep_container):
+        """
+         Retrieve next dependents attached to container object.
+        :param dep_container: Parent container object you wish to get next dependents from
+        :return: List of dependent objects attached to container object
+        """
+        dependents = []
+        if isinstance(dep_container, Dataset):
+            # TODO: get next dependents from the dataset dependency in cache, to be removed when empty
+            return dependents
+        elif isinstance(dep_container, Group):
+            # TODO: get next dependents from the group dependency in cache, to be removed when empty
+            return dependents
+        else:
+            raise ValueError("Unrecognized dependency container")
+
+    @checked_error
+    def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
+        """
+         Attach new dependents to container object.
+        :param dep_container: Parent container object to add dependents to
+        :param dep_type: Type of dependents to add
+        :param dep_datasets: The datasets we wish to use as children of the parent container
+        :param dep_groups: The groups we wish to use as children of the parent container
         """
         if isinstance(dep_container, Dataset):
 
@@ -142,59 +180,15 @@ class Client(object):
             raise ValueError("Unrecognized dependency container")
 
 
-
-
-
-    @checked_error
-    def delete_dependency(self, dep_container):
-        if isinstance(dep_container, Dataset):
-            # TODO: delete the dataset dependency
-            return True
-        elif isinstance(dep_container, Group):
-            # TODO: delete the group dependency
-            return True
-        else:
-            raise ValueError("Unrecognized dependency container")
-
-    @checked_error
-    def get_dependents(self, dep_container, dep_type, max_depth=1, chunk_size=100):
-        # retrieve dependents up to chunk_size at a time, subject to max_depth
-        n = 0
-        dependents = []
-        if isinstance(dep_container, Dataset):
-            # TODO: get dependents from the dataset dependency, to be cached
-            return n, dependents
-        elif isinstance(dep_container, Group):
-            # TODO: get dependents from the group dependency, to be cached
-            return n, dependents
-        else:
-            raise ValueError("Unrecognized dependency container")
-
-    @checked_error
-    def get_next_dependents(self, dep_container):
-        dependents = []
-        if isinstance(dep_container, Dataset):
-            # TODO: get next dependents from the dataset dependency in cache, to be removed when empty
-            return dependents
-        elif isinstance(dep_container, Group):
-            # TODO: get next dependents from the group dependency in cache, to be removed when empty
-            return dependents
-        else:
-            raise ValueError("Unrecognized dependency container")
-
-    @checked_error
-    def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
-        if isinstance(dep_container, Dataset):
-            # TODO: add dependents to the dataset dependency
-            return True
-        elif isinstance(dep_container, Group):
-            # TODO: add dependents to the group dependency
-            return True
-        else:
-            raise ValueError("Unrecognized dependency container")
-
     @checked_error
     def remove_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
+        """
+        Remove dependents from container object provided
+        :param dep_container: Parent container object to remove dependents from
+        :param dep_type: Type of dependents to remove
+        :param dep_datasets: The datasets we wish to remove from the parent container
+        :param dep_groups: The groups we wish to remove from the parent container
+        """
         if isinstance(dep_container, Dataset):
             # TODO: remove dependents from the dataset dependency
             return True

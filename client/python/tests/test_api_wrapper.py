@@ -14,26 +14,26 @@ def main():
 
     print("****** API WRAPPER TEST BEGIN ******\n")
 
-    # ============= create_dependency() testing starts here =============
+    # ============= add_dependents() testing starts here =============
     # ===================================================================
 
-    # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> create dependency metadata
+    # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> add dependency metadata
     try:
-        createdBefore = client.path(path=dataset001.path + ";v=current")
+        added_before = client.path(path=dataset001.path + ";v=current")
         dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
 
-        create_dependency = client.create_dependency(dep_container=dataset_to_Patch, dep_type="predecessor",
+        add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                      dep_datasets=dependents)
-        if(create_dependency):
-            createdAfter = client.path(path=dataset001.path + ";v=current")
+        if(add_dependents):
+            added_after = client.path(path=dataset001.path + ";v=current")
             print("Dependency Creation Successful: ")
-            print("OLD METADATA OUTPUT:", createdBefore.versionMetadata)
-            print("UPDATED METADATA OUTPUT:", createdAfter.versionMetadata)
+            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
+            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
     except:
         assert False, "dependency creation unsuccessful"
 
-    # Case 1.2 (dataset without versionPk) dataset doesn't have dependency metadata -> create dependency metadata
-    # Case 1.3 (dataset without metadata field) dataset doesn't have dependency metadata -> create dependency metadata
+    # Case 1.2 (dataset without versionPk) dataset doesn't have dependency metadata -> add dependency metadata
+    # Case 1.3 (dataset without metadata field) dataset doesn't have dependency metadata -> add dependency metadata
     # Case 2. dataset has dependency metadata -> update dependency metadata
 
 
