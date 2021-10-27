@@ -111,7 +111,7 @@ class Client(object):
         return ids
 
     @checked_error
-    def get_dependents(self, dep_container, dep_type, max_depth=1, chunk_size=100):
+    def get_dependents(self, dep_container, dep_type, max_depth=2, chunk_size=100):
         """
         Retrieve dependents up to chunk_size at a time, subject to max_depth
         :param dep_container: Parent container object you wish to get dependents from.
@@ -121,15 +121,47 @@ class Client(object):
         :return: List of dependents object attached to parent container
         """
 
+        # Check to see if container has any dependents that are of type group, if it does then chances are that it will
+        # have many levels we need to traverse.
+
+
+        currentDepth = 1
+        containersToProcess = []
+        newContainersToProcess = []
+
+        containersToProcess.append(dep_container)
         dependents = []
-        if isinstance(dep_container, Dataset):
-            # TODO: get dependents from the dataset dependency, to be cached
-            return dependents
-        elif isinstance(dep_container, Group):
-            # TODO: get dependents from the group dependency, to be cached
-            return dependents
-        else:
-            raise ValueError("Unrecognized dependency container")
+
+        def retrieveContainerDependents(dep_container_processed):
+            if isinstance(dep_container_processed, Dataset):
+
+                container_dependency_name = dep_container_processed.versionMetadata["dependencyName"]
+                dependentsToRetrieve = dep_container_processed.versionMetadata[dep_type + '.dataset']
+
+                for dataset in self.search(target=container_dependency_name, show="dependents", query='dependents in ({''})'.format(dependentsToRetrieve), ignoreShowKeyError=True):
+                    self.path(path=dataset.path + ";v=" + str(dataset.versionId))
+                    dependents.append(dataset)
+
+                return dependents
+
+            elif isinstance(dep_container_processed, Group):
+                # TODO: get dependents from the group dependency, to be cached
+                return dependents
+            else:
+                raise ValueError("Unrecognized dependency container")
+
+        # Iterates through each level starting at level 1.
+        for currentDepth in range(max_depth):
+            for unprocessedContainer in containersToProcess:
+                try:
+                    newContainersToProcess.extend(retrieveContainerDependents(unprocessedContainer))
+                except:
+                    print("No dependency found for this container")
+            containersToProcess.clear()
+            containersToProcess = newContainersToProcess
+
+        return dependents
+
 
     @checked_error
     def get_next_dependents(self, dep_container):

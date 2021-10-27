@@ -45,28 +45,18 @@ def main():
         if(add_dependents):
             added_after = client.path(path=dataset004.path + ";v=current")
 
-            print("Case 1.2 dependenct addition successful: ")
-            print("OLD METADATA OUTPUT:", None)
-            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
-            print("\n")
-    except:
-        assert False, "Case 1.2 dependency creation unsuccessful"
-    # Case 1.3 (dataset without versionPk) dataset doesn't have dependency metadata -> add dependency metadata
-    # Case 2. dataset has dependency metadata -> update dependency metadata
-    try:
-        added_before = client.path(path=dataset001.path + ";v=current")
-        dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
-        update_dependents = [dataset003,dataset004]
-        add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
-                                               dep_datasets=update_dependents)
+    # client.get_dependents()
+    parent_container = client.path(path=dataset001.path + ";v=current")
 
-        if(add_dependents):
-            added_after = client.path(path=dataset001.path + ";v=current")
-            print("Case 2 dependenct addition successful:")
-            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
-            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
-    except:
-        assert False, "Case 2 dependent addition unsuccessful"
+
+    dependents = []
+    dependents = (client.get_dependents(parent_container, "predecessor"))
+    print(dependents)
+
+
+
+
+
 
 
 
