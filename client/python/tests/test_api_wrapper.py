@@ -9,6 +9,7 @@ def main():
     dataset001 = created_datasets[0]
     dataset002 = created_datasets[1]
     dataset003 = created_datasets[2]
+    dataset004 = created_datasets[3] # without metadata field
 
     dependents = [dataset002, dataset003]
 
@@ -24,17 +25,48 @@ def main():
 
         add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                      dep_datasets=dependents)
+
         if(add_dependents):
             added_after = client.path(path=dataset001.path + ";v=current")
-            print("Dependency Creation Successful: ")
+            print("Case 1.1 dependenct addition successful:")
+            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
+            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("\n")
+    except:
+        assert False, "Case 1.1 dependent addition unsuccessful"
+
+    # Case 1.2 (dataset without metadata field) dataset doesn't have dependency metadata -> add dependency metadata
+    try:
+        dataset_to_Patch = client.path(path=dataset004.path + ";v=current")
+
+        add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
+                                               dep_datasets=dependents)
+
+        if(add_dependents):
+            added_after = client.path(path=dataset004.path + ";v=current")
+
+            print("Case 1.2 dependenct addition successful: ")
+            print("OLD METADATA OUTPUT:", None)
+            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("\n")
+    except:
+        assert False, "Case 1.2 dependency creation unsuccessful"
+    # Case 1.3 (dataset without versionPk) dataset doesn't have dependency metadata -> add dependency metadata
+    # Case 2. dataset has dependency metadata -> update dependency metadata
+    try:
+        added_before = client.path(path=dataset001.path + ";v=current")
+        dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
+        update_dependents = [dataset003,dataset004]
+        add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
+                                               dep_datasets=update_dependents)
+
+        if(add_dependents):
+            added_after = client.path(path=dataset001.path + ";v=current")
+            print("Case 2 dependenct addition successful:")
             print("OLD METADATA OUTPUT:", added_before.versionMetadata)
             print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
     except:
-        assert False, "dependency creation unsuccessful"
-
-    # Case 1.2 (dataset without versionPk) dataset doesn't have dependency metadata -> add dependency metadata
-    # Case 1.3 (dataset without metadata field) dataset doesn't have dependency metadata -> add dependency metadata
-    # Case 2. dataset has dependency metadata -> update dependency metadata
+        assert False, "Case 2 dependent addition unsuccessful"
 
 
 
@@ -89,13 +121,14 @@ def create_datasets():
     datacat_path03 = '/testpath/testfolder'  # Directory we are working in
     filename03 = "dataset003_0c89c.dat"  # Name of dataset to be created
     metadata03 = Metadata()  # Metadata
+    metadata03['nIsTest'] = 1
     full_file003 = file_path + '/' + filename03  # ../../../test/data/ + filename
 
     # Check to make sure the dataset doesnt already exist at the provided path
     if client.exists(datacat_path03 + '/' + filename03):
         client.rmds(datacat_path03 + '/' + filename03)
 
-    # use the client to create dataset002 - DOES NOT initialize dependency metadata
+    # use the client to create dataset003 - DOES NOT initialize dependency metadata
     ds003 = client.mkds(datacat_path03, filename03, 'JUNIT_TEST', 'junit.test',
                         versionMetadata=metadata03,
                         resource=full_file003,
@@ -103,7 +136,27 @@ def create_datasets():
     ds003_version_pk = ds003.versionPk
     print("created dataset: ", filename03, "(VersionPK = ", ds003_version_pk, ")")
 
-    return [ds001, ds002, ds003]
+    # ----------------------------
+    # ---creation of dataset004---
+    # ----------------------------
+    datacat_path04 = '/testpath/testfolder'  # Directory we are working in
+    filename04 = "dataset004_d8080.dat"  # Name of dataset to be created
+    metadata04 = Metadata()  # Metadata
+    full_file004 = file_path + '/' + filename04  # ../../../test/data/ + filename
+
+    # Check to make sure the dataset doesnt already exist at the provided path
+    if client.exists(datacat_path04 + '/' + filename04):
+        client.rmds(datacat_path04 + '/' + filename04)
+
+    # use the client to create dataset004 - DOES NOT initialize dependency metadata
+    ds004 = client.mkds(datacat_path03, filename04, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=metadata04,
+                        resource=full_file004,
+                        site='SLAC')
+    ds004_version_pk = ds004.versionPk
+    print("created dataset: ", filename04, "(VersionPK = ", ds004_version_pk, ")")
+
+    return [ds001, ds002, ds003, ds004]
 
 
 if __name__ == "__main__":

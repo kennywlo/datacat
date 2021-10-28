@@ -1,5 +1,6 @@
 
 import os
+from copy import deepcopy
 from .auth import auth_from_config
 from .config import config_from_file
 from .error import DcClientException, checked_error
@@ -157,16 +158,21 @@ class Client(object):
         :param dep_groups: The groups we wish to use as children of the parent container
         """
         if isinstance(dep_container, Dataset):
-
+            container = deepcopy(dep_container)
             if dep_datasets is not None:
                 if all(isinstance(x, Dataset) for x in dep_datasets):
                     dependents = self.get_dependent_id(dep_datasets)
                     dependency_metadata = {"dependents": str(dependents),
                                            "dependentType": dep_type}
+                    if hasattr(container, "versionMetadata"):
+                        container.versionMetadata.update(dependency_metadata)
+                    else:
+                        container.versionMetadata = dependency_metadata
 
-                    dep_container.versionMetadata.update(dependency_metadata)
-                    self.patchds(path=dep_container.path, dataset=dep_container)
-
+                    try:
+                        self.patchds(path=dep_container.path, dataset=container)
+                    except:
+                        assert False, "Failed to add dependents"
                 else:
                     raise ValueError("Unrecognized dependent dataset object")
             else:
