@@ -6,23 +6,21 @@ from datacat.model import Metadata
 def main():
 
     created_datasets = create_datasets()
-    dataset001 = created_datasets[0]
+    dataset001 = created_datasets[0] # used as container for add_dependents() Case 1.1, Case 2, and remove_dependents()
     dataset002 = created_datasets[1]
     dataset003 = created_datasets[2]
-    dataset004 = created_datasets[3] # without metadata field
+    dataset004 = created_datasets[3] # without metadata field, used as container for add_dependents() Case 1.2
 
     dependents = [dataset002, dataset003]
-
-    print("****** API WRAPPER TEST BEGIN ******\n")
+    print("\n")
 
     # ============= add_dependents() testing starts here =============
-    # ===================================================================
-
+    # ================================================================
+    print("******* add_dependents() TESTING BEGINS *******\n")
     # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> add dependency metadata
     try:
         added_before = client.path(path=dataset001.path + ";v=current")
         dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
-
         add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                      dep_datasets=dependents)
 
@@ -45,7 +43,39 @@ def main():
         if(add_dependents):
             added_after = client.path(path=dataset004.path + ";v=current")
 
-    # client.get_dependents()
+
+            print("Case 1.2 dependenct addition successful: ")
+            print("OLD METADATA OUTPUT:", None)
+            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("\n")
+    except:
+        assert False, "Case 1.2 dependency creation unsuccessful"
+
+    # Case 2 dataset has dependency metadata -> update dependency metadata
+    # try:
+    #     added_before = client.path(path=dataset001.path + ";v=current")
+    #     dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
+    #     update_dependents = [dataset003,dataset004]
+    #     add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
+    #                                            dep_datasets=update_dependents)
+    #
+    #     if(add_dependents):
+    #         added_after = client.path(path=dataset001.path + ";v=current")
+    #         print("Case 2 dependenct update successful:")
+    #         print("OLD METADATA OUTPUT:", added_before.versionMetadata)
+    #         print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+    #         print("\n")
+    # except:
+    #     assert False, "Case 2 dependent addition unsuccessful"
+
+    # Case 3.x Group as container dependency testing
+
+
+
+    # ======== get_dependents() & get_next_dependents() testing starts here ==================
+    # ========================================================================================
+
+    print("******* get_dependents() & get_next_dependents() TESTING BEGINS *******\n")
     parent_container = client.path(path=dataset001.path + ";v=current")
 
 
@@ -54,8 +84,29 @@ def main():
     print(dependents)
 
 
+    # ============= remove_dependents() testing starts here =============
+    # ===================================================================
+    print("******* remove_dependents() TESTING BEGINS *******\n")
 
 
+    try:
+        added_before = client.path(path=dataset001.path + ";v=current")
+        dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
+        update_dependents = [dataset002,dataset003]
+        add_dependents = client.remove_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
+                                               dep_datasets=update_dependents)
+
+        if(add_dependents):
+            # This part currently doesn't produce the correct result.
+            # But if you remove Case 2 in add_dependents() and run it again,
+            # you will get dataset with dependents removed, which is what we want.
+            added_after = client.path(path=dataset001.path + ";v=current")
+            print("Dependent removal successful:")
+            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
+            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("\n")
+    except:
+        assert False, "Dependents removal unsuccessful"
 
 
 
@@ -162,17 +213,7 @@ if __name__ == "__main__":
     main()
 
 
-    # Case 3.x Group container tests
 
-    # client.get_dependency(group, dependentType)
-
-    # client.delete_dependency(dependency)
-
-    # client.get_dependents(dependency, dependentType, max_dependents=100)
-
-    # client.add_dependents(dependency, datasets, groups)
-
-    # client.remove_dependents(dependency, datasets, groups)
 
 
 

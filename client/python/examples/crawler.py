@@ -16,16 +16,18 @@ This crawler only scans one folder at a time, retrieving up to 1000 results at a
 It searches for datasets which are unscanned for a particular location.
 """
 
-WATCH_FOLDER = '/testpath'
+WATCH_FOLDER = '/CDMS'
 WATCH_SITE = 'SLAC'
+
+path = os.path.dirname(__file__)
+
 
 class Crawler:
     RERUN_SECONDS = 300
 
     def __init__(self):
 
-        config_file = os.path.dirname(__file__) + '/../tests/config_srs.ini'
-        self.client = client_from_config_file(config_file)  # Reads default config files or returns a default config
+        self.client = client_from_config_file()  # Reads default config files or returns a default config
         self.sched = sched.scheduler(time.time, time.sleep)
         self._run()
 
@@ -55,14 +57,16 @@ class Crawler:
         return {}
 
     def run(self):
-        print(f"Checking for new datasets at {datetime.now().ctime()}")
+        sys.stdout = open(path+'/crawler_out.txt', 'w')
+        sys.stderr = open(path+'/crawler_err.txt', 'w')
+        sys.stdout.write(f"Checking for new datasets at {datetime.now().ctime()}\n")
         try:
             results = self.client.search(
                 WATCH_FOLDER + "/**", version="current", site=WATCH_SITE,
                 query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000
             )
         except DcException as error:
-            print(error)
+            sys.stderr.write(str(error))
             return False
 
         for dataset in results:
@@ -93,20 +97,27 @@ class Crawler:
                 md = self.get_metadata(dataset, dataset_location)
                 if md:
                     scan_result["versionMetadata"] = md
+            except PermissionError as e:
+                sys.stderr.write(f"Permission denied: {file_path}\n")
+                sys.stderr.flush()
+                continue
             except FileNotFoundError as e:
                 scan_result = {
                     "scanStatus": "MISSING",
                 }
-                print(f"Error: File {dataset.resource} not found for {dataset.site}. Status set to MISSING")
-
+                sys.stdout.write(f"Error: File {file_path} not found for {WATCH_SITE}. Status set to MISSING\n")
             try:
                 patched_ds = self.client.patch_dataset(dataset_path, scan_result, versionId=dataset.versionId,
                                                        site=WATCH_SITE)
-                print("How we would have updated Dataset:")
-                print(patched_ds)
+                sys.stdout.write("How we would have updated Dataset:\n")
+                sys.stdout.write(str(patched_ds)+"\n")
+                sys.stdout.flush()
             except DcException as error:
-                print(error)
-
+                sys.stderr.write(str(error)+"\n")
+                sys.stderr.flush()
+                continue
+        sys.stdout.close()
+        sys.stderr.close()
         return True
 
 

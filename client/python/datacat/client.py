@@ -1,6 +1,5 @@
 
 import os
-from copy import deepcopy
 from .auth import auth_from_config
 from .config import config_from_file
 from .error import DcClientException, checked_error
@@ -93,22 +92,22 @@ class Client(object):
         """
         return self.mkdir(path, "group", parents, metadata, **kwargs)
 
-    @checked_error
-    def get_dependent_id(self, datasets):
-        """
-        Fetch the identifiers used for dataset dependency.
-        :param datasets: one or more datasets
-        :return: the dependent identifiers (versionPk) of the input datasets
-        """
-        if datasets is None:
-            return None
-        if isinstance(datasets, Dataset):
-            return datasets.versionPk
-        ids = []
-        for ds in datasets:
-            if hasattr(ds, "versionPk"):
-                ids.append(ds.versionPk)
-        return ids
+    # @checked_error
+    # def get_dependent_id(self, datasets):
+    #     """
+    #     Fetch the identifiers used for dataset dependency.
+    #     :param datasets: one or more datasets
+    #     :return: the dependent identifiers (versionPk) of the input datasets
+    #     """
+    #     if datasets is None:
+    #         return None
+    #     if isinstance(datasets, Dataset):
+    #         return datasets.versionPk
+    #     ids = []
+    #     for ds in datasets:
+    #         if hasattr(ds, "versionPk"):
+    #             ids.append(ds.versionPk)
+    #     return ids
 
     @checked_error
     def get_dependents(self, dep_container, dep_type, max_depth=2, chunk_size=100):
@@ -186,14 +185,34 @@ class Client(object):
          Attach new dependents to container object.
         :param dep_container: Parent container object to add dependents to
         :param dep_type: Type of dependents to add
-        :param dep_datasets: The datasets we wish to use as children of the parent container
+        :param dep_datasets: The datasets we wish to use as children of the parent container.
+        VersionPKs are required for each dependent dataset.
         :param dep_groups: The groups we wish to use as children of the parent container
         """
+
+        def get_dependent_id(datasets):
+            """
+            Fetch the identifiers used for dataset dependency.
+            :param datasets: one or more datasets
+            :return: the dependent identifiers (versionPk) of the input datasets
+            """
+            if datasets is None:
+                return None
+            if isinstance(datasets, Dataset):
+                return datasets.versionPk
+            ids = []
+            for ds in datasets:
+                if hasattr(ds, "versionPk"):
+                    ids.append(ds.versionPk)
+                else:
+                    raise ValueError("Could not retrieve dependent dataset versionPK.")
+            return ids
+
         if isinstance(dep_container, Dataset):
-            container = deepcopy(dep_container)
+            container = Dataset(**dep_container.__dict__)
             if dep_datasets is not None:
                 if all(isinstance(x, Dataset) for x in dep_datasets):
-                    dependents = self.get_dependent_id(dep_datasets)
+                    dependents = get_dependent_id(dep_datasets)
                     dependency_metadata = {"dependents": str(dependents),
                                            "dependentType": dep_type}
                     if hasattr(container, "versionMetadata"):
@@ -227,9 +246,49 @@ class Client(object):
         :param dep_datasets: The datasets we wish to remove from the parent container
         :param dep_groups: The groups we wish to remove from the parent container
         """
+
+        def get_dependent_id(datasets):
+            """
+            Fetch the identifiers used for dataset dependency.
+            :param datasets: one or more datasets
+            :return: the dependent identifiers (versionPk) of the input datasets
+            """
+            if datasets is None:
+                return None
+            if isinstance(datasets, Dataset):
+                return datasets.versionPk
+            ids = []
+            for ds in datasets:
+                if hasattr(ds, "versionPk"):
+                    ids.append(ds.versionPk)
+                else:
+                    raise ValueError("Could not retrieve dependent dataset versionPK.")
+            return ids
+
+
         if isinstance(dep_container, Dataset):
-            # TODO: remove dependents from the dataset dependency
+
+            container = Dataset(**dep_container.__dict__)
+            if dep_datasets is not None:
+                if all(isinstance(x, Dataset) for x in dep_datasets):
+                    if hasattr(container, "versionMetadata"):
+                        container.versionMetadata = {"dependents": "",
+                                                     "dependentType": ""}
+                        try:
+                            # print("Before deletion:", dep_container.versionMetadata)
+                            returned = self.patchds(path=dep_container.path, dataset=container)
+                            # print("After deletion:", returned.versionMetadata)
+                        except:
+                            assert False, "Failed to remove dependents"
+                    else:
+                        raise ValueError("Dataset doesn't have dependency metadata to delete.")
+
+                else:
+                    raise ValueError("Unrecognized dependent dataset object")
+            else:
+                assert False, "Dependent dataset not given"
             return True
+
         elif isinstance(dep_container, Group):
             # TODO: remove dependents from the group dependency
             return True
