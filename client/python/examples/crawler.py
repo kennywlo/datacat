@@ -7,6 +7,7 @@ import sched
 import subprocess
 import sys
 import time
+import argparse
 
 __author__ = 'bvan'
 
@@ -26,7 +27,9 @@ class Crawler:
     RERUN_SECONDS = 300
 
     def __init__(self):
-
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-debug_mode", action='store_true')
+        self.args = parser.parse_args()
         self.client = client_from_config_file()  # Reads default config files or returns a default config
         self.sched = sched.scheduler(time.time, time.sleep)
         self._run()
@@ -53,18 +56,28 @@ class Crawler:
         Extract metadata from :param path
         """
         file_path = dataset_location.resource
-        # FIXME: Possibly based on value in Dataset, extract metadata
-        return {}
+
+        if not hasattr(dataset, "versionId"):
+            assert ValueError("Dataset has no versionId")
+
+        ds = self.client.path(path=dataset.path + ";v={}".format(dataset.versionId))
+        return dict(ds.versionMetadata)
 
     def run(self):
         sys.stdout = open(path+'/crawler_out.txt', 'w')
         sys.stderr = open(path+'/crawler_err.txt', 'w')
         sys.stdout.write(f"Checking for new datasets at {datetime.now().ctime()}\n")
         try:
-            results = self.client.search(
-                WATCH_FOLDER + "/**", version="current", site=WATCH_SITE,
-                query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000
-            )
+            if self.args.debug_mode:
+                results = self.client.search(
+                    target="testpath/testfolder", version="current", site=WATCH_SITE,
+                    query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000
+                )
+            else:
+                results = self.client.search(
+                    WATCH_FOLDER + "/**", version="current", site=WATCH_SITE,
+                    query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000
+                )
         except DcException as error:
             sys.stderr.write(str(error))
             return False
@@ -77,9 +90,10 @@ class Crawler:
                     dataset_location = location
                     break
             # We should be guaran
-            assert dataset_location is not None, "Error: We should never get an empty dataset location"
+            assert dataset_location is not None, "Error: We96 should never get an empty dataset location"
             file_path = dataset_location.resource
             dataset_path = dataset.path
+
             try:
                 stat = os.stat(file_path)
                 cksum = self.get_cksum(dataset_location)

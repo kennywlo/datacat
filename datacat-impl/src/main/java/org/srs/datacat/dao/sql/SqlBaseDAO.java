@@ -350,19 +350,29 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     protected void mergeDependencyMetadata(long dependencyPK, Map<String, Object> metaData)
         throws SQLException {
-        final String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ?";
-        if (!metaData.containsKey("dependents")) {
+        if (metaData.containsKey("dependents") && metaData.containsKey("dependentType")) {
+            String type = (String) metaData.get("dependentType");
+            if (type.isEmpty() || type.equals("*")){
+                String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ?";
+                PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
+                stmt.setLong(1, dependencyPK);
+                stmt.executeUpdate();
+            } else{
+                String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ? and DependentType = ?";
+                PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
+                stmt.setLong(1, dependencyPK);
+                stmt.setString(2, type);
+                stmt.executeUpdate();
+            }
+        } else {
+            // Nothing to be done
             return;
         }
-        PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
-        stmt.setLong(1, dependencyPK);
-        stmt.executeUpdate();
         // Add dependency if no dependencyGroup
         if (!metaData.containsKey("dependencyGroup")) {
             metaData.put("dependency", dependencyPK);
         }
         addDatasetDependency(metaData);
-
     }
 
     protected void addDatasetDependency(Map<String, Object> metaData) throws SQLException {

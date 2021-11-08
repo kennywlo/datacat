@@ -221,7 +221,7 @@ class Client(object):
                         container.versionMetadata = dependency_metadata
 
                     try:
-                        self.patchds(path=dep_container.path, dataset=container)
+                       returned = self.patchds(path=dep_container.path, dataset=container)
                     except:
                         assert False, "Failed to add dependents"
                 else:
@@ -265,23 +265,63 @@ class Client(object):
                     raise ValueError("Could not retrieve dependent dataset versionPK.")
             return ids
 
+        def convert_dependent_to_list(dependents):
+            """
+            :param dependents: string of comma seperated dependents
+            :return: list of dependents int
+            """
+            dependent_list = list(dependents.split(","))
+            int_list = []
+            # convert dependent to int
+            for dependent in dependent_list:
+                int_list.append(int(dependent))
+            return int_list
 
         if isinstance(dep_container, Dataset):
 
             container = Dataset(**dep_container.__dict__)
             if dep_datasets is not None:
                 if all(isinstance(x, Dataset) for x in dep_datasets):
-                    if hasattr(container, "versionMetadata"):
-                        container.versionMetadata = {"dependents": "",
-                                                     "dependentType": ""}
+                    if all(hasattr(container, attr) for attr in ["versionMetadata", "versionPk"]):
                         try:
-                            # print("Before deletion:", dep_container.versionMetadata)
-                            returned = self.patchds(path=dep_container.path, dataset=container)
-                            # print("After deletion:", returned.versionMetadata)
+                            # Get dependency metadata from container
+                            update_vmd = dict(container.versionMetadata)
+
+                            if "{}.dataset".format(dep_type) in update_vmd.keys():
+                                update_dependentType = dep_type
+                                update_dependents = convert_dependent_to_list(update_vmd.get("{}.dataset".format(dep_type)))
+                            else:
+                                raise ValueError("No dependents of type {} found".format(dep_type))
+
+                            # Check if user provided dependents are in container
+                            remove_dependents = get_dependent_id(dep_datasets)
+                            remove_set = set(remove_dependents)
+                            update_set = set(update_dependents)
+                            if not remove_set.issubset(update_set):
+                                raise ValueError("Dependent does not exsit.")
+
+
+                            # Step 1: remove dependents provided by users from container
+
+                            for dependent in remove_dependents:
+                                update_dependents.remove(dependent)
+
+                            # Step 2: update dependency metadata with new dependents
+
+                            if len(update_dependents) == 0:
+                                # if user wants to remove all dependents
+                                update_dependents = ""
+                                update_dependentType = ""
+
+                            update_vmd = {"dependents": str(update_dependents),
+                                          "dependentType": update_dependentType}
+                            container.versionMetadata = update_vmd
+                            self.patchds(path=dep_container.path, dataset=container)
                         except:
                             assert False, "Failed to remove dependents"
+
                     else:
-                        raise ValueError("Dataset doesn't have dependency metadata to delete.")
+                        raise ValueError("Container doesn't have versionMetadata.")
 
                 else:
                     raise ValueError("Unrecognized dependent dataset object")
