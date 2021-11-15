@@ -221,7 +221,7 @@ class Client(object):
                         container.versionMetadata = dependency_metadata
 
                     try:
-                       returned = self.patchds(path=dep_container.path, dataset=container)
+                       returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
                     except:
                         assert False, "Failed to add dependents"
                 else:
@@ -316,7 +316,8 @@ class Client(object):
                             update_vmd = {"dependents": str(update_dependents),
                                           "dependentType": update_dependentType}
                             container.versionMetadata = update_vmd
-                            self.patchds(path=dep_container.path, dataset=container)
+
+                            self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
                         except:
                             assert False, "Failed to remove dependents"
 
