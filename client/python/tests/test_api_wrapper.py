@@ -88,25 +88,33 @@ def main():
     # ===================================================================
     print("******* remove_dependents() TESTING BEGINS *******\n")
 
-
+    # Case 1.1 remove all dependency version metadata
     try:
         added_before = client.path(path=dataset001.path + ";v=current")
         dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
         remove_dependents = [dataset003, dataset004]
 
         add_dependents = client.remove_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
-                                               dep_datasets=remove_dependents)
+                                                  dep_datasets=remove_dependents)
 
         if(add_dependents):
-
+            remove_dpks = []
+            for dependent in remove_dependents:
+                remove_dpks.append(dependent.versionPk)
             added_after = client.path(path=dataset001.path + ";v=current")
+            print("Dependents to be removed:", remove_dpks)
+            if "predecessor.dataset" in added_after.versionMetadata:
+                assert False, "Dependents are not completely removed. " \
+                              "{} remains in versionMetadata." \
+                    .format(added_after.versionMetadata["predecessor.dataset"])
+
             print("Dependent removal successful:")
-            print("Dependents to be removed:", remove_dependents[0].versionPk)
             print("OLD METADATA OUTPUT:", added_before.versionMetadata)
             print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
             print("\n")
     except:
         assert False, "Dependents removal unsuccessful"
+
 
 
 
