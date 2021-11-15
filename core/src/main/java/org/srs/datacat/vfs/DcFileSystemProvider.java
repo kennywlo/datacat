@@ -346,7 +346,9 @@ public class DcFileSystemProvider {
     public Path getPath(String path){
         return PATH_PROVIDER.getPath(path);
     }
-    
+
+    public void removeFileFromCache(Path key){ cache.removeFile(key); }
+
     private boolean exists(Path path){
         try {
             resolveFile(path);

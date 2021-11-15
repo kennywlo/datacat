@@ -117,7 +117,7 @@ public class PathResource extends BaseResource {
         java.nio.file.Path dcp = getProvider().getPath(requestPath);
         try {
             if(refresh){
-                //getProvider().getCache().removeFile(dcp);
+                getProvider().removeFileFromCache(dcp);
             }
             DcFile file = getProvider().getFile(dcp, buildCallContext());
             if(file.isRegularFile()){
@@ -163,7 +163,7 @@ public class PathResource extends BaseResource {
         java.nio.file.Path dcp = getProvider().getPath(path);
         try {
             if(refresh){
-                //getProvider().getCache().removeFile(dcp);
+//                getProvider().getCache().removeFile(dcp);
             }
             DcFile file = getProvider().getFile(dcp, buildCallContext());
             DatacatNode ret;
