@@ -445,6 +445,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         this.conn.commit();
         // remove all dependency fields other than dependencyName, a.k.a. the dependency path
         metaData.remove("dependents");
+        metaData.remove("predecessor.dataset");
+        metaData.remove("successor.dataset");
+        metaData.remove("predecessor.group");
+        metaData.remove("successor.group");
         metaData.remove("dependentGroups");
         metaData.remove("dependentType");
         metaData.remove("dependency");

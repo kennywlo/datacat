@@ -39,7 +39,13 @@ public class DatasetViewProvider implements DcViewProvider<DatasetView> {
             }
         }
     }
-    
+
+    public void removeVersionFromCache(int versionId){
+        synchronized(this){
+            versionCache.remove(versionId);
+        }
+    }
+
     public void clear(){
         synchronized(this){
             versionCache.clear();
