@@ -208,22 +208,54 @@ class Client(object):
                     raise ValueError("Could not retrieve dependent dataset versionPK.")
             return ids
 
+        def convert_dependent_to_list(dependents):
+            """
+            :param dependents: string of comma seperated dependents
+            :return: list of dependents int
+            """
+            dependent_list = list(dependents.split(","))
+            int_list = []
+            # convert dependent to int
+            for dependent in dependent_list:
+                int_list.append(int(dependent))
+            return int_list
+
         if isinstance(dep_container, Dataset):
             container = Dataset(**dep_container.__dict__)
             if dep_datasets is not None:
                 if all(isinstance(x, Dataset) for x in dep_datasets):
+
+                    # default configuration
                     dependents = get_dependent_id(dep_datasets)
                     dependency_metadata = {"dependents": str(dependents),
-                                           "dependentType": dep_type}
+                                            "dependentType": dep_type}
+
                     if hasattr(container, "versionMetadata"):
+                        # if container has versionMetadata field
+                        # Get dependency metadata from container
+                        update_vmd = dict(container.versionMetadata)
+
+                        if "{}.dataset".format(dep_type) in update_vmd.keys():
+                            # if adding dependents of the same dependent type:
+                            # merge dependents of same type
+                            update_dependentType = dep_type
+                            update_dependents = convert_dependent_to_list(update_vmd.get("{}.dataset".format(dep_type)))
+                            dependents = list(set(dependents + update_dependents))
+                            dependency_metadata["dependents"] = str(dependents)
+
                         container.versionMetadata.update(dependency_metadata)
                     else:
+                        # if container doesn't have metadata field
+                        # provide dependency metadata as new metadata field
                         container.versionMetadata = dependency_metadata
 
+                    # patching with patchds()
                     try:
-                       returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
+                        returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
                     except:
                         assert False, "Failed to add dependents"
+
+
                 else:
                     raise ValueError("Unrecognized dependent dataset object")
             else:
@@ -317,7 +349,7 @@ class Client(object):
                                           "dependentType": update_dependentType}
                             container.versionMetadata = update_vmd
 
-                            self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
+                            returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
                         except:
                             assert False, "Failed to remove dependents"
 

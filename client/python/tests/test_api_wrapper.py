@@ -11,7 +11,7 @@ def main():
     dataset003 = created_datasets[2]
     dataset004 = created_datasets[3] # without metadata field, used as container for add_dependents() Case 1.2
 
-    dependents = [dataset002, dataset003]
+
     print("\n")
 
     # ============= add_dependents() testing starts here =============
@@ -21,12 +21,18 @@ def main():
     try:
         added_before = client.path(path=dataset001.path + ";v=current")
         dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
+        dependents = [dataset002, dataset003]
         add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                      dep_datasets=dependents)
 
         if(add_dependents):
             added_after = client.path(path=dataset001.path + ";v=current")
-            print("Case 1.1 dependenct addition successful:")
+            add_dpks = []
+            for dependent in dependents:
+                add_dpks.append(dependent.versionPk)
+
+            print("Dependents to add dependents:", add_dpks)
+            print("Case 1.1 dependent addition successful:")
             print("OLD METADATA OUTPUT:", added_before.versionMetadata)
             print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
             print("\n")
@@ -36,14 +42,12 @@ def main():
     # Case 1.2 (dataset without metadata field) dataset doesn't have dependency metadata -> add dependency metadata
     try:
         dataset_to_Patch = client.path(path=dataset004.path + ";v=current")
-
+        print("Dataset to add:", dataset004)
         add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                dep_datasets=dependents)
 
         if(add_dependents):
             added_after = client.path(path=dataset004.path + ";v=current")
-
-
             print("Case 1.2 dependenct addition successful: ")
             print("OLD METADATA OUTPUT:", None)
             print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
@@ -55,13 +59,17 @@ def main():
     try:
         added_before = client.path(path=dataset001.path + ";v=current")
         dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
-        update_dependents = [dataset003, dataset004]
+        update_dependents = [dataset003,dataset004]
         add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                dep_datasets=update_dependents)
 
         if(add_dependents):
-            added_after = client.path(path=dataset001.path + ";v=current")
+            update_dpks = []
+            for dependent in update_dependents:
+                update_dpks.append(dependent.versionPk)
             print("Case 2 dependenct update successful:")
+            print("Dependents to update:", update_dpks)
+            added_after = client.path(path=dataset001.path + ";v=current")
             print("OLD METADATA OUTPUT:", added_before.versionMetadata)
             print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
             print("\n")
@@ -75,13 +83,13 @@ def main():
     # ======== get_dependents() & get_next_dependents() testing starts here ==================
     # ========================================================================================
 
-    print("******* get_dependents() & get_next_dependents() TESTING BEGINS *******\n")
-    parent_container = client.path(path=dataset001.path + ";v=current")
-
-
-    dependents = []
-    dependents = (client.get_dependents(parent_container, "predecessor"))
-    print(dependents)
+    # print("******* get_dependents() & get_next_dependents() TESTING BEGINS *******\n")
+    # parent_container = client.path(path=dataset001.path + ";v=current")
+    #
+    #
+    # dependents = []
+    # dependents = (client.get_dependents(parent_container, "predecessor"))
+    # print(dependents)
 
 
     # ============= remove_dependents() testing starts here =============
@@ -92,8 +100,7 @@ def main():
     try:
         added_before = client.path(path=dataset001.path + ";v=current")
         dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
-        remove_dependents = [dataset003, dataset004]
-
+        remove_dependents = [dataset003, dataset004, dataset002]
         add_dependents = client.remove_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                   dep_datasets=remove_dependents)
 
