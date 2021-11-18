@@ -110,54 +110,172 @@ class Client(object):
     #     return ids
 
     @checked_error
-    def get_dependents(self, dep_container, dep_type, max_depth=2, chunk_size=100):
+    def get_dependents(self, dep_container, dep_type, max_depth, chunk_size):
         """
-        Retrieve dependents up to chunk_size at a time, subject to max_depth
-        :param dep_container: Parent container object you wish to get dependents from.
-        :param dep_type: Type of dependents to get
-        :param max_depth: Depth of dependency chain
-        :param chunk_size: Total amount of dependents retrieved
-        :return: List of dependents object attached to parent container
+        Retrieves dependents up to the provided "chunk_size" at a time, subject to "max_depth".
+
+        :param dep_container: Parent container to get dependents from.
+        :param dep_type: Type of dependents to get.
+        :param max_depth: Depth of dependency chain.
+        :param chunk_size: Total amount of dependents retrieved.
+        :return: List of retrieved dependents.
         """
 
-        # Check to see if container has any dependents that are of type group, if it does then chances are that it will
-        # have many levels we need to traverse.
-
-
-        currentDepth = 1
-        containersToProcess = []
-        newContainersToProcess = []
-
-        containersToProcess.append(dep_container)
-        dependents = []
-
+        # ----------------------------------------
+        # Nested Method (Start)
+        # ----------------------------------------
         def retrieveContainerDependents(dep_container_processed):
+            """
+            Method which retrieves dependents from a provided container (is to be used recursively)
+            :param dep_container_processed: Parent container object you wish to get dependents from.
+            :return: List of dependents object attached to parent container
+            """
+
+            nonlocal remaining_chunk_size
+            nonlocal currentDepth
+            nonlocal process_queue
+
+            innerDependents = []
+
+            # The provided container is a Dataset
             if isinstance(dep_container_processed, Dataset):
 
-                container_dependency_name = dep_container_processed.versionMetadata["dependencyName"]
-                dependentsToRetrieve = dep_container_processed.versionMetadata[dep_type + '.dataset']
+                if currentDepth == 0:
+                    dependentsToRetrieve = dep_container_processed.versionMetadata[dep_type + '.dataset']
 
-                for dataset in self.search(target=container_dependency_name, show="dependents", query='dependents in ({''})'.format(dependentsToRetrieve), ignoreShowKeyError=True):
-                    self.path(path=dataset.path + ";v=" + str(dataset.versionId))
-                    dependents.append(dataset)
+                try:
+                    if currentDepth > 0:
+                        dependentsToRetrieve = dep_container_processed.metadata.dct[dep_type + '.dataset']
+                except:
+                    pass
 
-                return dependents
+                # Iterate through the provided container dependents, retrieving each dependent one at a time.
+                searchResults = self.search(target=container_dependency_name,
+                                            show="dependents",
+                                            query='dependents in ({''})'.format(dependentsToRetrieve),
+                                            ignoreShowKeyError=True)
 
+                dependentQueue = copy.deepcopy(searchResults)
+
+                try:
+                    for i in searchResults:
+                        if remaining_chunk_size <= 0:
+                            # We now need to update the cache to contain information about where we stopped
+                            # retrieving dependents
+
+                            self.dependency_cache[container_dependency_name]["all_dependents_for_current_container"] = dependentsToRetrieve
+                            self.dependency_cache[container_dependency_name]["dependents_left"] = dependentQueue
+
+                            # Some important features we might want to keep stored in cache are...
+                            # Dependency Name
+                            # Current Depth
+                            # ALL Dependents at current level
+                            # Dependents that are yet to be returned.
+
+                            # From this we can calculate the next level and still return the current dependents at
+                            # the current level
+
+                            return innerDependents
+                        else:
+                            # retrieve up to "chunk size" dependents
+                            innerDependents.append(i)
+                            try:
+                                self.dependency_cache[container_dependency_name]["dependents_retrieved_so_far"].append(i)
+                            except Exception as e:
+                                print(e)
+                            dependentQueue.pop(0)
+                            remaining_chunk_size = remaining_chunk_size - 1
+                except IndexError:
+                    print("No more dependents to retrieve!")
+                    pass
+
+                # Return the retrieved dependents
+
+                return innerDependents
+
+            # The provided container is a Group
             elif isinstance(dep_container_processed, Group):
                 # TODO: get dependents from the group dependency, to be cached
                 return dependents
+
+            # The provided container is neither a Dataset or a Group
             else:
                 raise ValueError("Unrecognized dependency container")
 
-        # Iterates through each level starting at level 1.
+        # ----------------------------------------
+        # Nested Method (END)
+        # ----------------------------------------
+
+        currentDepth = 0  # Current depth should always start at 1.
+        containersToProcess = []  # The dependency containers we are processing.
+        newContainersToProcess = []  # The next iteration of containers to process, depending on the depth.
+        dependents = []  # arraylist for returned dependents to be stored
+
+        # If dataset, store the dependency name and its corresponding dependents
+        container_dependency_name = dep_container.versionMetadata["dependencyName"]
+        # Create a dictionary that will hold all of the current dependencies needed cache information
+        dependency_information = {"current_depth": None,
+                                  "all_containers_at_current_depth": None,
+                                  "containers_left_to_process": None,
+                                  "all_dependents_for_current_container": None,
+                                  "dependents_retrieved_so_far": [],
+                                  "dependents_left": None,
+                                  "chunk_size": chunk_size,
+                                  "max_depth": max_depth,
+                                  "dep_type": dep_type}
+        # Add the dependency to the cache, given that it doesnt already exist
+        self.dependency_cache[container_dependency_name] = dependency_information
+
+        currentObject = self.dependency_cache.get(container_dependency_name)
+        remaining_chunk_size = currentObject.get("chunk_size")
+        # The first iteration to process will always be the user defined one
+        containersToProcess.append(dep_container)
+        process_queue = containersToProcess.copy()
+
+        dependents_already_retrieved = []
+
+        # Iterates through each level starting at level 1 and ending at the user providing max_depth.
         for currentDepth in range(max_depth):
-            for unprocessedContainer in containersToProcess:
+            # Iterate through each container stored in containersToProcess
+            for x in containersToProcess:
                 try:
-                    newContainersToProcess.extend(retrieveContainerDependents(unprocessedContainer))
+                    try:
+                        # For each container retrieve its dependents using the method "retrieveContainerDependents(x)"
+                        newContainersToProcess = []
+                        newContainersToProcess.extend(retrieveContainerDependents(x))
+                        dependents = dependents + newContainersToProcess
+
+
+                    except:
+                        del process_queue[0]
+                        continue
+
+                    if remaining_chunk_size > 0:
+                        del process_queue[0]
+
+                    if remaining_chunk_size <= 0:
+                        self.dependency_cache[container_dependency_name]["current_depth"] = currentDepth
+                        self.dependency_cache[container_dependency_name]["all_containers_at_current_depth"] = containersToProcess
+                        self.dependency_cache[container_dependency_name]["containers_left_to_process"] = process_queue
+
+                        return dependents
+
                 except:
-                    print("No dependency found for this container")
+                    pass
+
             containersToProcess.clear()
-            containersToProcess = newContainersToProcess
+            containersToProcess = dependents_already_retrieved + newContainersToProcess
+            process_queue = copy.deepcopy(containersToProcess)
+            dependents_already_retrieved.clear()
+            self.dependency_cache[container_dependency_name]["containers_left_to_process"] = dependents_already_retrieved
+            self.dependency_cache[container_dependency_name]["dependents_retrieved_so_far"] = []
+
+
+            if not containersToProcess:
+                self.dependency_cache.pop(container_dependency_name)
+                return dependents
+            else:
+                newContainersToProcess.clear()
 
         return dependents
 
@@ -169,15 +287,180 @@ class Client(object):
         :param dep_container: Parent container object you wish to get next dependents from
         :return: List of dependent objects attached to container object
         """
-        dependents = []
-        if isinstance(dep_container, Dataset):
-            # TODO: get next dependents from the dataset dependency in cache, to be removed when empty
-            return dependents
-        elif isinstance(dep_container, Group):
-            # TODO: get next dependents from the group dependency in cache, to be removed when empty
-            return dependents
+
+        # ----------------------------------------
+        # Nested Method (Start)
+        # ----------------------------------------
+        def retrieveContainerDependents(dep_container_processed):
+            """
+            Method which retrieves dependents from a provided container (is to be used recursively)
+            :param dep_container_processed: Parent container object you wish to get dependents from.
+            :return: List of dependents object attached to parent container
+            """
+
+            nonlocal y
+            nonlocal dependencyName
+            nonlocal remaining_chunk_size
+            nonlocal current_depth
+            nonlocal container_queue
+            nonlocal currentDCItem
+            nonlocal dependents_already_retrieved
+
+            innerDependents = []
+
+            # The provided container is a Dataset
+            if isinstance(dep_container_processed, Dataset):
+
+
+                dependentsToRetrieve = str(self.get_dependent_id(currentDCItem.get("dependents_left")))
+                dependentsToRetrieve = dependentsToRetrieve.replace('[', '')
+                dependentsToRetrieve = dependentsToRetrieve.replace(']', '')
+
+                if dependents_already_retrieved == [] and (dependentsToRetrieve == '' or dependentsToRetrieve ==
+                                                           "None"):
+                    if y == 0:
+                        dependentsToRetrieve = dep_container_processed.versionMetadata[dep_type + '.dataset']
+                    try:
+                        if y > 0:
+                            dependentsToRetrieve = dep_container_processed.metadata.dct[dep_type + '.dataset']
+                    except:
+                        empty = []
+                        return empty
+
+                # if dependentsToRetrieve == '':
+                #    print("No more dependents!")
+                #    empty = []
+                #   return empty
+
+                # Iterate through the provided container dependents, retrieving each dependent one at a time.
+                searchResults = self.search(target=dependencyName,
+                                            show="dependents",
+                                            query='dependents in ({''})'.format(dependentsToRetrieve),
+                                            ignoreShowKeyError=True)
+
+                dependentQueue = copy.deepcopy(searchResults)
+
+                try:
+                    for i in searchResults:
+                        if remaining_chunk_size <= 0:
+                            # We now need to update the cache to contain information about where we stopped
+                            # retrieving dependents
+
+                            self.dependency_cache[dependencyName][
+                                "all_dependents_for_current_container"] = dependentsToRetrieve
+                            self.dependency_cache[dependencyName]["dependents_left"] = dependentQueue
+
+                            # Some important features we might want to keep stored in cache are...
+                            # Dependency Name
+                            # Current Depth
+                            # ALL Dependents at current level
+                            # Dependents that are yet to be returned.
+
+                            # From this we can calculate the next level and still return the current dependents at
+                            # the current level
+
+                            return innerDependents
+                        else:
+                            # retrieve up to "chunk size" dependents
+
+                            datasetCurr = i
+                            innerDependents.append(i)
+                            self.dependency_cache[dependencyName]["dependents_retrieved_so_far"].append(i)
+                            dependentQueue.pop(0)
+                            remaining_chunk_size = remaining_chunk_size - 1
+                except IndexError as e:
+                    print(e)
+                    pass
+
+                # Return the retrieved dependents
+                self.dependency_cache[dependencyName]["dependents_left"] = dependentQueue
+                return innerDependents
+
+            # The provided container is a Group
+            elif isinstance(dep_container_processed, Group):
+                # TODO: get dependents from the group dependency, to be cached
+                return innerDependents
+
+            # The provided container is neither a Dataset or a Group
+            else:
+                raise ValueError("Unrecognized dependency container")
+
+        # ----------------------------------------
+        # Nested Method (END)
+        # ----------------------------------------
+
+        # Now we have the information needed to continue from where we last left off.
+        # That means that get_next_dependents will be extremely similar to get_dependents.
+        # I just need to be able to change what parameters go into it at first
+
+        newContainersToProcess = []
+
+        # Step 1:
+        # Well first things first, lets get all the information we need read in from the cache.
+
+        dependencyName = dep_container.versionMetadata["dependencyName"]
+
+        currentDCItem = self.dependency_cache.get(dependencyName)
+
+        if currentDCItem is None:
+            print("ERROR: Dependency not found in cache!")
+            return
+
+        max_depth = currentDCItem.get("max_depth")
+        current_depth = currentDCItem.get("current_depth")
+        remaining_chunk_size = currentDCItem.get("chunk_size")
+        all_containers_at_current_depth = currentDCItem.get("all_containers_at_current_depth")
+        containersToProcess = currentDCItem.get("containers_left_to_process")
+        container_queue = currentDCItem.get("containers_left_to_process")
+        dependents_already_retrieved = copy.deepcopy(currentDCItem.get("dependents_retrieved_so_far"))
+        dep_type = currentDCItem.get("dep_type")
+
+        if dependents_already_retrieved is None:
+            dependents_already_retrieved = []
+
+        dependentsRetrieved = []
+
+        process_queue = copy.deepcopy(container_queue)
+
+        for y in range(max_depth)[current_depth:]:
+            for x in container_queue:
+
+                try:
+
+                    try:
+                        newContainersToProcess.extend(retrieveContainerDependents(x))
+                        dependentsRetrieved = dependentsRetrieved + newContainersToProcess
+                    except:
+                        del process_queue[0]
+                        continue
+
+                    if remaining_chunk_size > 0:
+                        del process_queue[0]
+
+                    if remaining_chunk_size <= 0:
+                        self.dependency_cache[dependencyName]["current_depth"] = y
+                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"] = containersToProcess
+                        self.dependency_cache[dependencyName]["containers_left_to_process"] = process_queue
+
+                        return dependentsRetrieved
+                except:
+                    pass
+
+            container_queue.clear()
+            container_queue = dependents_already_retrieved + newContainersToProcess
+            process_queue = copy.deepcopy(container_queue)
+            dependents_already_retrieved.clear()
+            self.dependency_cache[dependencyName]["containers_left_to_process"] = dependents_already_retrieved
+            self.dependency_cache[dependencyName]["dependents_retrieved_so_far"] = []
+
+        if not container_queue:
+            print("Finished Processing Dependency: ", dependencyName)
+            self.dependency_cache.pop(dependencyName)
+            return dependentsRetrieved
         else:
-            raise ValueError("Unrecognized dependency container")
+            newContainersToProcess.clear()
+
+        return dependentsRetrieved
 
     @checked_error
     def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):

@@ -48,8 +48,10 @@ class Crawler:
             # Handle error here, or raise exception/error
             pass
         cksum_out = cksum_proc.stdout.read().split(b" ")
-        cksum = cksum_out[0]
-        return cksum
+        # 0: checksum 1: size
+        cksum = cksum_out[0].decode("UTF-8")
+        ck = str(hex(int(cksum))).strip("0x")
+        return ck
 
     def get_metadata(self, dataset, dataset_location):
         """
@@ -69,15 +71,11 @@ class Crawler:
         sys.stdout.write(f"Checking for new datasets at {datetime.now().ctime()}\n")
         try:
             if self.args.debug_mode:
-                results = self.client.search(
-                    target="testpath/testfolder", version="current", site=WATCH_SITE,
-                    query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000
-                )
+                use_watch_folder = "testpath"
             else:
-                results = self.client.search(
-                    WATCH_FOLDER + "/**", version="current", site=WATCH_SITE,
-                    query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000
-                )
+                use_watch_folder = WATCH_FOLDER
+            results = self.client.search(use_watch_folder + "/**", version="current", site=WATCH_SITE,
+                                         query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000)
         except DcException as error:
             sys.stderr.write(str(error))
             return False
@@ -102,7 +100,7 @@ class Crawler:
                 # we tie the metadata to versionMetadata
                 scan_result = {
                     "size": stat.st_size,
-                    "checksum": str(hex(int(cksum))).lstrip("0x"),
+                    "checksum": cksum,
                     # UTC datetime in ISO format (Note: We need Z to denote UTC Time Zone)
                     "locationScanned": datetime.utcnow().isoformat()+"Z",
                     "scanStatus": "OK"

@@ -83,13 +83,14 @@ def main():
     # ======== get_dependents() & get_next_dependents() testing starts here ==================
     # ========================================================================================
 
-    # print("******* get_dependents() & get_next_dependents() TESTING BEGINS *******\n")
-    # parent_container = client.path(path=dataset001.path + ";v=current")
-    #
-    #
-    # dependents = []
-    # dependents = (client.get_dependents(parent_container, "predecessor"))
-    # print(dependents)
+    print("******* get_dependents() & get_next_dependents() TESTING BEGINS *******\n")
+    parent_container = client.path(path=dataset001.path + ";v=current")
+
+
+    dependents = []
+    dependents = (client.get_dependents(parent_container, "predecessor",max_depth=2, chunk_size=2))
+    for item in dependents:
+        print(item.name)
 
 
     # ============= remove_dependents() testing starts here =============
