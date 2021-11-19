@@ -222,44 +222,42 @@ class Client(object):
 
         if isinstance(dep_container, Dataset):
             container = Dataset(**dep_container.__dict__)
-            if dep_datasets is not None:
-                if all(isinstance(x, Dataset) for x in dep_datasets):
+            if dep_datasets is not None and all(isinstance(x, Dataset) for x in dep_datasets):
 
-                    # default configuration
-                    dependents = get_dependent_id(dep_datasets)
-                    dependency_metadata = {"dependents": str(dependents),
-                                            "dependentType": dep_type}
+                # default configuration
+                dependents = get_dependent_id(dep_datasets)
+                dependency_metadata = {"dependents": str(dependents),
+                                        "dependentType": dep_type}
 
-                    if hasattr(container, "versionMetadata"):
-                        # if container has versionMetadata field
-                        # Get dependency metadata from container
-                        update_vmd = dict(container.versionMetadata)
+                if hasattr(container, "versionMetadata"):
+                    # if container has versionMetadata field
+                    # Get dependency metadata from container
+                    vmd = dict(container.versionMetadata)
 
-                        if "{}.dataset".format(dep_type) in update_vmd.keys():
-                            # if adding dependents of the same dependent type:
-                            # merge dependents of same type
-                            update_dependentType = dep_type
-                            update_dependents = convert_dependent_to_list(update_vmd.get("{}.dataset".format(dep_type)))
-                            dependents = list(set(dependents + update_dependents))
-                            dependency_metadata["dependents"] = str(dependents)
+                    if "{}.dataset".format(dep_type) in vmd.keys():
+                        # if adding dependents of the same dependent type:
+                        # merge dependents of same type
+                        update_dependentType = dep_type
+                        update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
+                        dependents = list(set(dependents + update_dependents))
+                        dependency_metadata["dependents"] = str(dependents)
 
-                        container.versionMetadata.update(dependency_metadata)
-                    else:
-                        # if container doesn't have metadata field
-                        # provide dependency metadata as new metadata field
-                        container.versionMetadata = dependency_metadata
-
-                    # patching with patchds()
-                    try:
-                        returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
-                    except:
-                        assert False, "Failed to add dependents"
-
-
+                    container.versionMetadata.update(dependency_metadata)
                 else:
-                    raise ValueError("Unrecognized dependent dataset object")
+                    # if container doesn't have metadata field
+                    # provide dependency metadata as new metadata field
+                    container.versionMetadata = dependency_metadata
+
+                # patching with patchds()
+                try:
+                    returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
+                except:
+                    assert False, "Failed to add dependents"
+
+
             else:
-                assert False, "Dependent dataset not given"
+                raise ValueError("Unrecognized dependent dataset object")
+
             return True
 
         elif isinstance(dep_container, Group):
@@ -299,6 +297,7 @@ class Client(object):
 
         def convert_dependent_to_list(dependents):
             """
+            convert string of comma seperated versionPk of dependent datasets to list of int.
             :param dependents: string of comma seperated dependents
             :return: list of dependents int
             """
@@ -309,57 +308,64 @@ class Client(object):
                 int_list.append(int(dependent))
             return int_list
 
+        def check_exist(update_dp, remove_dp):
+            """
+            To ensure user provided dependent list is in container dependents.
+            :param update_dp: list of dependent versionPk (int) of container dataset
+            :param remove_dp: list of dependent versionPk (int) of user provided dep_datasets
+
+            """
+            remove_set = set(remove_dp)
+            update_set = set(update_dp)
+            if not remove_set.issubset(update_set):
+                raise ValueError("Dependent does not exsit.")
+
         if isinstance(dep_container, Dataset):
-
             container = Dataset(**dep_container.__dict__)
-            if dep_datasets is not None:
-                if all(isinstance(x, Dataset) for x in dep_datasets):
-                    if all(hasattr(container, attr) for attr in ["versionMetadata", "versionPk"]):
-                        try:
-                            # Get dependency metadata from container
-                            update_vmd = dict(container.versionMetadata)
 
-                            if "{}.dataset".format(dep_type) in update_vmd.keys():
-                                update_dependentType = dep_type
-                                update_dependents = convert_dependent_to_list(update_vmd.get("{}.dataset".format(dep_type)))
-                            else:
-                                raise ValueError("No dependents of type {} found".format(dep_type))
+            # Ensure dep_datasets presents and is dataset object
+            if dep_datasets is not None and all(isinstance(x, Dataset) for x in dep_datasets):
 
-                            # Check if user provided dependents are in container
-                            remove_dependents = get_dependent_id(dep_datasets)
-                            remove_set = set(remove_dependents)
-                            update_set = set(update_dependents)
-                            if not remove_set.issubset(update_set):
-                                raise ValueError("Dependent does not exsit.")
+                # Ensure container dataset has versionMetadata and versionPk field
+                if all(hasattr(container, attr) for attr in ["versionMetadata", "versionPk"]):
+                    vmd = dict(container.versionMetadata)
+                    remove_dependents = get_dependent_id(dep_datasets)
 
-
-                            # Step 1: remove dependents provided by users from container
-
-                            for dependent in remove_dependents:
-                                update_dependents.remove(dependent)
-
-                            # Step 2: update dependency metadata with new dependents
-
-                            if len(update_dependents) == 0:
-                                # if user wants to remove all dependents
-                                update_dependents = ""
-                                update_dependentType = ""
-
-                            update_vmd = {"dependents": str(update_dependents),
-                                          "dependentType": update_dependentType}
-                            container.versionMetadata = update_vmd
-
-                            returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
-                        except:
-                            assert False, "Failed to remove dependents"
-
+                    # Ensure dependent type provided by user is present in container dataset
+                    if "{}.dataset".format(dep_type) in vmd.keys():
+                        update_dependentType = dep_type
+                        update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
                     else:
-                        raise ValueError("Container doesn't have versionMetadata.")
+                        raise ValueError("No dependents of type {} found".format(dep_type))
 
+                    # Ensure user provided dependents are in container
+                    check_exist(update_dependents, remove_dependents)
+
+                    # Step 1: remove dependents provided by users from container
+
+                    for dependent in remove_dependents:
+                        update_dependents.remove(dependent)
+
+                    # Step 2: update dependency metadata with new dependents
+
+                    # if user removes all dependents
+                    # construct empty string dependency metadata
+                    if len(update_dependents) == 0:
+                        update_dependents = ""
+                        update_dependentType = ""
+
+                    container.versionMetadata = {"dependents": str(update_dependents),
+                                                "dependentType": update_dependentType}
+
+                    # use patchds() to patch dataset container
+                    try:
+                        returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
+                    except:
+                        assert False, "Failed to remove dependents"
                 else:
-                    raise ValueError("Unrecognized dependent dataset object")
+                    raise ValueError("Container doesn't have versionMetadata.")
             else:
-                assert False, "Dependent dataset not given"
+                raise ValueError("Unrecognized dependent dataset object")
             return True
 
         elif isinstance(dep_container, Group):
