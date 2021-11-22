@@ -24,13 +24,14 @@ path = os.path.dirname(__file__)
 
 
 class Crawler:
-    RERUN_SECONDS = 300
+    RERUN_SECONDS = 5
 
     def __init__(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("-debug_mode", action='store_true')
         self.args = parser.parse_args()
         self.client = client_from_config_file()  # Reads default config files or returns a default config
+        self.max_num = 1000
         self.sched = sched.scheduler(time.time, time.sleep)
         self._run()
 
@@ -38,7 +39,11 @@ class Crawler:
         self.sched.run()
 
     def _run(self):
+        sys.stdout = open(path + '/crawler_out.txt', 'w')
+        sys.stderr = open(path + '/crawler_err.txt', 'w')
         self.run()
+        sys.stdout.close()
+        sys.stderr.close()
         self.sched.enter(Crawler.RERUN_SECONDS, 1, self._run, ())
 
     def get_cksum(self, path):
@@ -58,16 +63,14 @@ class Crawler:
         Extract metadata from :param path
         """
         file_path = dataset_location.resource
-
-        if not hasattr(dataset, "versionId"):
-            assert ValueError("Dataset has no versionId")
-
-        ds = self.client.path(path=dataset.path + ";v={}".format(dataset.versionId))
-        return dict(ds.versionMetadata)
+        assert(hasattr(dataset, "versionId"))
+        if not hasattr(dataset, "versionMetadata"):
+            ds = self.client.path(path=dataset.path + ";v={}".format(dataset.versionId))
+            return dict(ds.versionMetadata)
+        else:
+            return dataset.versionMetadata
 
     def run(self):
-        sys.stdout = open(path+'/crawler_out.txt', 'w')
-        sys.stderr = open(path+'/crawler_err.txt', 'w')
         sys.stdout.write(f"Checking for new datasets at {datetime.now().ctime()}\n")
         try:
             if self.args.debug_mode:
@@ -75,11 +78,16 @@ class Crawler:
             else:
                 use_watch_folder = WATCH_FOLDER
             results = self.client.search(use_watch_folder + "/**", version="current", site=WATCH_SITE,
-                                         query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'", max_num=1000)
+                                         query="scanStatus = 'UNSCANNED' or scanStatus = 'MISSING'",
+                                         max_num=self.max_num)
+            # set max_num for next round between 1,000 and 100,000 for performance and reasonable progress
+            self.max_num = min(max(1000, results.count), 100000)
         except DcException as error:
             sys.stderr.write(str(error))
             return False
-
+        except Exception as error:
+            sys.stderr.write(str(error))
+            return False
         for dataset in results:
             locations = dataset.locations
             dataset_location = None
@@ -128,8 +136,6 @@ class Crawler:
                 sys.stderr.write(str(error)+"\n")
                 sys.stderr.flush()
                 continue
-        sys.stdout.close()
-        sys.stderr.close()
         return True
 
 
