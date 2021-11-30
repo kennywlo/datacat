@@ -58,14 +58,13 @@ class Crawler:
         ck = str(hex(int(cksum))).strip("0x")
         return ck
 
-    def get_metadata(self, dataset, dataset_location):
+    def get_metadata(self, dataset):
         """
         Extract metadata from :param path
         """
-        file_path = dataset_location.resource
         assert(hasattr(dataset, "versionId"))
         if not hasattr(dataset, "versionMetadata"):
-            ds = self.client.path(path=dataset.path + ";v={}".format(dataset.versionId))
+            ds = self.client.path(path=dataset.path, versionId=dataset.versionId)
             return dict(ds.versionMetadata)
         else:
             return dataset.versionMetadata
@@ -114,7 +113,7 @@ class Crawler:
                     "scanStatus": "OK"
                 }
 
-                md = self.get_metadata(dataset, dataset_location)
+                md = self.get_metadata(dataset)
                 if md:
                     scan_result["versionMetadata"] = md
             except PermissionError as e:
