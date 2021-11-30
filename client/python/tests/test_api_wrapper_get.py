@@ -41,12 +41,32 @@ def main():
     try:
         added_before = client.path(path=dataset003.path + ";v=current")
         dataset_to_Patch = client.path(path=dataset003.path + ";v=current")
-        dependents = [dataset004, dataset005]
+        dependents = [dataset004]
         add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                dep_datasets=dependents)
 
         if(add_dependents):
             added_after = client.path(path=dataset003.path + ";v=current")
+            add_dpks = []
+            for dependent in dependents:
+                add_dpks.append(dependent.versionPk)
+
+            print("Dependents to add:", add_dpks)
+            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
+            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("\n")
+    except:
+        assert False, "dependent addition unsuccessful"
+
+    try:
+        added_before = client.path(path=dataset004.path + ";v=current")
+        dataset_to_Patch = client.path(path=dataset004.path + ";v=current")
+        dependents = [dataset005]
+        add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
+                                               dep_datasets=dependents)
+
+        if(add_dependents):
+            added_after = client.path(path=dataset004.path + ";v=current")
             add_dpks = []
             for dependent in dependents:
                 add_dpks.append(dependent.versionPk)
@@ -73,7 +93,7 @@ def main():
 
     dependents = []
 
-    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=3, chunk_size=6))
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=6, chunk_size=6))
     try:
         for item in dependents:
             print(item.name)
@@ -190,6 +210,7 @@ def create_datasets():
     datacat_path04 = '/testpath/testfolder'  # Directory we are working in
     filename04 = "dataset004_d8080.dat"  # Name of dataset to be created
     metadata04 = Metadata()  # Metadata
+    metadata04['nIsTest'] = 1
     full_file004 = file_path + '/' + filename04  # ../../../test/data/ + filename
 
     # Check to make sure the dataset doesnt already exist at the provided path

@@ -121,6 +121,24 @@ class Client(object):
         :return: List of retrieved dependents.
         """
 
+        def encodeForCache(ToEncode):
+
+            if isinstance(ToEncode, str):
+                versionPK_list = ToEncode.split(",")
+                map_list = map(int, versionPK_list)
+                list_of_versionPKs = list(map_list)
+                return list_of_versionPKs
+
+            containerVersionPk = self.get_dependent_id(ToEncode)
+
+            if isinstance(containerVersionPk, list):
+                return containerVersionPk
+            else:
+                listConversion = []
+                listConversion.append(containerVersionPk)
+                return listConversion
+
+
         # ----------------------------------------
         # Nested Method (Start)
         # ----------------------------------------
@@ -162,8 +180,15 @@ class Client(object):
 
                         # We have reached the chunk size limit, return dependents for this container
                         if remaining_chunk_size <= 0:
-                            self.dependency_cache[dependencyName]["all_dependents_for_current_container"] = dependentsToRetrieve
-                            self.dependency_cache[dependencyName]["dependents_left"] = dependentQueue
+
+                            dependentsToRetrieve_encoded = encodeForCache(dependentsToRetrieve)
+                            self.dependency_cache[dependencyName]["all_dependents_for_current_container"] = dependentsToRetrieve_encoded
+
+                            # ********** Convert to versionPK list - dependents_left **********
+                            dependentQueue_VPK = encodeForCache(dependentQueue)
+                            self.dependency_cache[dependencyName]["dependents_left"].extend(dependentQueue_VPK)
+                            # self.dependency_cache[dependencyName]["dependents_left"] = dependentQueue
+
                             return CC_Dependents
 
                         # We have available chunks:
@@ -172,7 +197,12 @@ class Client(object):
                         #   Remove dependent from dependentQueue
                         else:
                             CC_Dependents.append(dependent)
-                            self.dependency_cache[dependencyName]["dependents_retrieved_so_far"].append(dependent)
+
+                            # ********** Convert to versionPK list - dependents_retrieved_so_far **********
+                            dependent_VPK = encodeForCache(dependent)
+                            self.dependency_cache[dependencyName]["dependents_retrieved_so_far"].extend(dependent_VPK)
+                            # self.dependency_cache[dependencyName]["dependents_retrieved_so_far"].append(dependent)
+
                             dependentQueue.pop(0)
                             remaining_chunk_size = remaining_chunk_size - 1
 
@@ -208,11 +238,11 @@ class Client(object):
 
         # Create a dictionary that will create a new cache entry
         dependency_information = {"current_depth": None,
-                                  "all_containers_at_current_depth": None,
-                                  "containers_left_to_process": None,
-                                  "all_dependents_for_current_container": None,
+                                  "all_containers_at_current_depth": [],
+                                  "containers_left_to_process": [],
+                                  "all_dependents_for_current_container": [],
                                   "dependents_retrieved_so_far": [],
-                                  "dependents_left": None,
+                                  "dependents_left": [],
                                   "chunk_size": chunk_size,
                                   "max_depth": max_depth,
                                   "dep_type": dep_type}
@@ -248,8 +278,16 @@ class Client(object):
 
                     if remaining_chunk_size <= 0:
                         self.dependency_cache[dependencyName]["current_depth"] = currentDepth
-                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"] = containersToProcess
-                        self.dependency_cache[dependencyName]["containers_left_to_process"] = process_queue
+
+                        # ********** Convert to versionPK list - dependents_retrieved_so_far **********
+                        containersToProcess_VPK = encodeForCache(containersToProcess)
+                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"].extend(containersToProcess_VPK)
+                        # self.dependency_cache[dependencyName]["all_containers_at_current_depth"] = containersToProcess
+
+                        # ********** Convert to versionPK list - dependents_retrieved_so_far **********
+                        process_queue_VPK = encodeForCache(process_queue)
+                        self.dependency_cache[dependencyName]["containers_left_to_process"].extend(process_queue_VPK)
+                        # self.dependency_cache[dependencyName]["containers_left_to_process"] = process_queue
 
                         return dependents
 
@@ -288,6 +326,34 @@ class Client(object):
         :return: List of dependent objects attached to container object
         """
 
+        def encodeForCache(ToEncode):
+            containerVersionPk = self.get_dependent_id(ToEncode)
+
+            if isinstance(containerVersionPk, list):
+                return containerVersionPk
+            else:
+                listConversion = []
+                listConversion.append(containerVersionPk)
+                return listConversion
+
+        def decodeFromCache(ToDecode):
+
+            if not ToDecode:
+                return []
+
+            try:
+                stringConversion = [str(element) for element in ToDecode]
+                ToDecodeCommaDelimited = ",".join(stringConversion)
+            except Exception as e:
+                print(e)
+
+            decodeResults = self.search(target=dependencyName,
+                                            show="dependents",
+                                            query='dependents in ({''})'.format(ToDecodeCommaDelimited),
+                                            ignoreShowKeyError=True)
+
+            return decodeResults
+
         # ----------------------------------------
         # Nested Method (Start)
         # ----------------------------------------
@@ -309,7 +375,10 @@ class Client(object):
             # The provided container is a Dataset
             if isinstance(dep_container_processed, Dataset):
 
-                dependentsToRetrieve = str(self.get_dependent_id(currentDependency.get("dependents_left")))
+                # Decode
+                dependentsToRetrieveConversion = decodeFromCache(currentDependency.get("dependents_left"))
+                dependentsToRetrieve = self.get_dependent_id(dependentsToRetrieveConversion)
+                dependentsToRetrieve = str(dependentsToRetrieve)
                 dependentsToRetrieve = dependentsToRetrieve.replace('[', '')
                 dependentsToRetrieve = dependentsToRetrieve.replace(']', '')
 
@@ -338,7 +407,12 @@ class Client(object):
                         # We have reached the chunk size limit, return dependents for this container
                         if remaining_chunk_size <= 0:
                             self.dependency_cache[dependencyName]["all_dependents_for_current_container"] = dependentsToRetrieve
-                            self.dependency_cache[dependencyName]["dependents_left"] = dependentQueue
+
+                            # ********** Convert to versionPK list - dependents_left **********
+                            dependentQueue_VPK = encodeForCache(dependentQueue)
+                            self.dependency_cache[dependencyName]["dependents_left"].extend(dependentQueue_VPK)
+                            #   self.dependency_cache[dependencyName]["dependents_left"] = dependentQueue
+
                             return CC_Dependents
 
                         # We have available chunks:
@@ -347,7 +421,12 @@ class Client(object):
                         #   Remove dependent from dependentQueue
                         else:
                             CC_Dependents.append(dependent)
-                            self.dependency_cache[dependencyName]["dependents_retrieved_so_far"].append(dependent)
+
+                            # ********** Convert to versionPK list - dependents_retrieved_so_far **********
+                            dependent_VPK = encodeForCache(dependent)
+                            self.dependency_cache[dependencyName]["dependents_retrieved_so_far"].extend(dependent_VPK)
+                            #   self.dependency_cache[dependencyName]["dependents_retrieved_so_far"].append(dependent)
+
                             dependentQueue.pop(0)
                             remaining_chunk_size = remaining_chunk_size - 1
                 except:
@@ -376,15 +455,23 @@ class Client(object):
         dependents = []
 
         if currentDependency is None:
-            print("ERROR: Dependency not found in cache!")
-            return
+            print("Dependency (" + dependencyName + "): No  dependents for that container!")
+            emptyReturn = []
+            return emptyReturn
 
         max_depth = currentDependency.get("max_depth")
         current_depth = currentDependency.get("current_depth")
         remaining_chunk_size = currentDependency.get("chunk_size")
-        all_containers_at_current_depth = currentDependency.get("all_containers_at_current_depth")
-        containersToProcess = currentDependency.get("containers_left_to_process")
-        dependents_already_retrieved = copy.deepcopy(currentDependency.get("dependents_retrieved_so_far"))
+
+        # Decode
+        all_containers_at_current_depth = decodeFromCache(currentDependency.get("all_containers_at_current_depth"))
+
+        # Decode
+        containersToProcess = decodeFromCache(currentDependency.get("containers_left_to_process"))
+
+        # Decode
+        dependents_already_retrieved_conversion = decodeFromCache(currentDependency.get("dependents_retrieved_so_far"))
+        dependents_already_retrieved = copy.deepcopy(dependents_already_retrieved_conversion)
         dep_type = currentDependency.get("dep_type")
 
         if dependents_already_retrieved is None:
@@ -413,8 +500,17 @@ class Client(object):
 
                     if remaining_chunk_size <= 0:
                         self.dependency_cache[dependencyName]["current_depth"] = currentDepth
-                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"] = containersToProcess
-                        self.dependency_cache[dependencyName]["containers_left_to_process"] = process_queue
+
+                        # ********** Convert to versionPK list - dependents_retrieved_so_far **********
+                        containersToProcess_VPK = encodeForCache(containersToProcess)
+                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"].extend(containersToProcess_VPK)
+                        #   self.dependency_cache[dependencyName]["all_containers_at_current_depth"] = containersToProcess
+
+
+                        # ********** Convert to versionPK list - dependents_retrieved_so_far **********
+                        process_queue_VPK = encodeForCache(process_queue)
+                        self.dependency_cache[dependencyName]["containers_left_to_process"].extend(process_queue_VPK)
+                        #   self.dependency_cache[dependencyName]["containers_left_to_process"] = process_queue
 
                         return dependents
                 except:
@@ -472,6 +568,24 @@ class Client(object):
                     raise ValueError("Could not retrieve dependent dataset versionPK.")
             return ids
 
+        def get_group_id(groups):
+            """
+            Fetch the identifiers used for group dependency.
+            :param groups: one or more groups
+            :return: the dependent identifiers (versionPk) of the input datasets
+            """
+            if groups is None:
+                return None
+            if isinstance(groups, Group):
+                return groups.pk
+            ids = []
+            for gs in groups:
+                if hasattr(gs, "pk"):
+                    ids.append(gs.pk)
+                else:
+                    raise ValueError("Could not retrieve dependent group Pk.")
+            return ids
+
         def convert_dependent_to_list(dependents):
             """
             :param dependents: string of comma seperated dependents
@@ -484,6 +598,7 @@ class Client(object):
                 int_list.append(int(dependent))
             return int_list
 
+        # Dataset as container
         if isinstance(dep_container, Dataset):
             container = Dataset(**dep_container.__dict__)
             if dep_datasets is not None and all(isinstance(x, Dataset) for x in dep_datasets):
@@ -491,7 +606,7 @@ class Client(object):
                 # default configuration
                 dependents = get_dependent_id(dep_datasets)
                 dependency_metadata = {"dependents": str(dependents),
-                                        "dependentType": dep_type}
+                                       "dependentType": dep_type}
 
                 if hasattr(container, "versionMetadata"):
                     # if container has versionMetadata field
@@ -524,11 +639,74 @@ class Client(object):
 
             return True
 
+
+        # Group as Container
         elif isinstance(dep_container, Group):
+            container = Group(**dep_container.__dict__)
+            if dep_datasets is not None and all(isinstance(x, Dataset) for x in dep_datasets):
+
+                # default configuration
+                dependents = get_dependent_id(dep_datasets)
+                dependency_metadata = {"dependents": str(dependents),
+                                       "dependentType": dep_type}
+
+                if hasattr(container, "metadata"):
+                    # if container has versionMetadata field
+                    # Get dependency metadata from container
+                    vmd = dict(container.metadata)
+
+                    if "{}.dataset".format(dep_type) in vmd.keys():
+                        # if adding dependents of the same dependent type:
+                        # merge dependents of same type
+                        update_dependentType = dep_type
+                        update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
+                        dependents = list(set(dependents + update_dependents))
+                        dependency_metadata["dependents"] = str(dependents)
+
+                    container.metadata.update(dependency_metadata)
+                else:
+                    # if container doesn't have metadata field
+                    # provide dependency metadata as new metadata field
+                    metadata = Metadata()
+                    metadata.update(dependency_metadata)
+                    container.metadata = metadata
+
+
+                # patching with patchds()
+                try:
+                    return_patch = self.patchdir(path=container.path, container=container, type="group")
+                except:
+                    assert False, "Failed to add dataset dependents."
+
+
+
+
+
+            if dep_groups is not None and all(isinstance(x, Group) for x in dep_groups):
+
+                # default configuration
+                dependents = get_group_id(dep_groups)
+                dependency_metadata = {"dependents": str(dependents),
+                                       "dependentType": dep_type}
+
+                metadata = Metadata()
+                metadata.update(dependency_metadata)
+                container.metadata = metadata
+
+                try:
+                    return_patch = self.patchdir(path=container.path, container=container, type="group")
+                except:
+                    assert False, "Failed to add group dependents."
+
+
+            if dep_datasets is None and dep_groups is None:
+                assert False, "No dependents found."
+
 
             return True
         else:
             raise ValueError("Unrecognized dependency container")
+
 
 
     @checked_error
@@ -619,7 +797,7 @@ class Client(object):
                         update_dependentType = ""
 
                     container.versionMetadata = {"dependents": str(update_dependents),
-                                                "dependentType": update_dependentType}
+                                                 "dependentType": update_dependentType}
 
                     # use patchds() to patch dataset container
                     try:
