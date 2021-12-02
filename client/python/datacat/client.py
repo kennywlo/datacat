@@ -686,7 +686,7 @@ class Client(object):
 
                 # default configuration
                 dependents = get_group_id(dep_groups)
-                dependency_metadata = {"dependents": str(dependents),
+                dependency_metadata = {"dependentGroups": str(dependents),
                                        "dependentType": dep_type}
 
                 metadata = Metadata()

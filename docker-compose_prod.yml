@@ -1,0 +1,51 @@
+# Copyright 2021 SLAC for the benefit of the SuperCDMS collaboration.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Authors:
+# - Kenny Lo <kennywlo@slac.stanford.edu>, 2021
+
+# To run/stop the containers in this file:
+#   docker-compose --file ./docker-compose_prod.yml up -d
+#   docker-compose --file ./docker-compose_prod.yml down
+#
+# To verify Datacat status:
+#   https://srs.slac.stanford.edu/datacat-v0.6-dep/display/browser
+
+version: '3'
+services:
+  datacat:
+    image: slac-lab/datacat:v0.6-dep
+    container_name: datacat
+    volumes:
+      - /tmp:/tmp
+
+  tomcat:
+    image: tomcat:8.5-jdk8-openjdk
+    environment:
+      JPDA_ADDRESS: 8000
+      JPDA_TRANSPORT: dt_socket
+    entrypoint: /usr/local/tomcat/bin/catalina.sh jpda run
+    container_name: tomcat
+    depends_on:
+      - datacat
+    volumes:
+      - /tmp/ojdbc8.jar:/usr/local/tomcat/lib/ojdbc8.jar
+      - /tmp/server_prod.xml:/usr/local/tomcat/conf/server.xml
+      - /tmp/datacat.war:/usr/local/tomcat/webapps/datacat-v0.6-dep.war
+      - /tmp/java.security:/usr/local/openjdk-8/jre/lib/security/java.security
+      - /tmp:/tmp
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "8000:8000"

@@ -15,12 +15,26 @@ def main():
     created_groups = create_groups()
     group1 = created_groups[0]
     group2 = created_groups[1]
+    group3 = created_groups[2]
+    group4 = created_groups[3]
+    group5 = created_groups[4]
+
 
     print("\n")
 
     # ============= add_dependents() testing starts here =============
     # ================================================================
     print("******* add_dependents() TESTING BEGINS *******\n")
+
+    """
+    
+    ****************************************************
+    *** The following are dataset as container tests ***
+    ****************************************************
+    
+    """
+
+
     # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> add dependency metadata
     try:
         added_before = client.path(path=dataset001.path + ";v=current")
@@ -101,42 +115,126 @@ def main():
     except:
         assert False, "Case 2 dependent addition unsuccessful"
 
+    """
+    
+    **************************************************
+    *** The following are group as container tests ***
+    **************************************************
+    
+    """
+
+
+
     # Case 3.1 Attach dataset to group container
     try:
-        added_before = client.path(path='/testpath/depGroup1')
-        group_to_patch = client.path(path='/testpath/depGroup1')
+        added_before = client.path(path='/testpath/depGroup1;v=current')
+        group_to_patch = client.path(path='/testpath/depGroup1;v=current')
         update_dependents = [dataset001, dataset002]
         add_dependents = client.add_dependents(dep_container=group_to_patch, dep_type="predecessor",
                                                dep_datasets=update_dependents)
+
+
+        group_md = None
+        if hasattr(added_before, "metadata"):
+            group_md = added_after.metadata
+
         if add_dependents:
             update_dpks = []
             for dependent in update_dependents:
                 update_dpks.append(dependent.versionPk)
-            print("Case 3.1 dependent addition successful:")
-            print("Dependent to add:", update_dpks)
+
+            expected = [('dependencyName','{}'.format(group_to_patch.path)), ('predecessor.dataset','{},{}'.format(update_dpks[0],update_dpks[1]))]
             added_after = client.path(path='/testpath/depGroup1;metadata=dependents')
 
-            print("OLD GROUP DEPENDENCY OUTPUT:", added_before)
+            # if len(expected) != len(added_after) or set(expected) != set(added_after):
+            #     assert False, "Case 3.1 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+
+            print("Case 3.1 group dependent addition successful:")
+            print("Dependent group to be added:", update_dpks)
+            print("CONTAINER GROUP NAME:", added_before.name)
+            print("CONTAINER GROUP OLD METADATA:", group_md)
             print("UPDATED METADATA OUTPUT:", added_after)
+            print("\n")
 
     except:
-        assert False, "Case 3.1 dependent addition unsuccessful"
+        assert False, "Case 3.1 group dependent addition unsuccessful"
 
     # Case 3.2 Attach group to group container
     try:
-        added_before = client.path(path='/testpath/depGroup1;v=current')
-        group_to_patch = client.path(path='/testpath/depGroup1;v=current')
-        update_dependent = [group2]
+        added_before = client.path(path='/testpath/depGroup2;v=current')
+        group_to_patch = client.path(path='/testpath/depGroup2;v=current')
+        update_dependents = [group3]
         add_dependents = client.add_dependents(dep_container=group_to_patch, dep_type="predecessor",
-                                               dep_groups=update_dependent)
+                                               dep_groups=update_dependents)
+
+        group_md = None
+        if hasattr(added_before, "metadata"):
+            group_md = added_after.metadata
+
+
         if add_dependents:
-            added_after = client.path(path='/testpath/depGroup1;metadata=dependents')
-            print("Case 3.2 dependent addition successful:")
-            print("OLD GROUP DEPENDENCY OUTPUT:", added_before)
+            update_gpks = []
+            for dependent in update_dependents:
+                update_gpks.append(dependent.pk)
+
+            added_after = client.path(path='/testpath/depGroup2;metadata=dependents')
+
+            expected = [('predecessor.group','{}'.format(update_gpks[0])), ('dependencyName','{}'.format(group_to_patch.path)),('dependencyGroup','{}'.format(group_to_patch.pk))]
+
+            # if len(expected) != len(added_after) or set(expected) != set(added_after):
+            #     assert False, "Case 3.2 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+
+            print("Case 3.2 group dependent addition successful:")
+            print("CONTAINER GROUP NAME:", added_before.name)
+            print("CONTAINER GROUP OLD METADATA:", group_md)
             print("UPDATED METADATA OUTPUT:", added_after)
+            print("\n")
 
     except:
-        assert False, "Case 3.2 dependent addition unsuccessful"
+        assert False, "Case 3.2 group dependent addition unsuccessful"
+
+
+
+
+    # Case 3.3 Attach dataset AND group to a group container
+    try:
+        added_before = client.path(path='/testpath/depGroup3;v=current')
+        group_to_patch = client.path(path='/testpath/depGroup3;v=current')
+        update_dependent_groups = [group4]
+        update_dependent_datasets = [dataset001, dataset002]
+
+        add_dependents = client.add_dependents(dep_container=group_to_patch,
+                                               dep_type="predecessor",
+                                               dep_groups=update_dependent_groups,
+                                               dep_datasets=update_dependent_datasets)
+
+        group_md = None
+        if hasattr(added_before, "metadata"):
+            group_md = added_after.metadata
+
+
+        if add_dependents:
+            update_gpks = []
+            for dependent in update_dependents:
+                update_gpks.append(dependent.pk)
+
+            added_after = client.path(path='/testpath/depGroup3;metadata=dependents')
+
+            expected = [('predecessor.group','{}'.format(update_gpks[0])), ('dependencyName','{}'.format(group_to_patch.path)),('dependencyGroup','{}'.format(group_to_patch.pk))]
+
+            # if len(expected) != len(added_after) or set(expected) != set(added_after):
+            #     assert False, "Case 3.2 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+
+            print("Case 3.3 group dependent addition successful:")
+            print("CONTAINER GROUP NAME:", added_before.name)
+            print("CONTAINER GROUP OLD METADATA:", group_md)
+            print("UPDATED METADATA OUTPUT:", added_after)
+            print("\n")
+
+    except:
+        assert False, "Case 3.3 group dependent addition unsuccessful"
+
+
 
     # ======== get_dependents() & get_next_dependents() testing starts here ==================
     # ========================================================================================
@@ -322,6 +420,10 @@ def create_groups():
 
     containerPath1 = "/testpath/depGroup1"
     containerPath2 = "/testpath/depGroup2"
+    containerPath3 = "/testpath/depGroup3"
+    containerPath4 = "/testpath/depGroup4"
+    containerPath5 = "/testpath/depGroup5"
+
     try:
         if client.exists(containerPath1):
             client.rmdir(containerPath1, type="group")
@@ -329,16 +431,41 @@ def create_groups():
         if client.exists(containerPath2):
             client.rmdir(containerPath2, type="group")
 
+        if client.exists(containerPath3):
+            client.rmdir(containerPath3, type="group")
+
+        if client.exists(containerPath4):
+            client.rmdir(containerPath4, type="group")
+
+        if client.exists(containerPath5):
+            client.rmdir(containerPath5, type="group")
+
 
         client.mkgroup(containerPath1)
         client.path(path='/testpath/depGroup1;v=current')
         group1 = client.path(path='{};v=current'.format(containerPath1))
-        print("created group:", group1.name)
+        print("created group:", group1.name, "(Pk {})".format(group1.pk))
+
+
         client.mkgroup(containerPath2)
         group2 = client.path(path='{};v=current'.format(containerPath2))
-        print("created group:", group2.name)
+        print("created group:", group2.name, "(Pk {})".format(group2.pk))
 
-        return [group1, group2]
+        client.mkgroup(containerPath3)
+        group3 = client.path(path='{};v=current'.format(containerPath3))
+        print("created group:", group3.name, "(Pk {})".format(group3.pk))
+
+
+        client.mkgroup(containerPath4)
+        group4 = client.path(path='{};v=current'.format(containerPath4))
+        print("created group:", group4.name, "(Pk {})".format(group4.pk))
+
+        client.mkgroup(containerPath5)
+        group5 = client.path(path='{};v=current'.format(containerPath5))
+        print("created group:", group5.name, "(Pk {})".format(group5.pk))
+
+
+        return [group1, group2, group3, group4, group5]
 
     except:
         assert False, "Group creation failed"
