@@ -146,11 +146,11 @@ def main():
             expected = [('dependencyName','{}'.format(group_to_patch.path)), ('predecessor.dataset','{},{}'.format(update_dpks[0],update_dpks[1]))]
             added_after = client.path(path='/testpath/depGroup1;metadata=dependents')
 
-            # if len(expected) != len(added_after) or set(expected) != set(added_after):
-            #     assert False, "Case 3.1 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            if len(expected) != len(added_after) or set(expected) != set(added_after):
+                assert False, "Case 3.1 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
 
             print("Case 3.1 group dependent addition successful:")
-            print("Dependent group to be added:", update_dpks)
+            print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
             print("CONTAINER GROUP NAME:", added_before.name)
             print("CONTAINER GROUP OLD METADATA:", group_md)
             print("UPDATED METADATA OUTPUT:", added_after)
@@ -179,12 +179,13 @@ def main():
 
             added_after = client.path(path='/testpath/depGroup2;metadata=dependents')
 
-            expected = [('predecessor.group','{}'.format(update_gpks[0])), ('dependencyName','{}'.format(group_to_patch.path)),('dependencyGroup','{}'.format(group_to_patch.pk))]
+            expected = [('predecessor.group','{}'.format(update_gpks[0])), ('dependencyName','{}'.format(group_to_patch.path))]
 
-            # if len(expected) != len(added_after) or set(expected) != set(added_after):
-            #     assert False, "Case 3.2 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            if len(expected) != len(added_after) or set(expected) != set(added_after):
+                assert False, "Case 3.2 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
 
             print("Case 3.2 group dependent addition successful:")
+            print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
             print("CONTAINER GROUP NAME:", added_before.name)
             print("CONTAINER GROUP OLD METADATA:", group_md)
             print("UPDATED METADATA OUTPUT:", added_after)
@@ -215,17 +216,23 @@ def main():
 
         if add_dependents:
             update_gpks = []
-            for dependent in update_dependents:
+            update_dpks = []
+            for dependent in update_dependent_datasets:
+                update_dpks.append(dependent.versionPk)
+
+            for dependent in update_dependent_groups:
                 update_gpks.append(dependent.pk)
 
             added_after = client.path(path='/testpath/depGroup3;metadata=dependents')
 
-            expected = [('predecessor.group','{}'.format(update_gpks[0])), ('dependencyName','{}'.format(group_to_patch.path)),('dependencyGroup','{}'.format(group_to_patch.pk))]
+            expected = [('predecessor.group', '{}'.format(update_gpks[0])), ('predecessor.dataset', '{},{}'.format(update_dpks[0],update_dpks[1])),('dependencyName','{}'.format(group_to_patch.path))]
 
-            # if len(expected) != len(added_after) or set(expected) != set(added_after):
-            #     assert False, "Case 3.2 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            if len(expected) != len(added_after) or set(expected) != set(added_after):
+                assert False, "Case 3.2 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
 
             print("Case 3.3 group dependent addition successful:")
+            print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
+            print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
             print("CONTAINER GROUP NAME:", added_before.name)
             print("CONTAINER GROUP OLD METADATA:", group_md)
             print("UPDATED METADATA OUTPUT:", added_after)

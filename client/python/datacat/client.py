@@ -107,6 +107,8 @@ class Client(object):
         for ds in datasets:
             if hasattr(ds, "versionPk"):
                 ids.append(ds.versionPk)
+            else:
+                raise ValueError("Could not retrieve dependent dataset versionPK.")
         return ids
 
     @checked_error
@@ -225,6 +227,14 @@ class Client(object):
         # Nested Method (END)
         # ----------------------------------------
 
+        try:
+            # If dataset, store the dependency name and its corresponding dependents
+            dependencyName = dep_container.versionMetadata["dependencyName"]
+        except Exception as e:
+            print("Provided container has no dependency information associated")
+            return
+
+
         currentDepth = 0  # Current depth should always start at 1.
         containersToProcess = []  # The dependency containers we are processing.
         nextContainersToProcess = []  # The next iteration of containers to process, depending on the depth.
@@ -232,9 +242,6 @@ class Client(object):
 
         # Will keep track of all the dependents already retrieved
         dependents_already_retrieved = []
-
-        # If dataset, store the dependency name and its corresponding dependents
-        dependencyName = dep_container.versionMetadata["dependencyName"]
 
         # Create a dictionary that will create a new cache entry
         dependency_information = {"current_depth": None,
@@ -247,6 +254,12 @@ class Client(object):
                                   "max_depth": max_depth,
                                   "dep_type": dep_type}
         # Add the dependency to the cache, given that it doesnt already exist
+
+        if dependencyName in self.dependency_cache.keys():
+            print("Error in method call: .get_dependents")
+            print("Search process already started, please use get_next_dependency method call to continue retrieval")
+            return
+
         self.dependency_cache[dependencyName] = dependency_information
 
         currentDependency = self.dependency_cache.get(dependencyName)
@@ -449,7 +462,12 @@ class Client(object):
         # Nested Method (END)
         # ----------------------------------------
 
-        dependencyName = dep_container.versionMetadata["dependencyName"]
+        try:
+            dependencyName = dep_container.versionMetadata["dependencyName"]
+        except Exception as e:
+            print("Provided container has no dependency information associated")
+            return
+
         currentDependency = self.dependency_cache.get(dependencyName)
         nextContainersToProcess = []
         dependents = []
@@ -550,23 +568,6 @@ class Client(object):
         :param dep_groups: The groups we wish to use as children of the parent container
         """
 
-        def get_dependent_id(datasets):
-            """
-            Fetch the identifiers used for dataset dependency.
-            :param datasets: one or more datasets
-            :return: the dependent identifiers (versionPk) of the input datasets
-            """
-            if datasets is None:
-                return None
-            if isinstance(datasets, Dataset):
-                return datasets.versionPk
-            ids = []
-            for ds in datasets:
-                if hasattr(ds, "versionPk"):
-                    ids.append(ds.versionPk)
-                else:
-                    raise ValueError("Could not retrieve dependent dataset versionPK.")
-            return ids
 
         def get_group_id(groups):
             """
@@ -604,7 +605,7 @@ class Client(object):
             if dep_datasets is not None and all(isinstance(x, Dataset) for x in dep_datasets):
 
                 # default configuration
-                dependents = get_dependent_id(dep_datasets)
+                dependents = self.get_dependent_id(dep_datasets)
                 dependency_metadata = {"dependents": str(dependents),
                                        "dependentType": dep_type}
 
@@ -641,67 +642,52 @@ class Client(object):
 
 
         # Group as Container
+
         elif isinstance(dep_container, Group):
             container = Group(**dep_container.__dict__)
+            dependency_metadata = {"dependentType": dep_type}
+
             if dep_datasets is not None and all(isinstance(x, Dataset) for x in dep_datasets):
 
-                # default configuration
-                dependents = get_dependent_id(dep_datasets)
-                dependency_metadata = {"dependents": str(dependents),
-                                       "dependentType": dep_type}
-
-                if hasattr(container, "metadata"):
-                    # if container has versionMetadata field
-                    # Get dependency metadata from container
-                    vmd = dict(container.metadata)
-
-                    if "{}.dataset".format(dep_type) in vmd.keys():
-                        # if adding dependents of the same dependent type:
-                        # merge dependents of same type
-                        update_dependentType = dep_type
-                        update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
-                        dependents = list(set(dependents + update_dependents))
-                        dependency_metadata["dependents"] = str(dependents)
-
-                    container.metadata.update(dependency_metadata)
-                else:
-                    # if container doesn't have metadata field
-                    # provide dependency metadata as new metadata field
-                    metadata = Metadata()
-                    metadata.update(dependency_metadata)
-                    container.metadata = metadata
-
-
-                # patching with patchds()
-                try:
-                    return_patch = self.patchdir(path=container.path, container=container, type="group")
-                except:
-                    assert False, "Failed to add dataset dependents."
-
-
-
-
+                ds_dependents = self.get_dependent_id(dep_datasets)
+                dependency_metadata["dependents"] = str(ds_dependents)
 
             if dep_groups is not None and all(isinstance(x, Group) for x in dep_groups):
 
-                # default configuration
-                dependents = get_group_id(dep_groups)
-                dependency_metadata = {"dependentGroups": str(dependents),
-                                       "dependentType": dep_type}
-
-                metadata = Metadata()
-                metadata.update(dependency_metadata)
-                container.metadata = metadata
-
-                try:
-                    return_patch = self.patchdir(path=container.path, container=container, type="group")
-                except:
-                    assert False, "Failed to add group dependents."
+                grp_dependents = get_group_id(dep_groups)
+                dependency_metadata["dependentGroups"] = str(grp_dependents)
 
 
             if dep_datasets is None and dep_groups is None:
                 assert False, "No dependents found."
 
+            if hasattr(container, "metadata"):
+                # if container has versionMetadata field
+                # Get dependency metadata from container
+                vmd = dict(container.metadata)
+
+                if "{}.dataset".format(dep_type) in vmd.keys():
+                    # if adding dependents of the same dependent type:
+                    # merge dependents of same type
+                    update_dependentType = dep_type
+                    update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
+                    dependents = list(set(dependents + update_dependents))
+                    dependency_metadata["dependents"] = str(dependents)
+
+                container.metadata.update(dependency_metadata)
+            else:
+                # if container doesn't have metadata field
+                # provide dependency metadata as new metadata field
+                metadata = Metadata()
+                metadata.update(dependency_metadata)
+                container.metadata = metadata
+
+
+             # patching with patchds()
+            try:
+                return_patch = self.patchdir(path=container.path, container=container, type="group")
+            except:
+                assert False, "Failed to add dataset dependents."
 
             return True
         else:
