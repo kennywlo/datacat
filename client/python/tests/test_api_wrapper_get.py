@@ -5,87 +5,91 @@ from datacat.model import Metadata
 
 def main():
 
-    created_datasets = create_datasets()
-    created_groups = create_groups()
-
-    create_dataset_dependencies(created_datasets)
-
-    # Adding group as dependent to a dataset
-    dataset001 = created_datasets[0]
-    try:
-        # initializing dependency metadata
-        metadata = Metadata()
-        metadata['nIsTest'] = 1
-
-        dep_metadata = {"dependentGroups": str(created_groups.pk),
-                        "dependentType": "predecessor"}
-        metadata.update(dep_metadata)
-        dataset001.versionMetadata.update(metadata)
-
-        response = client.patchds(path=dataset001.path, dataset=dataset001)
-
-    except:
-        assert False, "dependent addition unsuccessful"
-
-
-    # ======== get_dependents() & get_next_dependents() testing starts here ==================
+    # Testing setup ==========================================================================
     # ========================================================================================
 
-    print("******* get_dependents() & get_next_dependents() TESTING BEGINS *******\n")
-    parent_container = client.path(path=dataset001.path + ";v=current")
+    # Create datasets needed for testing
+    created_datasets = create_datasets()
 
-    dependents = []
-    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=4, chunk_size=3))
+    dataset001 = created_datasets[0]  # used as container for add_dependents() Case 1.1, Case 2, and remove_dependents()
+    dataset002 = created_datasets[1]
+    dataset003 = created_datasets[2]
+    dataset004 = created_datasets[3]  # without metadata field, used as container for add_dependents() Case 1.2
+    dataset005 = created_datasets[4]
+
+    # Create dataset dependencies
+    create_dataset_dependencies(created_datasets)
+
+    # get_dependents() & get_next_dependents() testing starts here ===========================
+    # ========================================================================================
+    print("*******TESTING BEGINS*******\n")
+
+    # **** (DATASET CONTAINER) ****
+    parent_container = client.path(path=dataset001.path, versionId="current")
+
+    # Case D1:
+    # This test case should make sure that if given a DATASET container we can retrieve ONLY DATASET dependents from it
+    # This test case will also make sure that we can continue to retrieve using .get_next_dependents
+
+    print("(Case D1):")
+
+    # Start dependent retrieval using .get_dependents
+    # (Feel free to modify as to test different depths and chunk sizes)
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=10, chunk_size=2))
+    print("Dependents =")
     try:
         for item in dependents:
-            print(item.name)
+            print("\t" + item.name)
     except:
         pass
-
     print("")
-    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=4, chunk_size=3))
-    try:
-        for item in dependents:
-            print(item.name)
-    except:
-        pass
 
-    print("")
+    # Continue the previously started search using .get_next_dependents
     dependents = (client.get_next_dependents(parent_container))
+    print("Dependents =")
     try:
         for item in dependents:
-            print(item.name)
+            print("\t" + item.name)
     except:
         pass
-
     print("")
-    dependents = (client.get_next_dependents(parent_container))
-    try:
-        for item in dependents:
-            print(item.name)
-    except:
-        pass
 
-    print("")
-    dependents = (client.get_next_dependents(parent_container))
-    try:
-        for item in dependents:
-            print(item.name)
-    except:
-        pass
+    # Case D2:
+    # This test case should make sure that if given a DATASET container we can retrieve ONLY GROUP dependents from it
+    # This test case will also make sure that we can continue to retrieve using .get_next_dependents
 
-    print("")
-    dependents = (client.get_next_dependents(parent_container))
-    try:
-        for item in dependents:
-            print(item.name)
-    except:
-        pass
+    # Case D3:
+    # /* This test case should make sure that if given a DATASET container we can retrieve A COMBINATION of GROUP and
+    # DATASET dependents from it */
+
+    # **** (GROUP CONTAINER) ****
+    # Case G1:
+    # This test case should make sure that if given a GROUP container we can retrieve ONLY DATASET dependents from it
+    # This test case will also make sure that we can continue to retrieve using .get_next_dependents
+
+    # Case G2:
+    # This test case should make sure that if given a GROUP container we can retrieve ONLY GROUP dependents from it
+    # This test case will also make sure that we can continue to retrieve using .get_next_dependents
+
+    # Case G3:
+    # /* This test case should make sure that if given a GROUP container we can retrieve A COMBINATION of GROUP and
+    # DATASET dependents from it */
+
+    # *************************************************************************************************************
+    # *************************************************************************************************************
+    # In order to verify the accuracy of the retrievals being provided by .get_dependents and get_next_dependents I
+    # propose the following test.
+    #
+    # Because the structure of dependency follows that of a tree, we can assume that if we retrieve the wrong
+    # dependents at a lower level then all of the retrieved dependents at a higher level will be incorrect. This
+    # allows us to test the accuracy of retrieval by comparing the last level retrieved to a stored instance of the
+    # last level saved upon addition of the dependencies. If these two match then we know that the algorithm devised
+    # is indeed following the proper paths and returning all the dependents in the correct order.
+    # *************************************************************************************************************
+    # *************************************************************************************************************
 
 
 def create_datasets():
-
-    print("****** DATASETS CREATION BEGIN ******\n")
     # ----------------------------
     # ---creation of dataset001---
     # ----------------------------
@@ -218,24 +222,24 @@ def create_dataset_dependencies(created_datasets):
     dataset005 = created_datasets[4]
 
     try:
-        added_before = client.path(path=dataset001.path + ";v=current")
-        dataset_to_Patch = client.path(path=dataset001.path + ";v=current")
+        added_before = client.path(path=dataset001.path, versionId="current")
+        dataset_to_Patch = client.path(path=dataset001.path, versionId="current")
         dependents = [dataset002, dataset003]
         add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                dep_datasets=dependents)
 
         if(add_dependents):
-            added_after = client.path(path=dataset001.path + ";v=current")
+            added_after = client.path(path=dataset001.path, versionId="current")
             add_dpks = []
             for dependent in dependents:
                 add_dpks.append(dependent.versionPk)
 
-            print("Dependents added:", add_dpks, "\n@ " + dataset001.path + ";v=current\n")
+            print("\nDependents added:", add_dpks, "\n@ " + dataset001.path + ";v=current\n")
     except:
         assert False, "dependent addition unsuccessful"
 
     try:
-        added_before = client.path(path=dataset003.path + ";v=current")
+        added_before = client.path(path=dataset003.path, versionId="current")
         dataset_to_Patch = client.path(path=dataset003.path + ";v=current")
         dependents = [dataset004]
         add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
@@ -248,9 +252,10 @@ def create_dataset_dependencies(created_datasets):
                 add_dpks.append(dependent.versionPk)
 
             print("Dependents added:", add_dpks, "\n@ " + dataset003.path + ";v=current\n")
-            print("\n")
     except:
         assert False, "dependent addition unsuccessful"
+
+    return dataset001, dataset002, dataset003, dataset004, dataset005
 
 
 
@@ -265,4 +270,3 @@ if __name__ == "__main__":
     file_path = os.path.abspath("../../../test/data/")
 
     main()
-
