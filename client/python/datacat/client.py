@@ -111,12 +111,10 @@ class Client(object):
                 if hasattr(dep, "versionPk"):
                     ids.append(dep.versionPk)
                 else:
-                    raise ValueError("Could not retrieve the versionPk of the dataset dependent.")
+                    raise ValueError("Could not retrieve dependent dataset versionPK.")
             elif isinstance(dep, Group):
                 if hasattr(dep, "pk"):
                     ids.append(dep.pk)
-                else:
-                    raise ValueError("Could not retrieve the pk of the group dependent")
             else:
                 raise ValueError("Unrecognized dependent type")
         return ids
