@@ -578,28 +578,9 @@ class Client(object):
         :param dep_groups: The groups we wish to use as children of the parent container
         """
 
-
-        def get_group_id(groups):
-            """
-            Fetch the identifiers used for group dependency.
-            :param groups: one or more groups
-            :return: the dependent identifiers (versionPk) of the input datasets
-            """
-            if groups is None:
-                return None
-            if isinstance(groups, Group):
-                return groups.pk
-            ids = []
-            for gs in groups:
-                if hasattr(gs, "pk"):
-                    ids.append(gs.pk)
-                else:
-                    raise ValueError("Could not retrieve dependent group Pk.")
-            return ids
-
         def convert_dependent_to_list(dependents):
             """
-            :param dependents: string of comma seperated dependents
+            :param dependents: string of comma-delimited dependents
             :return: list of dependents int
             """
             dependent_list = list(dependents.split(","))
@@ -633,12 +614,10 @@ class Client(object):
                 ds_dependents = self.get_dependent_id(dep_datasets)
                 dependency_metadata["dependents"] = str(ds_dependents)
 
-
             if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
 
-                grp_dependents = get_group_id(dep_groups)
+                grp_dependents = self.get_dependent_id(dep_groups)
                 dependency_metadata["dependentGroups"] = str(grp_dependents)
-
 
             if hasattr(container, "versionMetadata"):
                 # if container has versionMetadata field
@@ -669,15 +648,13 @@ class Client(object):
 
             # patching with patchds()
             try:
-                returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
+                ret = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
             except:
                 assert False, "Failed to add dependents"
 
-            return True
-
+            return ret
 
         # Group as Container
-
         elif isinstance(dep_container, Group):
             container = Group(**dep_container.__dict__)
             dependency_metadata = {"dependentType": dep_type}
@@ -691,7 +668,7 @@ class Client(object):
 
             if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
 
-                grp_dependents = get_group_id(dep_groups)
+                grp_dependents = self.get_dependent_id(dep_groups)
                 dependency_metadata["dependentGroups"] = str(grp_dependents)
 
             if hasattr(container, "metadata"):
@@ -723,14 +700,12 @@ class Client(object):
                 metadata.update(dependency_metadata)
                 container.metadata = metadata
 
-
-             # patching with patchds()
+            # patching with patchdir()
             try:
-                return_patch = self.patchdir(path=container.path, container=container, type="group")
+                ret = self.patchdir(path=container.path, container=container, type="group")
             except:
                 assert False, "Failed to add dataset dependents."
-
-            return True
+            return ret
         else:
             raise ValueError("Unrecognized dependency container")
 
@@ -810,18 +785,19 @@ class Client(object):
 
                     # use patchds() to patch dataset container
                     try:
-                        returned = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
+                        ret = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
                     except:
                         assert False, "Failed to remove dependents"
                 else:
                     raise ValueError("Container doesn't have versionMetadata.")
             else:
                 raise ValueError("Unrecognized dependent dataset object")
-            return True
+            return ret
 
         elif isinstance(dep_container, Group):
             # TODO: remove dependents from the group dependency
-            return True
+            ret = None
+            return ret
         else:
             raise ValueError("Unrecognized dependency container")
 

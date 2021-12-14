@@ -162,8 +162,8 @@ public class PathResource extends BaseResource {
         }
         java.nio.file.Path dcp = getProvider().getPath(path);
         try {
-            if(refresh){
-//                getProvider().getCache().removeFile(dcp);
+            if (refresh){
+                getProvider().removeFileFromCache(dcp);
             }
             DcFile file = getProvider().getFile(dcp, buildCallContext());
             DatacatNode ret;
@@ -204,14 +204,14 @@ public class PathResource extends BaseResource {
                                          entries.add(entry);
                                      }
                                 } else{
-                                    retmap = SearchUtils.getDependentsByType(conn, "dependencyGroup",
+                                    retmap = SearchUtils.getDependentsByType(conn, "dependency",
                                         "dependent", builder, dependentType);
-                                    retmap2 =SearchUtils.getDependentsByType(conn, "dependencyGroup",
+                                    retmap2 =SearchUtils.getDependentsByType(conn, "dependency",
                                         "dependentGroup", builder, dependentType);
+                                    if (!retmap2.isEmpty()){
+                                        retmap.putAll(retmap2);
+                                    }
                                     if (!retmap.isEmpty()) {
-                                        if (!retmap2.isEmpty()){
-                                            retmap.putAll(retmap2);
-                                        }
                                         for (String type: retmap.keySet()) {
                                             MetadataEntry entry = new MetadataEntry(type, (String) retmap.get(type));
                                             entries.add(entry);

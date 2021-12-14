@@ -5,7 +5,6 @@ from datacat.model import Metadata
 
 
 def main():
-
     case1_datasets = create_datasets(case=1, num=3)
     dataset001_1 = case1_datasets[0]
     dataset002_1 = case1_datasets[1]
@@ -40,7 +39,6 @@ def main():
     group3_4 = case4_groups[2]
     group4_4 = case4_groups[3]
     group5_4 = case4_groups[4]
-
 
     print("\n")
 
@@ -139,20 +137,22 @@ def main():
         update_dependents = [group1_3]
         add_dependents = client.add_dependents(dep_container=dataset_to_patch, dep_type="successor",
                                                dep_groups=update_dependents)
-        added_after = client.path(path=dataset003_3.path, versionId="current")
-        expected = OrderedDict([('nIsTest',1.0), ('successor.group', '117')])
-        if expected != added_after.versionMetadata:
-            assert False, "Case 3.1 dataset dependent addition result is " \
-                      "not as expected: {}.\nExpected: {}".format(added_after.versionMetadata, expected)
+        added_after = client.path(path=dataset_to_patch.path + ";versionMetadata=dependents",
+                                  versionId=dataset_to_patch.versionId)
+        expected = {'successor.group': str(update_dependents[0].pk)}
+        added_after = dict(added_after)
+        assert expected['successor.group'] == added_after['successor.group'], \
+            "Case 3.1 dataset dependent addition result is not as expected: {}.\nExpected: {}".format(added_after,
+                                                                                                      expected)
+
         if add_dependents:
             update_gpks = client.get_dependent_id(update_dependents)
             print("Case 3.1 dependent update successful:")
             print("CONTAINER DATASET NAME:", dataset_to_patch.name)
             print("GROUP DEPENDENTS TO UPDATE:", update_gpks)
 
-            # added_after = client.path(path=dataset002.path + ";metadata=dependents", versionId="current")
             print("OLD METADATA OUTPUT:", added_before.versionMetadata)
-            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("UPDATED METADATA OUTPUT:", added_after)
             print("\n")
     except:
         assert False, "Case 3.1 dependent addition unsuccessful"
@@ -167,23 +167,24 @@ def main():
                                                dep_type="successor",
                                                dep_datasets=update_dependent_datasets,
                                                dep_groups=update_dependent_groups)
-        if add_dependents:
-            update_gpks = client.get_dependent_id(update_dependent_groups)
-            update_dpks = client.get_dependent_id(update_dependent_datasets)
-            expected = OrderedDict([('nIsTest', 1.0),
-                                    ('successor.dataset', '{}'.format(update_dpks[0])),
-                                    ('successor.group', '{}'.format(update_gpks[0]))])
-            added_after = client.path(path=dataset002_3.path, versionId="current")
 
-            # if len(added_after.versionMetadata) != len(expected) or check_ordereddict(expected,added_after.versionMetadata):
-            #    assert False, "Case 3.2 dataset dependent addition result is " \
-            #                  "not as expected: {}.\nExpected: {}".format(added_after.versionMetadata, expected)
+        if add_dependents:
+            update_dpks = client.get_dependent_id(update_dependent_datasets)
+            update_gpks = client.get_dependent_id(update_dependent_groups)
+            expected = {'successor.dataset': '{}'.format(update_dpks[0]),
+                        'successor.group': '{}'.format(update_gpks[0])}
+            added_after = client.path(path=dataset_to_patch.path + ";versionMetadata=dependents",
+                                      versionId=dataset_to_patch.versionId)
+            added_after = dict(added_after)
+            assert expected['successor.dataset'] == added_after['successor.dataset'] and \
+                   expected['successor.group'] == added_after['successor.group'], "Case 3.2 dataset dependent " \
+                   "addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
             print("Case 3.2 dependent update successful:")
             print("CONTAINER DATASET NAME:", dataset_to_patch.name)
             print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
             print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
-            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
-            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("OLD METADATA OUTPUT:", added_before)
+            print("UPDATED METADATA OUTPUT:", added_after)
             print("\n")
     except:
         assert False, "Case 3.2 dependent addition unsuccessful"
@@ -204,18 +205,15 @@ def main():
                                                dep_datasets=update_dependents)
         group_md = None
         if hasattr(added_before, "metadata"):
-            group_md = added_after.metadata
+            group_md = added_before.metadata
         if add_dependents:
-            update_dpks = []
-            for dependent in update_dependents:
-                update_dpks.append(dependent.versionPk)
-
-            expected = [('dependencyName', '{}'.format(group_to_patch.path)), ('predecessor.dataset',
-                                                                               '{},{}'.format(update_dpks[0],update_dpks[1]))]
+            update_dpks = client.get_dependent_id(update_dependents)
+            expected = {'predecessor.dataset': '{},{}'.format(update_dpks[0], update_dpks[1])}
             added_after = client.path(path='/testpath/depGroup1_4;metadata=dependents')
-
-            if len(expected) != len(added_after) or set(expected) != set(added_after):
-                assert False, "Case 4.1 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            added_after = dict(added_after)
+            assert added_after['predecessor.dataset'] == expected['predecessor.dataset'], \
+                "Case 4.1 group dependent addition result is not as expected: {}.\n" \
+                "Expected: {}".format(added_after, expected)
 
             print("Case 4.1 group dependent addition successful:")
             print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
@@ -236,16 +234,16 @@ def main():
                                                dep_groups=update_dependents)
         group_md = None
         if hasattr(added_before, "metadata"):
-            group_md = added_after.metadata
+            group_md = added_before.metadata
         if add_dependents:
-            update_gpks = []
-            for dependent in update_dependents:
-                update_gpks.append(dependent.pk)
+            update_gpks = client.get_dependent_id(update_dependents)
             added_after = client.path(path='/testpath/depGroup2_4;metadata=dependents')
-            expected = [('predecessor.group','{}'.format(update_gpks[0])), ('dependencyName',
-                                                                            '{}'.format(group_to_patch.path))]
-            if len(expected) != len(added_after) or set(expected) != set(added_after):
-                assert False, "Case 4.2 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            added_after = dict(added_after)
+            expected = {'predecessor.group': '{}'.format(update_gpks[0])}
+
+            assert added_after['predecessor.group'] == expected['predecessor.group'], \
+                "Case 4.2 group dependent addition result is not as expected: {}.\n" \
+                "Expected: {}".format(added_after, expected)
             print("Case 4.2 group dependent addition successful:")
             print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
             print("CONTAINER GROUP NAME:", added_before.name)
@@ -269,16 +267,19 @@ def main():
                                                dep_datasets=update_dependent_datasets)
         group_md = None
         if hasattr(added_before, "metadata"):
-            group_md = added_after.metadata
+            group_md = added_before.metadata
         if add_dependents:
             update_gpks = client.get_dependent_id(update_dependent_groups)
             update_dpks = client.get_dependent_id(update_dependent_datasets)
             added_after = client.path(path='/testpath/depGroup3_4;metadata=dependents')
+            added_after = dict(added_after)
+            expected = {'predecessor.dataset': '{},{}'.format(update_dpks[0], update_dpks[1]),
+                        'predecessor.group': '{}'.format(update_gpks[0])}
 
-            expected = [('predecessor.group', '{}'.format(update_gpks[0])), ('predecessor.dataset', '{},{}'.format(update_dpks[0],update_dpks[1])),('dependencyName','{}'.format(group_to_patch.path))]
-
-            if len(expected) != len(added_after) or set(expected) != set(added_after):
-                assert False, "Case 4.3 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
+                   added_after['predecessor.group'] == expected['predecessor.group'], \
+                   "Case 4.3 group dependent addition result is not as expected: {}.\n" \
+                   "Expected: {}".format(added_after, expected)
 
             print("Case 4.3 group dependent addition successful:")
             print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
@@ -299,18 +300,17 @@ def main():
         add_dependents = client.add_dependents(dep_container=group_to_patch, dep_type="predecessor",
                                                dep_datasets=update_dependents)
 
-        group_md = None
         if hasattr(added_before, "metadata"):
-            group_md = added_after.metadata
+            group_md = added_before.metadata
 
         if add_dependents:
             update_dpks = client.get_dependent_id(update_dependents)
-
-            expected = [('dependencyName','{}'.format(group_to_patch.path)), ('predecessor.dataset','{},{}'.format(update_dpks[0],update_dpks[1]))]
+            expected = {'predecessor.dataset': '{},{}'.format(update_dpks[0], update_dpks[1])}
             added_after = client.path(path='/testpath/depGroup1_4;metadata=dependents')
-
-            # if len(expected) != len(added_after) or set(expected) != set(added_after):
-            #     assert False, "Case 4.1 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            added_after = dict(added_after)
+            assert added_after['predecessor.dataset'] == expected['predecessor.dataset'], \
+                "Case 4.1 group dependent addition result is not as expected: {}.\n" \
+                "Expected: {}".format(added_after, expected)
             print("Case 5.1 group dependent addition successful:")
             print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
             print("CONTAINER GROUP NAME:", added_before.name)
@@ -325,20 +325,16 @@ def main():
 
     # Case 5.3 patch dataset AND group dependents in group container
 
-
-
     # ======== get_dependents() & get_next_dependents() testing starts here ==================
     # ========================================================================================
-
 
     print("\n******* get_dependents() & get_next_dependents() TESTING BEGINS *******\n")
     parent_container = client.path(path=dataset001_1.path, versionId="current")
 
     dependents = []
-    dependents = (client.get_dependents(parent_container, "predecessor",max_depth=2, chunk_size=2))
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=2, chunk_size=2))
     for item in dependents:
         print(item.name)
-
 
     # ============= remove_dependents() testing starts here =============
     # ===================================================================
@@ -390,8 +386,7 @@ def main():
         assert False, "Dependents removal unsuccessful"
 
 
-def create_datasets(case, num, has_metadata = True):
-
+def create_datasets(case, num, has_metadata=True):
     print("****** CASE {} DATASETS CREATION BEGIN ******\n".format(case))
 
     dataset_nums = num
@@ -416,9 +411,9 @@ def create_datasets(case, num, has_metadata = True):
 
         # Use the client to create a new dataset using the params mentioned above
         ds = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
-                            versionMetadata=metadata,
-                            resource=full_file,
-                            site='SLAC')
+                         versionMetadata=metadata,
+                         resource=full_file,
+                         site='SLAC')
         ds_version_pk = ds.versionPk
         print("created dataset: ", filename, "(VersionPK = ", ds_version_pk, ")")
         dataset_list.append(ds)
@@ -427,9 +422,7 @@ def create_datasets(case, num, has_metadata = True):
     return dataset_list
 
 
-
 def create_groups(case, num):
-
     print("\n******CASE {} GROUPS CASE CREATION BEGIN ******\n".format(case))
 
     group_nums = num
@@ -455,12 +448,9 @@ def create_groups(case, num):
     return group_list
 
 
-
-
 if __name__ == "__main__":
-
     # datacat
-    config_file ='./config_srs.ini'
+    config_file = './config_srs.ini'
     config = config_from_file(config_file)
     client = client_from_config(config)
 
@@ -468,7 +458,3 @@ if __name__ == "__main__":
     file_path = os.path.abspath("../../../test/data/")
 
     main()
-
-
-
-

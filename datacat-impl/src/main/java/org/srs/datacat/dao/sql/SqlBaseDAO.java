@@ -318,11 +318,11 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     protected void addGroupMetadata(DatasetContainer datasetGroup, Map<String, Object> metaData) throws SQLException {
-        long datasetGroupPK = datasetGroup.getPk();
+        long datasetGroupPk = datasetGroup.getPk();
         metaData.put("dependencyName", datasetGroup.getPath());
-        metaData.put("dependencyGroup", datasetGroupPK);
+        metaData.put("dependencyGroup", datasetGroupPk);
         addDatasetDependency(metaData);
-        addDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
+        addDatacatObjectMetadata(datasetGroupPk, metaData, "DatasetGroup", "DatasetGroup");
     }
 
     protected void addFolderMetadata(long logicalFolderPK, Map<String, Object> metaData) throws SQLException {
@@ -330,47 +330,53 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
     }
 
     protected void mergeDatasetVersionMetadata(DatacatRecord ds, Map<String, Object> metaData) throws SQLException {
-        long pk = ds.getPk();
+        long pK = ds.getPk();
+        metaData.put("dependency", pK);
         metaData.put("dependencyName", ds.getPath());
-        mergeDependencyMetadata(pk, metaData);
-        mergeDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
+        mergeDependencyMetadata(metaData);
+        mergeDatacatObjectMetadata(pK, metaData, "VerDataset", "DatasetVersion");
     }
 
     private void mergeGroupMetadata(DatacatRecord datasetGroup, Map<String, Object> metaData) throws SQLException {
-        long datasetGroupPK = datasetGroup.getPk();
+        long datasetGroupPk = datasetGroup.getPk();
         metaData.put("dependencyName", datasetGroup.getPath());
-        metaData.put("dependencyGroup", datasetGroupPK);
-        mergeDependencyMetadata(datasetGroupPK, metaData);
-        mergeDatacatObjectMetadata(datasetGroupPK, metaData, "DatasetGroup", "DatasetGroup");
+        metaData.put("dependencyGroup", datasetGroupPk);
+        mergeDependencyMetadata(metaData);
+        mergeDatacatObjectMetadata(datasetGroupPk, metaData, "DatasetGroup", "DatasetGroup");
     }
 
     private void mergeFolderMetadata(long logicalFolderPK, Map<String, Object> metaData) throws SQLException {
         mergeDatacatObjectMetadata(logicalFolderPK, metaData, "LogicalFolder", "LogicalFolder");
     }
 
-    protected void mergeDependencyMetadata(long dependencyPK, Map<String, Object> metaData)
+    protected void mergeDependencyMetadata(Map<String, Object> metaData)
         throws SQLException {
-        if (metaData.containsKey("dependents") && metaData.containsKey("dependentType")) {
+        if (metaData.containsKey("dependents") || metaData.containsKey("dependentGroups")) {
             String type = (String) metaData.get("dependentType");
-            if (type.isEmpty() || type.equals("*")){
-                String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ?";
+            String depContainer;
+            long dependencyPk;
+            if (metaData.containsKey("dependencyGroup")) {
+                depContainer = "DependencyGroup";
+                dependencyPk = (long) metaData.get("dependencyGroup");
+            } else{
+                depContainer = "Dependency";
+                dependencyPk = (long) metaData.get("dependency");
+            }
+            if (type.equals("*")){
+                String deleteSql = "DELETE FROM DatasetDependency WHERE " + depContainer + " = ?";
                 PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
-                stmt.setLong(1, dependencyPK);
+                stmt.setLong(1, dependencyPk);
                 stmt.executeUpdate();
             } else{
-                String deleteSql = "DELETE FROM DatasetDependency WHERE Dependency = ? and DependentType = ?";
+                String deleteSql = "DELETE FROM DatasetDependency WHERE " + depContainer + " = ? and DependentType = ?";
                 PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
-                stmt.setLong(1, dependencyPK);
+                stmt.setLong(1, dependencyPk);
                 stmt.setString(2, type);
                 stmt.executeUpdate();
             }
         } else {
-            // Nothing to be done
+            // Nothing to be removed
             return;
-        }
-        // Add dependency if no dependencyGroup
-        if (!metaData.containsKey("dependencyGroup")) {
-            metaData.put("dependency", dependencyPK);
         }
         addDatasetDependency(metaData);
     }

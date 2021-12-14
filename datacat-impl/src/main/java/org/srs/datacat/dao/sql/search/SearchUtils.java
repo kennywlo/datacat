@@ -14,8 +14,6 @@ import java.util.*;
 import org.freehep.commons.lang.AST;
 import org.srs.datacat.model.DatacatNode;
 import org.srs.datacat.shared.DatacatObject;
-import org.srs.datacat.shared.Dataset;
-import org.srs.datacat.shared.DatasetVersion;
 import org.zerorm.core.Select;
 
 import org.srs.datacat.model.DatasetContainer;
@@ -545,12 +543,7 @@ public final class SearchUtils {
 
     public static Map<String, Object> getDependents(Connection conn, String dependencyContainer, String dependent,
                                                     DatacatObject.Builder builder) throws SQLException {
-        Long dependency;
-        if (dependencyContainer.equals("dependencyGroup") || builder instanceof DatasetVersion.Builder){
-            dependency = builder.pk;
-        } else {
-            dependency = ((Dataset.Builder) builder).versionPk;
-        }
+        Long dependency = builder.pk;
         String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
         Map<String, Object> metadata = new HashMap<>();
         for (String type: dependentTypes) {
@@ -574,11 +567,7 @@ public final class SearchUtils {
         HashMap<String, Object> metadata = new HashMap();
         try (PreparedStatement stmt = conn.prepareStatement(sql)){
             Long dependentid;
-            if (dependencyContainer.equals("dependencyGroup") || builder instanceof DatasetVersion.Builder){
-                dependentid = builder.pk;
-            } else {
-                dependentid = ((Dataset.Builder) builder).versionPk;
-            }
+            dependentid = builder.pk;
             stmt.setLong(1, dependentid);
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
