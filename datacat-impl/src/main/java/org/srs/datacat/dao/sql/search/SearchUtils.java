@@ -661,8 +661,9 @@ public final class SearchUtils {
             List<String> types = new ArrayList<String>();
             while (rs.next()) {
                 String dt = rs.getString("dependentType");
-                if (!types.contains(dt)){
-                    types.add(dt);
+                String dtR = dt.equals("predecessor") ? "successor": "predecessor";
+                if (!types.contains(dtR)){
+                    types.add(dtR);
                 }
             }
             return types.toArray(new String[types.size()]);

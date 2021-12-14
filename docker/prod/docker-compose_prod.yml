@@ -31,16 +31,17 @@ services:
       - /tmp:/tmp
 
   tomcat:
-    image: tomcat:8.5-jdk8-openjdk
+    image: tomcat:datacat-v0.6-dep
+    depends_on:
+      - datacat
+    container_name: tomcat
+    entrypoint: /usr/local/tomcat/bin/catalina.sh jpda run
     environment:
       JPDA_ADDRESS: 8000
       JPDA_TRANSPORT: dt_socket
-    entrypoint: /usr/local/tomcat/bin/catalina.sh jpda run
-    container_name: tomcat
-    depends_on:
-      - datacat
     volumes:
-      - /tmp/ojdbc8.jar:/usr/local/tomcat/lib/ojdbc8.jar
+      - /sdf/sw/Oracle:/sdf/sw/Oracle
+      - /sdf/sw/Oracle/product/18.9.0/dbhome_1/jdbc/lib/ojdbc8.jar:/usr/local/tomcat/lib/ojdbc8.jar
       - /tmp/server_prod.xml:/usr/local/tomcat/conf/server.xml
       - /tmp/datacat.war:/usr/local/tomcat/webapps/datacat-v0.6-dep.war
       - /tmp/java.security:/usr/local/openjdk-8/jre/lib/security/java.security
