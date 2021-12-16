@@ -179,9 +179,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         }
         // fetch the dependency info
         Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency",
-            "dependent", builder);
+            "dependent", builder.pk);
         Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(), "dependency",
-            "dependentGroup", builder);
+            "dependentGroup", builder.pk);
         if (!dependents.isEmpty()) {
             if (!dependents2.isEmpty()){
                 dependents.putAll(dependents2);
@@ -207,12 +207,12 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         // fetch the dependency info
         if (tableType != null && tableType.equals("DatasetGroup")) {
             Map<String, Object> dependents = SearchUtils.getDependents(getConnection(),
-                "dependencyGroup", "dependent", builder);
+                "dependencyGroup", "dependent", pk);
             if (!dependents.isEmpty()) {
                 metadata.putAll(dependents);
             }
             dependents = SearchUtils.getDependents(getConnection(),
-                "dependencyGroup", "dependentGroup", builder);
+                "dependencyGroup", "dependentGroup", pk);
             if (!dependents.isEmpty()){
                 metadata.putAll(dependents);
             }

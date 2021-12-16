@@ -13,7 +13,6 @@ import java.util.*;
 
 import org.freehep.commons.lang.AST;
 import org.srs.datacat.model.DatacatNode;
-import org.srs.datacat.shared.DatacatObject;
 import org.zerorm.core.Select;
 
 import org.srs.datacat.model.DatasetContainer;
@@ -95,9 +94,6 @@ public final class SearchUtils {
             // Set path for the Dataset container
             String path = SearchUtils.getDependencyPath(conn, versionPk);
             builder.path(path);
-            if (!path.isEmpty()) {
-                builder.pk(versionPk);
-            }
         }
 
         ArrayList<DatasetLocationModel> locations = new ArrayList<>();
@@ -107,22 +103,22 @@ public final class SearchUtils {
                 String[] deps = s.split("\\.");
                 Map<String, Object> retmap, retmap2;
                 if (deps[1].equals("groups")){
-                    retmap =  SearchUtils.getDependencyGroups(conn, (DatacatObject.Builder)builder);
+                    retmap =  SearchUtils.getDependencyGroups(conn, versionPk);
                 } else{ // return dependents
                     retmap = SearchUtils.getDependentsByType(conn, "dependency", "dependent",
-                        (DatacatObject.Builder) builder, deps[1]);
+                        versionPk, deps[1]);
                     retmap2 = SearchUtils.getDependentsByType(conn, "dependency", "dependentGroup",
-                        (DatacatObject.Builder) builder, deps[1]);
+                        versionPk, deps[1]);
                     if (!retmap2.isEmpty()){
                         retmap.putAll(retmap2);
                     }
                     retmap2 = SearchUtils.getDependentsByType(conn, "dependencyGroup", "dependent",
-                        (DatacatObject.Builder) builder, deps[1]);
+                        versionPk, deps[1]);
                     if (!retmap2.isEmpty()){
                         retmap.putAll(retmap2);
                     }
                     retmap2 = SearchUtils.getDependentsByType(conn, "dependencyGroup", "dependentGroup",
-                        (DatacatObject.Builder) builder, deps[1]);
+                        versionPk, deps[1]);
                     if (!retmap2.isEmpty()){
                         retmap.putAll(retmap2);
                     }
@@ -174,10 +170,10 @@ public final class SearchUtils {
             if (s.contains("dependency")){
                 String[] deps = s.split("\\.");
                 Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, "dependency",
-                    "dependent", (DatacatObject.Builder)builder, deps[1]);
+                    "dependent", rs.getLong("pk"), deps[1]);
                 metadata.putAll(depmap);
                 depmap = SearchUtils.getDependentsByType(conn, "dependency",
-                    "dependentGroup", (DatacatObject.Builder)builder, deps[1]);
+                    "dependentGroup", rs.getLong("pk"), deps[1]);
                 metadata.putAll(depmap);
                 continue;
             }
@@ -545,13 +541,12 @@ public final class SearchUtils {
     }
 
     public static Map<String, Object> getDependents(Connection conn, String dependencyContainer, String dependent,
-                                                    DatacatObject.Builder builder) throws SQLException {
-        Long dependency = builder.pk;
+                                                    Long dependency) throws SQLException {
         String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
         Map<String, Object> metadata = new HashMap<>();
         for (String type: dependentTypes) {
             Map<String, Object> dependents = SearchUtils.getDependentsByType(conn, dependencyContainer, dependent,
-                builder, type);
+                dependency, type);
             if (!dependents.isEmpty()) {
                 metadata.putAll(dependents);
             }
@@ -560,18 +555,16 @@ public final class SearchUtils {
     }
 
     public static Map<String, Object> getDependentsByType(Connection conn, String dependencyContainer,
-                                                          String dependent,  DatacatObject.Builder builder,
+                                                          String dependent,  Long dependency,
                                                           String type) throws SQLException {
         if (type.isEmpty() || type.equals("*")) {
-            return SearchUtils.getDependents(conn, dependencyContainer, dependent, builder);
+            return SearchUtils.getDependents(conn, dependencyContainer, dependent, dependency);
         }
         String sql = "SELECT dependencyName, " + dependent + " FROM DatasetDependency WHERE " +
             dependencyContainer + " = ? AND (dependentType = ? AND " + dependent + " IS NOT NULL)";
         HashMap<String, Object> metadata = new HashMap();
         try (PreparedStatement stmt = conn.prepareStatement(sql)){
-            Long dependentid;
-            dependentid = builder.pk;
-            stmt.setLong(1, dependentid);
+            stmt.setLong(1, dependency);
             stmt.setString(2, type);
             ResultSet rs = stmt.executeQuery();
             ArrayList<Long> dependents = new ArrayList<>();
@@ -581,7 +574,7 @@ public final class SearchUtils {
             // locate more dependents by the reciprocal nature of the relation
             if (Arrays.asList("predecessor", "successor").contains(type)) {
                 Long[] moreDependents = SearchUtils.getReciprocalDependents(conn, dependencyContainer, dependent,
-                    dependentid, type.equals("predecessor") ? "successor" : "predecessor");
+                    dependency, type.equals("predecessor") ? "successor" : "predecessor");
                 for (Long d: moreDependents) {
                     if (!dependents.contains(d)){
                         dependents.add(d);
@@ -673,13 +666,12 @@ public final class SearchUtils {
         }
     }
 
-    public static Map<String, Object> getDependencyGroups(Connection conn,
-                                                         DatacatObject.Builder builder) throws SQLException {
+    public static Map<String, Object> getDependencyGroups(Connection conn, Long dependency) throws SQLException {
         String sql = "SELECT dependencyName, dependencyGroup FROM DatasetDependency WHERE dependent = ? " +
             "AND dependencyGroup IS NOT NULL";
         HashMap<String, Object> verMetadata = new HashMap();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, builder.pk);
+            stmt.setLong(1, dependency);
             ResultSet rs = stmt.executeQuery();
             StringBuilder dependencyGroups = new StringBuilder();
             while (rs.next()) {

@@ -197,7 +197,7 @@ public class PathResource extends BaseResource {
                                 Connection conn = getConnection();
                                 Map<String, Object> retmap, retmap2;
                                 if (dependentType.equals("groups")){
-                                     retmap = SearchUtils.getDependencyGroups(conn, builder);
+                                     retmap = SearchUtils.getDependencyGroups(conn, builder.pk);
                                      if (!retmap.isEmpty()) {
                                          MetadataEntry entry = new MetadataEntry("dependencyGroups",
                                              (String) retmap.get("dependencyGroups"));
@@ -205,9 +205,9 @@ public class PathResource extends BaseResource {
                                      }
                                 } else{
                                     retmap = SearchUtils.getDependentsByType(conn, "dependency",
-                                        "dependent", builder, dependentType);
+                                        "dependent", builder.pk, dependentType);
                                     retmap2 =SearchUtils.getDependentsByType(conn, "dependency",
-                                        "dependentGroup", builder, dependentType);
+                                        "dependentGroup", builder.pk, dependentType);
                                     if (!retmap2.isEmpty()){
                                         retmap.putAll(retmap2);
                                     }

@@ -822,6 +822,9 @@ class Client(object):
                         assert False, "Failed to remove dependents"
                 else:
                     raise ValueError("Container doesn't have metadata.")
+            else:
+                raise ValueError("Unrecognized dependent dataset object")
+            return ret
 
             #
             #     # Ensure container dataset has versionMetadata and versionPk field
