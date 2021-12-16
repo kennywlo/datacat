@@ -146,8 +146,9 @@ public class ContainerSearch {
                 return "path";
             case "size":
                 return "fileSizeBytes";
+            case "dependentGroups":
+                return "datasetGroup";
             case "dependents":
-            case "dependency":
                 return "datasetVersion";
             default:
                 return ident;

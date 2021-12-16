@@ -60,15 +60,6 @@ def main():
     ****************************************************
     """
 
-    def check_ordereddict(expect_ordereddict, ordereddict):
-        if expect_ordereddict != ordereddict:
-            return False
-        return True
-
-    def check_list(expect_list, list):
-        if len(expect_list) != len(list) or set(expect_list) != set(list):
-            return False
-        return True
 
     # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> add dependency metadata
     try:
@@ -245,10 +236,14 @@ def main():
         if add_dependents:
             update_gpks = client.get_dependent_id(update_dependents)
             added_after = client.path(path='/testpath/depGroup2_4;metadata=dependents')
-            expected = [('predecessor.group','{}'.format(update_gpks[0])), ('dependencyName',
-                                                                            '{}'.format(group_to_patch.path))]
-            if not check_list(expected, added_after):
-                assert False, "Case 4.2 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            added_after = dict(added_after)
+            expected = {
+                'predecessor.group': '{}'.format(update_gpks[0])
+            }
+
+            assert added_after['predecessor.group'] == expected['predecessor.group'], \
+                "Case 4.2 group dependent addition result is not as expected: {}.\n" \
+                "Expected: {}".format(added_after, expected)
 
             print("Case 4.2 group dependent addition successful:")
             print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
@@ -280,10 +275,13 @@ def main():
             added_after = client.path(path='/testpath/depGroup3_4;metadata=dependents')
             added_after = dict(added_after)
             expected = {'predecessor.dataset': '{},{}'.format(update_dpks[0], update_dpks[1]),
-                        'predecessor.group': '{}'.format(update_gpks[0])}
+                        'predecessor.group': '{}'.format(update_gpks[0])
+                        }
+
 
             assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                   added_after['predecessor.group'] == expected['predecessor.group'], \
+                   added_after['predecessor.group'] == expected['predecessor.group'] and \
+                   hasattr(added_after,'successor.group'), \
                 "Case 4.3 group dependent addition result is not as expected: {}.\n" \
                 "Expected: {}".format(added_after, expected)
 
@@ -380,8 +378,8 @@ def main():
             update_dpks = client.get_dependent_id(update_dependent_datasets)
             added_after = client.path(path='/testpath/depGroup3_4;metadata=dependents')
             added_after = dict(added_after)
-            # expected = {'predecessor.dataset': '{},{}'.format(update_dpks[0], update_dpks[1]),
-            #             'predecessor.group': '{}'.format(update_gpks[0])}
+            # expected = {'predecessor.dataset': '{},{},{}'.format(update_dpks[0], update_dpks[1], update_dpks[2]),
+            #             'predecessor.group': '{},{}'.format(update_gpks[0], update_gpks[1])}
             #
             # assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
             #        added_after['predecessor.group'] == expected['predecessor.group'], \
