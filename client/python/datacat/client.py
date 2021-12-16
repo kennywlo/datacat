@@ -794,7 +794,52 @@ class Client(object):
 
         elif isinstance(dep_container, Group):
             # TODO: remove dependents from the group dependency
-            ret = None
+
+            container = Group(**dep_container.__dict__)
+            # Ensure dep_groups presents and is group object
+            if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
+
+                # Ensure container group has versionMetadata and versionPk field
+                if all(hasattr(container, attr) for attr in ["metadata"]):
+                    vmd = dict(container.metadata)
+                    remove_dependents = self.get_dependent_id(dep_groups)
+
+                    # Ensure dependent type provided by user is present in container group
+                    if "{}.group".format(dep_type) in vmd.keys():
+                        update_dependentType = dep_type
+                        update_dependents = convert_dependent_to_list(vmd.get("{}.group".format(dep_type)))
+                    else:
+                        raise ValueError("No dependents of type {} found".format(dep_type))
+
+                    # Ensure user provided dependents are in container
+                    check_exist(update_dependents, remove_dependents)
+
+                    # Step 1: remove dependents provided by users from container
+
+                    for dependent in remove_dependents:
+                        update_dependents.remove(dependent)
+
+                    # Step 2: update dependency metadata with new dependents
+
+                    # if user removes all dependents
+                    # construct empty string dependency metadata
+                    if len(update_dependents) == 0:
+                        update_dependents = ""
+                        update_dependentType = dep_type
+
+                    container.metadata = {"dependentGroups": str(update_dependents),
+                                          "dependentType": update_dependentType}
+
+                    # use patchdir() to patch group container
+                    try:
+
+                        ret = self.patchdir(path=container.path, container=container, type="group")
+                    except:
+                        assert False, "Failed to remove dependents"
+                else:
+                    raise ValueError("Container doesn't have metadata.")
+            else:
+                raise ValueError("Unrecognized dependent group object")
             return ret
         else:
             raise ValueError("Unrecognized dependency container")

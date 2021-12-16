@@ -92,9 +92,12 @@ public final class SearchUtils {
         try {
             builder.path(PathUtils.resolve(rs.getString("containerpath"), name));
         } catch (SQLException e) {
-            // Set containerpath for dependents
+            // Set path for the Dataset container
             String path = SearchUtils.getDependencyPath(conn, versionPk);
             builder.path(path);
+            if (!path.isEmpty()) {
+                builder.pk(versionPk);
+            }
         }
 
         ArrayList<DatasetLocationModel> locations = new ArrayList<>();
@@ -500,11 +503,11 @@ public final class SearchUtils {
         return stream;
     }
 
-    public static String getDependencyPath(Connection conn, long dependent) throws SQLException {
-        String sql = "SELECT dependencyName from DatasetDependency WHERE dependent = ?";
+    public static String getDependencyPath(Connection conn, long dependency) throws SQLException {
+        String sql = "SELECT dependencyName from DatasetDependency WHERE Dependency = ?";
         String dependencyPath = "";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, dependent);
+            stmt.setLong(1, dependency);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()){
                 dependencyPath = rs.getString("dependencyName");
