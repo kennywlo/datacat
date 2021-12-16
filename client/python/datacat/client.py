@@ -9,7 +9,6 @@ from .model import *
 
 # noinspection PyPep8Naming,PyShadowingBuiltins,PyUnusedLocal
 class Client(object):
-
     """
     Pythonic Client for interacting with the data catalog. This client interacts solely through JSON.
     """
@@ -192,7 +191,8 @@ class Client(object):
                         if remaining_chunk_size <= 0:
 
                             dependentsToRetrieve_encoded = encodeForCache(dependentsToRetrieve)
-                            self.dependency_cache[dependencyName]["all_dependents_for_current_container"] = dependentsToRetrieve_encoded
+                            self.dependency_cache[dependencyName][
+                                "all_dependents_for_current_container"] = dependentsToRetrieve_encoded
 
                             # ********** Convert to versionPK list - dependents_left **********
                             dependentQueue_VPK = encodeForCache(dependentQueue)
@@ -302,7 +302,8 @@ class Client(object):
 
                         # ********** Convert to versionPK list - dependents_retrieved_so_far **********
                         containersToProcess_VPK = encodeForCache(containersToProcess)
-                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"].extend(containersToProcess_VPK)
+                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"].extend(
+                            containersToProcess_VPK)
                         # self.dependency_cache[dependencyName]["all_containers_at_current_depth"] = containersToProcess
 
                         # ********** Convert to versionPK list - dependents_retrieved_so_far **********
@@ -330,14 +331,14 @@ class Client(object):
             self.dependency_cache[dependencyName]["dependents_retrieved_so_far"] = []
 
             if not containersToProcess:
-                print("Finished Processing the following dependency --> ", dependencyName, "\nReturning last batch of dependents, if any... ")
+                print("Finished Processing the following dependency --> ", dependencyName,
+                      "\nReturning last batch of dependents, if any... ")
                 self.dependency_cache.pop(dependencyName)
                 return dependents
             else:
                 nextContainersToProcess.clear()
 
         return dependents
-
 
     @checked_error
     def get_next_dependents(self, dep_container):
@@ -427,7 +428,8 @@ class Client(object):
 
                         # We have reached the chunk size limit, return dependents for this container
                         if remaining_chunk_size <= 0:
-                            self.dependency_cache[dependencyName]["all_dependents_for_current_container"] = dependentsToRetrieve
+                            self.dependency_cache[dependencyName][
+                                "all_dependents_for_current_container"] = dependentsToRetrieve
 
                             # ********** Convert to versionPK list - dependents_left **********
                             dependentQueue_VPK = encodeForCache(dependentQueue)
@@ -529,9 +531,9 @@ class Client(object):
 
                         # ********** Convert to versionPK list - dependents_retrieved_so_far **********
                         containersToProcess_VPK = encodeForCache(containersToProcess)
-                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"].extend(containersToProcess_VPK)
+                        self.dependency_cache[dependencyName]["all_containers_at_current_depth"].extend(
+                            containersToProcess_VPK)
                         #   self.dependency_cache[dependencyName]["all_containers_at_current_depth"] = containersToProcess
-
 
                         # ********** Convert to versionPK list - dependents_retrieved_so_far **********
                         process_queue_VPK = encodeForCache(process_queue)
@@ -557,7 +559,8 @@ class Client(object):
             self.dependency_cache[dependencyName]["dependents_retrieved_so_far"] = []
 
         if not containersToProcess:
-            print("Finished Processing the following dependency --> ", dependencyName, "\nReturning last batch of dependents, if any... ")
+            print("Finished Processing the following dependency --> ", dependencyName,
+                  "\nReturning last batch of dependents, if any... ")
             self.dependency_cache.pop(dependencyName)
             return dependents
         else:
@@ -608,12 +611,10 @@ class Client(object):
             grp_dependents = []
 
             if dep_datasets is not None and all(isinstance(dataset, Dataset) for dataset in dep_datasets):
-
                 ds_dependents = self.get_dependent_id(dep_datasets)
                 dependency_metadata["dependents"] = str(ds_dependents)
 
             if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
-
                 grp_dependents = self.get_dependent_id(dep_groups)
                 dependency_metadata["dependentGroups"] = str(grp_dependents)
 
@@ -660,12 +661,10 @@ class Client(object):
             grp_dependents = []
 
             if dep_datasets is not None and all(isinstance(dataset, Dataset) for dataset in dep_datasets):
-
                 ds_dependents = self.get_dependent_id(dep_datasets)
                 dependency_metadata["dependents"] = str(ds_dependents)
 
             if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
-
                 grp_dependents = self.get_dependent_id(dep_groups)
                 dependency_metadata["dependentGroups"] = str(grp_dependents)
 
@@ -707,8 +706,6 @@ class Client(object):
         else:
             raise ValueError("Unrecognized dependency container")
 
-
-
     @checked_error
     def remove_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
         """
@@ -744,102 +741,198 @@ class Client(object):
             if not remove_set.issubset(update_set):
                 raise ValueError("Dependent does not exsit.")
 
+        def dependent_check(datasets, groups):
+
+            if datasets is None and groups is None:
+                assert False, "No dependents found."
+            elif datasets is not None and not all(isinstance(dataset, Dataset) for dataset in dep_datasets):
+                assert False, "Unrecognized dataset dependent object."
+            elif groups is not None and not all(isinstance(group, Group) for group in dep_groups):
+                assert False, "Unrecognized group dependent object"
+
+        # check dependents to prevent illegal dependent object being passed in
+        dependent_check(dep_datasets, dep_groups)
+
         if isinstance(dep_container, Dataset):
             container = Dataset(**dep_container.__dict__)
 
             # Ensure dep_datasets presents and is dataset object
             if dep_datasets is not None and all(isinstance(x, Dataset) for x in dep_datasets):
+                container = Dataset(**dep_container.__dict__)
+                remove_dataset_dependents = []
+                remove_group_dependents = []
 
-                # Ensure container dataset has versionMetadata and versionPk field
-                if all(hasattr(container, attr) for attr in ["versionMetadata", "versionPk"]):
-                    vmd = dict(container.versionMetadata)
-                    remove_dependents = self.get_dependent_id(dep_datasets)
+            # Ensure dep_groups or dep_datasets presents and is group object
 
-                    # Ensure dependent type provided by user is present in container dataset
-                    if "{}.dataset".format(dep_type) in vmd.keys():
-                        update_dependentType = dep_type
-                        update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
-                    else:
-                        raise ValueError("No dependents of type {} found".format(dep_type))
+                if dep_datasets is not None and all(isinstance(datasets, Dataset) for datasets in dep_datasets):
+                    remove_dataset_dependents = self.get_dependent_id(dep_datasets)
 
-                    # Ensure user provided dependents are in container
-                    check_exist(update_dependents, remove_dependents)
-
-                    # Step 1: remove dependents provided by users from container
-
-                    for dependent in remove_dependents:
-                        update_dependents.remove(dependent)
-
-                    # Step 2: update dependency metadata with new dependents
-
-                    # if user removes all dependents
-                    # construct empty string dependency metadata
-                    if len(update_dependents) == 0:
-                        update_dependents = ""
-                        update_dependentType = dep_type
-
-                    container.versionMetadata = {"dependents": str(update_dependents),
-                                                 "dependentType": update_dependentType}
-
-                    # use patchds() to patch dataset container
-                    try:
-                        ret = self.patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
-                    except:
-                        assert False, "Failed to remove dependents"
-                else:
-                    raise ValueError("Container doesn't have versionMetadata.")
-            else:
-                raise ValueError("Unrecognized dependent dataset object")
-            return ret
-
-        elif isinstance(dep_container, Group):
-            # TODO: remove dependents from the group dependency
-
-            container = Group(**dep_container.__dict__)
-            # Ensure dep_groups presents and is group object
-            if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
+                if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
+                    remove_group_dependents = self.get_dependent_id(dep_groups)
 
                 # Ensure container group has versionMetadata and versionPk field
-                if all(hasattr(container, attr) for attr in ["metadata"]):
-                    vmd = dict(container.metadata)
-                    remove_dependents = self.get_dependent_id(dep_groups)
+                if all(hasattr(container, attr) for attr in ["versionMetadata", "versionPk"]):
+                    vmd = dict(container.versionMetadata)
+                    update_dependentType = dep_type
+                    update_dataset_dependents = []
+                    update_group_dependents = []
 
                     # Ensure dependent type provided by user is present in container group
+                    if "{}.dataset".format(dep_type) in vmd.keys():
+                        update_dataset_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
+
                     if "{}.group".format(dep_type) in vmd.keys():
-                        update_dependentType = dep_type
-                        update_dependents = convert_dependent_to_list(vmd.get("{}.group".format(dep_type)))
-                    else:
+                        update_group_dependents = convert_dependent_to_list(vmd.get("{}.group".format(dep_type)))
+
+                    if "{}.group".format(dep_type) not in vmd.keys() and "{}.dataset".format(dep_type) not in vmd.keys():
                         raise ValueError("No dependents of type {} found".format(dep_type))
 
                     # Ensure user provided dependents are in container
-                    check_exist(update_dependents, remove_dependents)
+                    check_exist(update_dataset_dependents, remove_dataset_dependents)
+                    check_exist(update_group_dependents, remove_group_dependents)
 
                     # Step 1: remove dependents provided by users from container
 
-                    for dependent in remove_dependents:
-                        update_dependents.remove(dependent)
+                    for dependent in remove_dataset_dependents:
+                        update_dataset_dependents.remove(dependent)
+
+                    for dependent in remove_group_dependents:
+                        update_group_dependents.remove(dependent)
 
                     # Step 2: update dependency metadata with new dependents
 
                     # if user removes all dependents
                     # construct empty string dependency metadata
-                    if len(update_dependents) == 0:
-                        update_dependents = ""
-                        update_dependentType = dep_type
+                    if len(update_dataset_dependents) == 0:
+                        update_dataset_dependents = ""
 
-                    container.metadata = {"dependentGroups": str(update_dependents),
-                                          "dependentType": update_dependentType}
+                    if len(update_group_dependents) == 0:
+                        update_group_dependents = ""
+
+                    container.versionMetadata = {"dependentGroups": str(update_group_dependents),
+                                                    "dependents": str(update_dataset_dependents),
+                                                    "dependentType": update_dependentType
+                                                }
 
                     # use patchdir() to patch group container
                     try:
-
-                        ret = self.patchdir(path=container.path, container=container, type="group")
+                        ret = self.patchds(path=dep_container.path, dataset=container,
+                                           versionId=dep_container.versionId)
                     except:
                         assert False, "Failed to remove dependents"
                 else:
                     raise ValueError("Container doesn't have metadata.")
+
+            #
+            #     # Ensure container dataset has versionMetadata and versionPk field
+            #     if all(hasattr(container, attr) for attr in ["versionMetadata", "versionPk"]):
+            #         vmd = dict(container.versionMetadata)
+            #         remove_dependents = self.get_dependent_id(dep_datasets)
+            #
+            #         # Ensure dependent type provided by user is present in container dataset
+            #         if "{}.dataset".format(dep_type) in vmd.keys():
+            #             update_dependentType = dep_type
+            #             update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
+            #         else:
+            #             raise ValueError("No dependents of type {} found".format(dep_type))
+            #
+            #         # Ensure user provided dependents are in container
+            #         check_exist(update_dependents, remove_dependents)
+            #
+            #         # Step 1: remove dependents provided by users from container
+            #
+            #         for dependent in remove_dependents:
+            #             update_dependents.remove(dependent)
+            #
+            #         # Step 2: update dependency metadata with new dependents
+            #
+            #         # if user removes all dependents
+            #         # construct empty string dependency metadata
+            #         if len(update_dependents) == 0:
+            #             update_dependents = ""
+            #             update_dependentType = dep_type
+            #
+            #         container.versionMetadata = {"dependents": str(update_dependents),
+            #                                      "dependentType": update_dependentType}
+            #
+            #         # use patchds() to patch dataset container
+            #         try:
+            #             ret = self.patchds(path=dep_container.path, dataset=container,
+            #                                versionId=dep_container.versionId)
+            #         except:
+            #             assert False, "Failed to remove dependents"
+            #     else:
+            #         raise ValueError("Container doesn't have versionMetadata.")
+            # else:
+            #     raise ValueError("Unrecognized dependent dataset object")
+            # return ret
+
+        elif isinstance(dep_container, Group):
+
+            container = Group(**dep_container.__dict__)
+            remove_dataset_dependents = []
+            remove_group_dependents = []
+
+            # Ensure dep_groups or dep_datasets presents and is group object
+
+            if dep_datasets is not None and all(isinstance(datasets, Dataset) for datasets in dep_datasets):
+                remove_dataset_dependents = self.get_dependent_id(dep_datasets)
+
+            if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
+                remove_group_dependents = self.get_dependent_id(dep_groups)
+
+            # Ensure container group has versionMetadata and versionPk field
+            if all(hasattr(container, attr) for attr in ["metadata"]):
+                vmd = dict(container.metadata)
+                update_dependentType = dep_type
+                update_dataset_dependents = []
+                update_group_dependents = []
+
+                # Ensure dependent type provided by user is present in container group
+                if "{}.dataset".format(dep_type) in vmd.keys():
+                    update_dataset_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
+
+                if "{}.group".format(dep_type) in vmd.keys():
+                    update_group_dependents = convert_dependent_to_list(vmd.get("{}.group".format(dep_type)))
+
+                if "{}.group".format(dep_type) not in vmd.keys() and "{}.dataset".format(dep_type) not in vmd.keys():
+                    raise ValueError("No dependents of type {} found".format(dep_type))
+
+                # Ensure user provided dependents are in container
+                check_exist(update_dataset_dependents, remove_dataset_dependents)
+                check_exist(update_group_dependents, remove_group_dependents)
+
+                # Step 1: remove dependents provided by users from container
+
+                for dependent in remove_dataset_dependents:
+                    update_dataset_dependents.remove(dependent)
+
+                for dependent in remove_group_dependents:
+                    update_group_dependents.remove(dependent)
+
+                # Step 2: update dependency metadata with new dependents
+
+                # if user removes all dependents
+                # construct empty string dependency metadata
+                if len(update_dataset_dependents) == 0:
+                    update_dataset_dependents = ""
+
+                if len(update_group_dependents) == 0:
+                    update_group_dependents = ""
+
+                container.metadata = {"dependentGroups": str(update_group_dependents),
+                                      "dependents": str(update_dataset_dependents),
+                                      "dependentType": update_dependentType
+                                      }
+
+                # use patchdir() to patch group container
+                try:
+                    ret = self.patchdir(path=container.path, container=container, type="group")
+                except:
+                    assert False, "Failed to remove dependents"
             else:
-                raise ValueError("Unrecognized dependent group object")
+                raise ValueError("Container doesn't have metadata.")
+
             return ret
         else:
             raise ValueError("Unrecognized dependency container")
