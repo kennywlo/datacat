@@ -281,3 +281,71 @@ if __name__ == "__main__":
         print(client.path(path='/testpath/customDependents;metadata=dependents.simulation_XXX'))
     except:
         assert False, "Error. search unsuccessful. Case 5"
+
+
+    print("\n***** .Search error test case *****")
+    # NEW TEST CASE FOR KENNY
+    # Take a look into the functionality of .search when it comes to groups. This test case will provide the environment
+    # needed to recreate an issue found earlier while using .search with show="dependency.groups" and
+    # query='dependentGroups in ({''})'.format(created_group.pk)
+
+    # First we will create a new dataset and group.
+
+    # ------------------------------------
+    # ---creation of dataset_searchTest---
+    # ------------------------------------
+    datacat_path_searchTest = '/testpath/testfolder'  # Directory we are working in
+    filename_searchTest = "dataset_searchTest.dat"  # Name of dataset to be created
+    metadata_searchTest = Metadata()  # Metadata
+    metadata_searchTest['nIsTest'] = 1
+    full_file_searchTest = file_path + '/' + filename_searchTest  # ../../../test/data/ + filename
+
+    if client.exists(datacat_path_searchTest + '/' + filename_searchTest):
+        client.rmds(datacat_path_searchTest + '/' + filename_searchTest)
+
+    ds_searchTest = client.mkds(datacat_path_searchTest, filename_searchTest, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=metadata_searchTest,
+                        resource=full_file_searchTest,
+                        site='SLAC')
+    ds001_version_pk = ds_searchTest.versionPk
+    print("created dataset: ", filename_searchTest, "(VersionPK = ", ds001_version_pk, ")")
+
+    # ------------------------------------
+    # ---creation of group_searchTest---
+    # ------------------------------------
+
+    container_path1 = "/testpath/group_searchTest"
+
+    try:
+        if client.exists(container_path1):
+            client.rmdir(container_path1, type="group")
+
+        client.mkgroup(container_path1)
+        dep_group_searchTest = client.path(path='/testpath/group_searchTest;v=current')
+        print("created group: ", dep_group_searchTest.name, "(VersionPK = ",dep_group_searchTest.pk, ")")
+    except:
+        assert False, "Group creation failed"
+
+    # Now we will create the needed dependency. Group will be a dependent of dataset
+
+    print("\nAdding group dependents")
+    added_before = client.path(path=ds_searchTest.path, versionId="current")
+    print("\t",added_before.versionMetadata)
+
+    update_dependents = [dep_group_searchTest]
+    client.add_dependents(dep_container=ds_searchTest, dep_type="predecessor",
+                          dep_groups=update_dependents)
+
+    added_after = client.path(path=ds_searchTest.path, versionId="current")
+    print("\t",added_after.versionMetadata)
+
+    # Now we will use .search to try and retrieve the dependent group using "dependency.groups" and a query.
+    # This will be the issue as the return value is empty
+
+    searchResults = client.search(target="/testpath/testfolder/dataset001_82f24.dat;v=current",
+                                  show="dependency.groups",
+                                  query='dependentGroups in ({''})'.format(dep_group_searchTest.pk),
+                                  ignoreShowKeyError=True)
+
+    print("\nReturn value of .search call:", searchResults)
+
