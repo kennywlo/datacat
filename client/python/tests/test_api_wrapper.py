@@ -443,13 +443,13 @@ def main():
                 "Expected: {}".format(added_after, expected)
 
 
-            print("Dependents to be removed:", remove_dpks)
+            print("Dataset dependents to be removed:", remove_dpks)
             print("Case 1.1 dependent removal successful:")
             print("OLD METADATA OUTPUT:", added_before.versionMetadata)
             print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
             print("\n")
     except:
-        assert False, "Dependents removal unsuccessful"
+        assert False, "Case 1.1 dependents removal unsuccessful"
 
     # Case 1.2 remove all dependency version metadata
     try:
@@ -461,7 +461,7 @@ def main():
         if add_dependents:
             remove_dpks = client.get_dependent_id(remove_dependents)
             added_after = client.path(path=dataset001_1.path, versionId="current")
-            print("Dependents to be removed:", remove_dpks)
+            print("Dataset dependents to be removed:", remove_dpks)
             if "predecessor.dataset" in added_after.versionMetadata:
                 assert False, "Dependents are not completely removed. " \
                               "{} remains in versionMetadata." \
@@ -472,7 +472,38 @@ def main():
             print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
             print("\n")
     except:
-        assert False, "Dependents removal unsuccessful"
+        assert False, "Case 1.2 dependents removal unsuccessful"
+
+    # Case 1.3 remove group from dataset container
+    try:
+        added_before = client.path(path=dataset001_3.path, versionId="current")
+        dataset_to_patch = client.path(path=dataset001_3.path, versionId="current")
+        remove_dependents = [group1_3]
+        add_dependents = client.remove_dependents(dep_container=dataset_to_patch, dep_type="successor",
+                                                  dep_groups=remove_dependents)
+
+        if add_dependents:
+            remove_gpks = []
+            for dependent in remove_dependents:
+                remove_gpks.append(dependent.pk)
+            added_after = client.path(path=dataset001_1.path, versionId="current")
+            expected = {
+                'dependencyName': '/testpath/testfolder/dataset001_1.dat;v=0'
+            }
+
+            assert 'predecessor.group' not in added_after.versionMetadata and \
+                    'successor.dataset' not in added_after.versionMetadata, \
+                "Case 1.1 dependent removal result is not as expected: {}.\n" \
+                "Expected: {}".format(added_after.versionMetadata, expected)
+
+            print("Case 1.3 dependent removal successful:")
+            print("DEPENDENT GROUPS TO BE REMOVED:", remove_gpks)
+            print("CONTAINER DATASET NAME:", added_before.name)
+            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
+            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("\n")
+    except:
+        assert False, "Case 1.3 dependents removal unsuccessful"
 
     # Case 2.1 remove dataset from group container
     try:
@@ -526,7 +557,7 @@ def main():
 
             assert added_after['predecessor.group'] == expected['predecessor.group'] and \
                    'successor.group' not in added_after, \
-                "Case 4.2 group dependent addition result is not as expected: {}.\n" \
+                "Case 2.2 group dependent removal result is not as expected: {}.\n" \
                 "Expected: {}".format(added_after, expected)
 
             print("Case 2.2 group dependent removal successful:")

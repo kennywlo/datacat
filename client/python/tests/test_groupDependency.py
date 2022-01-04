@@ -282,15 +282,11 @@ if __name__ == "__main__":
     except:
         assert False, "Error. search unsuccessful. Case 5"
 
+    # Case 6: Testing to ensure that the proper groups are returned when using .search to retrieve from a dependency
 
     print("\n***** .Search error test case *****")
-    # NEW TEST CASE FOR KENNY
-    # Take a look into the functionality of .search when it comes to groups. This test case will provide the environment
-    # needed to recreate an issue found earlier while using .search with show="dependency.groups" and
-    # query='dependentGroups in ({''})'.format(created_group.pk)
 
     # First we will create a new dataset and group.
-
     # ------------------------------------
     # ---creation of dataset_searchTest---
     # ------------------------------------
@@ -313,7 +309,6 @@ if __name__ == "__main__":
     # ------------------------------------
     # ---creation of group_searchTest---
     # ------------------------------------
-
     container_path1 = "/testpath/group_searchTest"
 
     try:
@@ -348,4 +343,7 @@ if __name__ == "__main__":
                                   ignoreShowKeyError=True)
 
     print("\nReturn value of .search call:", searchResults)
+
+    expectedValue = dep_group_searchTest.pk
+    assert(searchResults.pk == expectedValue), "Expected value not equal to returned value"
 

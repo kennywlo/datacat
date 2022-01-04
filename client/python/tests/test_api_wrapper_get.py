@@ -8,34 +8,26 @@ def main():
     # Testing setup ==========================================================================
     # ========================================================================================
 
-    # Create datasets needed for testing
-    created_datasets = create_datasets()
 
-    dataset001 = created_datasets[0]  # used as container for add_dependents() Case 1.1, Case 2, and remove_dependents()
-    dataset002 = created_datasets[1]
-    dataset003 = created_datasets[2]
-    dataset004 = created_datasets[3]  # without metadata field, used as container for add_dependents() Case 1.2
-    dataset005 = created_datasets[4]
+    # Create datasets needed for testing
+    created_datasets = generate_datasets(10)
+    generate_dependencies(created_datasets)
 
     # Create dataset dependencies
-    create_dataset_dependencies(created_datasets)
+    #create_dataset_dependencies(created_datasets)
 
     # get_dependents() & get_next_dependents() testing starts here ===========================
     # ========================================================================================
-    print("*******TESTING BEGINS*******\n")
+    # **** For (DATASET CONTAINER) ****
+    parent_container = client.path(path=created_datasets[0].path, versionId="current")
 
-    # **** (DATASET CONTAINER) ****
-    parent_container = client.path(path=dataset001.path, versionId="current")
+    # Case D1: Retrieving with a chunk size of 1, one dependent at a time
 
-    # Case D1:
-    # This test case should make sure that if given a DATASET container we can retrieve ONLY DATASET dependents from it
-    # This test case will also make sure that we can continue to retrieve using .get_next_dependents
-
-    print("(Case D1):")
+    print("--------------------------------------------------------------------------------\n")
+    print("(Case D1): Retrieving dependents using a chunk size of 1\n")
 
     # Start dependent retrieval using .get_dependents
-    # (Feel free to modify as to test different depths and chunk sizes)
-    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=10, chunk_size=2))
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=10, chunk_size=1))
     print("Dependents =")
     try:
         for item in dependents:
@@ -44,8 +36,22 @@ def main():
         pass
     print("")
 
-    # Continue the previously started search using .get_next_dependents
-    dependents = (client.get_next_dependents(parent_container))
+    # Continue to retrieve dependents until there are no more left to retrieve
+    while dependents != []:
+        dependents = (client.get_next_dependents(parent_container))
+        print("Dependents =")
+        try:
+            for item in dependents:
+                print("\t" + item.name)
+        except:
+            pass
+        print("")
+    print("--------------------------------------------------------------------------------\n")
+
+    # Case D2: Retrieving with a chunk size of n, In this case three dependents at a time
+    print("(Case D2): Retrieving dependents using a chunk size of 3\n")
+    # Start dependent retrieval using .get_dependents
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=5, chunk_size=3))
     print("Dependents =")
     try:
         for item in dependents:
@@ -53,6 +59,125 @@ def main():
     except:
         pass
     print("")
+
+    # Continue to retrieve dependents until there are no more left to retrieve
+    while dependents != []:
+        dependents = (client.get_next_dependents(parent_container))
+        print("Dependents =")
+        try:
+            for item in dependents:
+                print("\t" + item.name)
+        except:
+            pass
+        print("")
+    print("--------------------------------------------------------------------------------\n")
+
+    # Case D3: Retrieving dependents while only going 1 level deep in depth
+    parent_container = client.path(path=created_datasets[0].path, versionId="current")
+    print("(Case D3): Retrieving dependents while only going 1 level deep in depth\n")
+    # Start dependent retrieval using .get_dependents
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=1, chunk_size=1))
+    print("Dependents =")
+    try:
+        for item in dependents:
+            print("\t" + item.name)
+    except:
+        pass
+    print("")
+
+    # Continue to retrieve dependents until there are no more left to retrieve
+    while dependents != []:
+        dependents = (client.get_next_dependents(parent_container))
+        print("Dependents =")
+        try:
+            for item in dependents:
+                print("\t" + item.name)
+        except:
+            pass
+        print("")
+
+    print("--------------------------------------------------------------------------------\n")
+
+
+    # Case D4: Retrieving from a dependency that is currently not in cache
+    parent_container = client.path(path=created_datasets[0].path, versionId="current")
+    print("(Case D4): Retrieving dependents while only going 'n' levels deep in depth, in this case 3\n")
+    # Start dependent retrieval using .get_dependents
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=3, chunk_size=1))
+    print("Dependents =")
+    try:
+        for item in dependents:
+            print("\t" + item.name)
+    except:
+        pass
+    print("")
+
+    # Continue to retrieve dependents until there are no more left to retrieve
+    while dependents != []:
+        dependents = (client.get_next_dependents(parent_container))
+        print("Dependents =")
+        try:
+            for item in dependents:
+                print("\t" + item.name)
+        except:
+            pass
+        print("")
+
+    print("--------------------------------------------------------------------------------\n")
+
+    last_dataset = len(created_datasets) - 1
+    # Case D5: Retrieving from a dependency that is currently not in cache
+    parent_container = client.path(path=created_datasets[last_dataset].path, versionId="current")
+    print("(Case D5): Retrieving from a dependency that is currently not in cache\n")
+    # Start dependent retrieval using .get_dependents
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=5, chunk_size=3))
+    print("Dependents =")
+    try:
+        for item in dependents:
+            print("\t" + item.name)
+    except:
+        pass
+    print("")
+
+    print("--------------------------------------------------------------------------------\n")
+
+    # Case D6: 50 Levels each with 2 datasets each.
+    # If the last level retrieved matches with the last level saved during the creation of dependencies then we know
+    # that the retrievals are working as intended
+
+    datasets_for_stress_test = generate_datasets(101)
+    last_level_returned = generate_dependencies_stress_test(datasets_for_stress_test)
+    last_level_calculated = []
+    last_level_calculated_datasets = []
+
+    print("(Case D6): Generating 50 levels each with two dependent datasets, testing for proper retrieval of last level ")
+
+    parent_container = client.path(path=datasets_for_stress_test[0].path, versionId="current")
+    dependents = client.get_dependents(parent_container, "predecessor", max_depth=150, chunk_size=2)
+
+    while dependents != []:
+        dependents = (client.get_next_dependents(parent_container))
+
+        if dependents != []:
+            last_level_calculated.clear()
+            last_level_calculated_datasets.clear()
+        try:
+            for item in dependents:
+                last_level_calculated.append(item.versionPk)
+                last_level_calculated_datasets.append(item.name)
+        except:
+            pass
+
+    print("\nLast Level of dependents retrieved")
+    for x in last_level_calculated_datasets:
+        print("\t" + x)
+
+    print("\nComparing expected value to returned value... If no assert failure occurs then the values are a match. ")
+    assert (last_level_calculated == last_level_returned), "Last level not matching... Dependent retrieval incorrect"
+
+
+
+
 
     # Case D2:
     # This test case should make sure that if given a DATASET container we can retrieve ONLY GROUP dependents from it
@@ -89,113 +214,97 @@ def main():
     # *************************************************************************************************************
 
 
-def create_datasets():
-    # ----------------------------
-    # ---creation of dataset001---
-    # ----------------------------
-    datacat_path01 = '/testpath/testfolder'  # Directory we are working in
-    filename01 = "dataset001_82f24.dat"  # Name of dataset to be created
-    metadata01 = Metadata()  # Metadata
-    metadata01['nIsTest'] = 1
-    full_file001 = file_path + '/' + filename01  # ../../../test/data/ + filename
+def generate_datasets(number_to_generate):
 
-    # Check to make sure the dataset doesnt already exist at the provided path
-    if client.exists(datacat_path01 + '/' + filename01):
-        client.rmds(datacat_path01 + '/' + filename01)
+    dataset_return = []
 
-    # Use the client to create a new dataset using the params mentioned above
-    ds001 = client.mkds(datacat_path01, filename01, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata01,
-                        resource=full_file001,
-                        site='SLAC')
-    ds001_version_pk = ds001.versionPk
-    print("created dataset: ", filename01, "(VersionPK = ", ds001_version_pk, ")")
+    for x in range(number_to_generate):
 
-    # ----------------------------
-    # ---creation of dataset002---
-    # ----------------------------
-    datacat_path02 = '/testpath/testfolder'  # Directory we are working in
-    filename02 = "dataset002_92e56.dat"  # Name of dataset to be created
-    metadata02 = Metadata()  # Metadata
-    metadata02['nIsTest'] = 1
-    full_file002 = file_path + '/' + filename02  # ../../../test/data/ + filename
+        datacat_path_generic = '/testpath/testfolder'  # Directory we are working in
+        filename_generic = "dataset_" + str(x) + ".dat"  # Name of dataset to be created
+        metadata_generic = Metadata()  # Metadata
+        metadata_generic['nIsTest'] = 1
+        full_file_generic = file_path + '/' + filename_generic  # ../../../test/data/ + filename
 
-    # Check to make sure the dataset doesnt already exist at the provided path
-    if client.exists(datacat_path02 + '/' + filename02):
-        client.rmds(datacat_path02 + '/' + filename02)
+        # Check to make sure the dataset doesnt already exist at the provided path
+        if client.exists(datacat_path_generic + '/' + filename_generic):
+            client.rmds(datacat_path_generic + '/' + filename_generic)
 
-    # use the client to create dataset002 - DOES NOT initialize dependency metadata
-    ds002 = client.mkds(datacat_path02, filename02, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata02,
-                        resource=full_file002,
-                        site='SLAC')
-    ds002_version_pk = ds002.versionPk
-    print("created dataset: ", filename02, "(VersionPK = ", ds002_version_pk, ")")
+        # Use the client to create a new dataset using the params mentioned above
+        ds_generic = client.mkds(datacat_path_generic, filename_generic, 'JUNIT_TEST', 'junit.test',
+                            versionMetadata=metadata_generic,
+                            resource=full_file_generic,
+                            site='SLAC')
+        ds_generic_version_pk = ds_generic.versionPk
+        print("created dataset: ", filename_generic, "(VersionPK = ", ds_generic_version_pk, ")")
 
-    # ----------------------------
-    # ---creation of dataset003---
-    # ----------------------------
-    datacat_path03 = '/testpath/testfolder'  # Directory we are working in
-    filename03 = "dataset003_0c89c.dat"  # Name of dataset to be created
-    metadata03 = Metadata()  # Metadata
-    metadata03['nIsTest'] = 1
-    full_file003 = file_path + '/' + filename03  # ../../../test/data/ + filename
+        dataset_return.append(ds_generic)
 
-    # Check to make sure the dataset doesnt already exist at the provided path
-    if client.exists(datacat_path03 + '/' + filename03):
-        client.rmds(datacat_path03 + '/' + filename03)
-
-    # use the client to create dataset003 - DOES NOT initialize dependency metadata
-    ds003 = client.mkds(datacat_path03, filename03, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata03,
-                        resource=full_file003,
-                        site='SLAC')
-    ds003_version_pk = ds003.versionPk
-    print("created dataset: ", filename03, "(VersionPK = ", ds003_version_pk, ")")
-
-    # ----------------------------
-    # ---creation of dataset004---
-    # ----------------------------
-    datacat_path04 = '/testpath/testfolder'  # Directory we are working in
-    filename04 = "dataset004_d8080.dat"  # Name of dataset to be created
-    metadata04 = Metadata()  # Metadata
-    metadata04['nIsTest'] = 1
-    full_file004 = file_path + '/' + filename04  # ../../../test/data/ + filename
-
-    # Check to make sure the dataset doesnt already exist at the provided path
-    if client.exists(datacat_path04 + '/' + filename04):
-        client.rmds(datacat_path04 + '/' + filename04)
-
-    # use the client to create dataset004 - DOES NOT initialize dependency metadata
-    ds004 = client.mkds(datacat_path04, filename04, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata04,
-                        resource=full_file004,
-                        site='SLAC')
-    ds004_version_pk = ds004.versionPk
-    print("created dataset: ", filename04, "(VersionPK = ", ds004_version_pk, ")")
+    return dataset_return
 
 
-    # ----------------------------
-    # ---creation of dataset005---
-    # ----------------------------
-    datacat_path05 = '/testpath/testfolder'  # Directory we are working in
-    filename05 = "dataset005_d8080.dat"  # Name of dataset to be created
-    metadata05 = Metadata()  # Metadata
-    full_file005 = file_path + '/' + filename05  # ../../../test/data/ + filename
+def generate_dependencies(list_of_datasets):
 
-    # Check to make sure the dataset doesnt already exist at the provided path
-    if client.exists(datacat_path05 + '/' + filename05):
-        client.rmds(datacat_path05 + '/' + filename05)
+    level_counter = 1
 
-    # use the client to create dataset005 - DOES NOT initialize dependency metadata
-    ds005 = client.mkds(datacat_path05, filename05, 'JUNIT_TEST', 'junit.test',
-                        versionMetadata=metadata05,
-                        resource=full_file005,
-                        site='SLAC')
-    ds005_version_pk = ds005.versionPk
-    print("created dataset: ", filename05, "(VersionPK = ", ds005_version_pk, ")")
+    # Level 1
+    print(len(list_of_datasets))
+    for dataset in range(len(list_of_datasets)-1):
 
-    return [ds001, ds002, ds003, ds004, ds005]
+        try:
+            added_before = client.path(path=list_of_datasets[dataset].path, versionId="current")
+            dataset_to_Patch = client.path(path=list_of_datasets[dataset].path, versionId="current")
+            dependents = [list_of_datasets[dataset+1]]
+            add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
+                                                   dep_datasets=dependents)
+
+            if(add_dependents):
+                added_after = client.path(path=list_of_datasets[dataset].path, versionId="current")
+                add_dpks = []
+                for dependent in dependents:
+                    add_dpks.append(dependent.versionPk)
+                print("\nLevel: " + str(level_counter))
+                print("Dependents added:", add_dpks, "\n@ " + list_of_datasets[dataset].path + ";v=current\n")
+                level_counter = level_counter + 1
+        except:
+            assert False, "dependent addition unsuccessful"
+
+
+# This will add two dependents per level instead of the original 1 dataset per level.
+# We can use this to test the accuracy of the get methods
+def generate_dependencies_stress_test(list_of_datasets):
+
+    last_level_of_dependents = []
+    level_counter = 1
+
+    # Level 1
+    print(len(list_of_datasets))
+    for datasetIndex in range(0, len(list_of_datasets)-1, 2):
+
+        try:
+            added_before = client.path(path=list_of_datasets[datasetIndex].path, versionId="current")
+            dataset_to_Patch = client.path(path=list_of_datasets[datasetIndex].path, versionId="current")
+            dependents = [list_of_datasets[datasetIndex+1], list_of_datasets[datasetIndex+2]]
+            last_level_of_dependents.clear()
+            for x in dependents:
+                last_level_of_dependents.append(x.versionPk)
+            add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
+                                                   dep_datasets=dependents)
+
+            if(add_dependents):
+                added_after = client.path(path=list_of_datasets[datasetIndex].path, versionId="current")
+                add_dpks = []
+                for dependent in dependents:
+                    add_dpks.append(dependent.versionPk)
+
+                print("\nLevel: " + str(level_counter))
+                print("Dependents added:", add_dpks, "\n@ " + list_of_datasets[datasetIndex].path + ";v=current\n")
+                level_counter = level_counter + 1
+
+        except:
+            assert False, "dependent addition unsuccessful"
+
+    return last_level_of_dependents
 
 
 def create_groups():
@@ -213,49 +322,6 @@ def create_groups():
         assert False, "Group creation failed"
 
 
-def create_dataset_dependencies(created_datasets):
-
-    dataset001 = created_datasets[0]  # used as container for add_dependents() Case 1.1, Case 2, and remove_dependents()
-    dataset002 = created_datasets[1]
-    dataset003 = created_datasets[2]
-    dataset004 = created_datasets[3]  # without metadata field, used as container for add_dependents() Case 1.2
-    dataset005 = created_datasets[4]
-
-    try:
-        added_before = client.path(path=dataset001.path, versionId="current")
-        dataset_to_Patch = client.path(path=dataset001.path, versionId="current")
-        dependents = [dataset002, dataset003]
-        add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
-                                               dep_datasets=dependents)
-
-        if(add_dependents):
-            added_after = client.path(path=dataset001.path, versionId="current")
-            add_dpks = []
-            for dependent in dependents:
-                add_dpks.append(dependent.versionPk)
-
-            print("\nDependents added:", add_dpks, "\n@ " + dataset001.path + ";v=current\n")
-    except:
-        assert False, "dependent addition unsuccessful"
-
-    try:
-        added_before = client.path(path=dataset003.path, versionId="current")
-        dataset_to_Patch = client.path(path=dataset003.path + ";v=current")
-        dependents = [dataset004]
-        add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
-                                               dep_datasets=dependents)
-
-        if(add_dependents):
-            added_after = client.path(path=dataset003.path + ";v=current")
-            add_dpks = []
-            for dependent in dependents:
-                add_dpks.append(dependent.versionPk)
-
-            print("Dependents added:", add_dpks, "\n@ " + dataset003.path + ";v=current\n")
-    except:
-        assert False, "dependent addition unsuccessful"
-
-    return dataset001, dataset002, dataset003, dataset004, dataset005
 
 
 
