@@ -59,7 +59,7 @@ def main():
     *** The following are dataset as container tests ***
     ****************************************************
     """
-
+    enable_assertion = True
 
     # Case 1.1 (general dataset) dataset doesn't have dependency metadata -> add dependency metadata
     try:
@@ -139,12 +139,15 @@ def main():
         update_dependents = [group1_3]
         add_dependents = client.add_dependents(dep_container=dataset_to_patch, dep_type="successor",
                                                dep_groups=update_dependents)
-        added_after = client.path(path=dataset003_3.path, versionId="current")
-        expected = OrderedDict([('nIsTest', 1.0), ('successor.group', '{}'.format(group1_3.pk))])
+        added_after = client.path(path=dataset_to_patch.path + ";versionMetadata=dependents",
+                                  versionId=dataset_to_patch.versionId)
+        expected = {'successor.group': str(update_dependents[0].pk)}
+        added_after = dict(added_after)
 
-        # if not check_ordereddict(expected, added_after.versionMetadata):
-        #     assert False, "Case 3.1 dataset dependent addition result is " \
-        #               "not as expected: {}.\nExpected: {}".format(added_after.versionMetadata, expected)
+        if enable_assertion:
+            assert expected['successor.group'] == added_after['successor.group'], \
+                "Case 3.1 dataset dependent addition result is not as expected: {}.\nExpected: {}".format(added_after,
+                                                                                                          expected)
 
         if add_dependents:
             update_gpks = client.get_dependent_id(update_dependents)
@@ -176,15 +179,16 @@ def main():
             added_after = client.path(path=dataset_to_patch.path + ";versionMetadata=dependents",
                                       versionId=dataset_to_patch.versionId)
             added_after = dict(added_after)
-            assert expected['successor.dataset'] == added_after['successor.dataset'] and \
-                   expected['successor.group'] == added_after['successor.group'], "Case 3.2 dataset dependent " \
-                                                                                  "addition result is not as expected: {}.\nExpected: {}".format(
-                added_after, expected)
+            if enable_assertion:
+                assert expected['successor.dataset'] == added_after['successor.dataset'] and \
+                       expected['successor.group'] == added_after['successor.group'], "Case 3.2 dataset dependent " \
+                                                                                      "addition result is not as expected: {}.\nExpected: {}".format(
+                    added_after, expected)
             print("Case 3.2 dependent update successful:")
             print("CONTAINER DATASET NAME:", dataset_to_patch.name)
             print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
             print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
-            print("OLD METADATA OUTPUT:", added_before)
+            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
             print("UPDATED METADATA OUTPUT:", added_after)
             print("\n")
     except:
@@ -209,9 +213,12 @@ def main():
             update_dpks = client.get_dependent_id(update_dependents)
             expected = {'predecessor.dataset': '{},{}'.format(update_dpks[0], update_dpks[1])}
             added_after = client.path(path='/testpath/depGroup1_4;metadata=dependents')
+            added_after = dict(added_after)
 
-            if not check_list(expected, added_after):
-                assert False, "Case 4.1 group dependent addition result is not as expected: {}.\nExpected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'], \
+                    "Case 4.1 group dependent addition result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 4.1 group dependent addition successful:")
             print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
@@ -240,10 +247,10 @@ def main():
             expected = {
                 'predecessor.group': '{}'.format(update_gpks[0])
             }
-
-            assert added_after['predecessor.group'] == expected['predecessor.group'], \
-                "Case 4.2 group dependent addition result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after['predecessor.group'] == expected['predecessor.group'], \
+                    "Case 4.2 group dependent addition result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 4.2 group dependent addition successful:")
             print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
@@ -278,12 +285,12 @@ def main():
                         'predecessor.group': '{}'.format(update_gpks[0])
                         }
 
-
-            assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                   added_after['predecessor.group'] == expected['predecessor.group'] and \
-                   'successor.group' not in added_after, \
-                "Case 4.3 group dependent addition result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
+                       added_after['predecessor.group'] == expected['predecessor.group'] and \
+                       'successor.group' not in added_after, \
+                    "Case 4.3 group dependent addition result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 4.3 group dependent addition successful:")
             print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
@@ -318,11 +325,11 @@ def main():
                 'dependencyName': '{}'.format(group_to_patch.path),
                 'predecessor.dataset': expected_predecessor_dataset_str
             }
-
-            assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                   'successor.dataset' not in added_after, \
-                "Case 5.1 group dependent addition result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
+                       'successor.dataset' not in added_after, \
+                    "Case 5.1 group dependent addition result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 5.1 group dependent addition successful:")
             print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
@@ -353,12 +360,12 @@ def main():
             expected_v2 = {'predecessor.group': '{},{}'.format(update_dpks[0], group_md['predecessor.group'])}
             added_after = client.path(path='/testpath/depGroup2_4;metadata=dependents')
             added_after = dict(added_after)
-
-            assert (added_after['predecessor.group'] == expected['predecessor.group']
-                   or added_after['predecessor.group'] == expected_v2['predecessor.group']) and \
-                   'successor.dataset' not in added_after, \
-                "Case 5.2 group dependent addition result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert (added_after['predecessor.group'] == expected['predecessor.group']
+                        or added_after['predecessor.group'] == expected_v2['predecessor.group']) and \
+                       'successor.dataset' not in added_after, \
+                    "Case 5.2 group dependent addition result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 5.2 group dependent addition successful:")
             print("DEPENDENT DATASETS TO BE ADDED:", update_dpks)
@@ -395,12 +402,12 @@ def main():
 
             expected = {'predecessor.dataset': expected_predecessor_dataset_str,
                         'predecessor.group': expected_predecessor_group_str}
-
-            assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                   added_after['predecessor.group'] == expected['predecessor.group'] and \
-                   'successor.group' not in added_after, \
-                "Case 5.3 group dependent addition result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
+                       added_after['predecessor.group'] == expected['predecessor.group'] and \
+                       'successor.group' not in added_after, \
+                    "Case 5.3 group dependent addition result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 5.3 group dependent addition successful:")
             print("DEPENDENT GROUPS TO BE ADDED:", update_gpks)
@@ -436,11 +443,11 @@ def main():
                 'successor.dataset': added_before.versionMetadata['successor.dataset'],
                 'predecessor.dataset': expected_predecessor_dataset_str
             }
-
-            assert added_after.versionMetadata['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                   added_after.versionMetadata['successor.dataset'] == expected['successor.dataset'], \
-                "Case 1.1 dependent removal result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after.versionMetadata['predecessor.dataset'] == expected['predecessor.dataset'] and \
+                       added_after.versionMetadata['successor.dataset'] == expected['successor.dataset'], \
+                    "Case 1.1 dependent removal result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
 
             print("Dataset dependents to be removed:", remove_dpks)
@@ -462,10 +469,11 @@ def main():
             remove_dpks = client.get_dependent_id(remove_dependents)
             added_after = client.path(path=dataset001_1.path, versionId="current")
             print("Dataset dependents to be removed:", remove_dpks)
-            if "predecessor.dataset" in added_after.versionMetadata:
-                assert False, "Dependents are not completely removed. " \
-                              "{} remains in versionMetadata." \
-                    .format(added_after.versionMetadata["predecessor.dataset"])
+            if enable_assertion:
+                if "predecessor.dataset" in added_after.versionMetadata:
+                    assert False, "Dependents are not completely removed. " \
+                                  "{} remains in versionMetadata." \
+                        .format(added_after.versionMetadata["predecessor.dataset"])
 
             print("Case 1.2 dependent removal successful:")
             print("OLD METADATA OUTPUT:", added_before.versionMetadata)
@@ -490,11 +498,11 @@ def main():
             expected = {
                 'dependencyName': '/testpath/testfolder/dataset001_1.dat;v=0'
             }
-
-            assert 'predecessor.group' not in added_after.versionMetadata and \
-                    'successor.dataset' not in added_after.versionMetadata, \
-                "Case 1.1 dependent removal result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after.versionMetadata, expected)
+            if enable_assertion:
+                assert 'predecessor.group' not in added_after.versionMetadata and \
+                       'successor.dataset' not in added_after.versionMetadata, \
+                    "Case 1.1 dependent removal result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after.versionMetadata, expected)
 
             print("Case 1.3 dependent removal successful:")
             print("DEPENDENT GROUPS TO BE REMOVED:", remove_gpks)
@@ -505,6 +513,44 @@ def main():
     except:
         assert False, "Case 1.3 dependents removal unsuccessful"
 
+    # Case 1.4 remove group AND dataset from dataset container
+    try:
+        added_before = client.path(path=dataset002_3.path, versionId="current")
+        dataset_to_patch = client.path(path=dataset002_3.path, versionId="current")
+        remove_dependent_datasets = [dataset003_3]
+        remove_dependent_groups = [group2_3]
+        add_dependents = client.remove_dependents(dep_container=dataset_to_patch,
+                                               dep_type="successor",
+                                               dep_datasets=remove_dependent_datasets,
+                                               dep_groups=remove_dependent_groups)
+
+        if add_dependents:
+            remove_gpks = []
+            remove_dpks = []
+            for dependent in remove_dependent_groups:
+                remove_gpks.append(dependent.pk)
+            for dependent in remove_dependent_datasets:
+                remove_dpks.append(dependent.versionPk)
+
+            added_after = client.path(path=dataset002_3.path, versionId="current")
+            expected = {
+                'dependencyName': '/testpath/testfolder/dataset002_3.dat;v=0'
+            }
+            if enable_assertion:
+                assert 'successor.group' not in added_after.versionMetadata and \
+                       'successor.dataset' not in added_after.versionMetadata, \
+                    "Case 1.4 dependent removal result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after.versionMetadata, expected)
+
+            print("Case 1.4 dependent removal successful:")
+            print("DEPENDENT GROUPS TO BE REMOVED:", remove_gpks)
+            print("DEPENDENT DATASETS TO BE REMOVED:", remove_dpks)
+            print("CONTAINER DATASET NAME:", added_before.name)
+            print("OLD METADATA OUTPUT:", added_before.versionMetadata)
+            print("UPDATED METADATA OUTPUT:", added_after.versionMetadata)
+            print("\n")
+    except:
+        assert False, "Case 1.4 dependents removal unsuccessful"
     # Case 2.1 remove dataset from group container
     try:
         added_before = client.path(path='/testpath/depGroup1_4')
@@ -523,9 +569,10 @@ def main():
 
             added_after = client.path(path='/testpath/depGroup1_4;metadata=dependents')
             added_after = dict(added_after)
-            assert added_after['predecessor.dataset'] == expected['predecessor.dataset'], \
-                "Case 2.1 group dependent addition result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'], \
+                    "Case 2.1 group dependent addition result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 2.1 group dependent removal successful:")
             print("DEPENDENT DATASETS TO BE REMOVE:", update_dpks)
@@ -554,11 +601,11 @@ def main():
 
             expected_predecessor_group_str = group_md['predecessor.group'].replace(str(update_gpks[0]) + ',', '')
             expected = {'predecessor.group': expected_predecessor_group_str}
-
-            assert added_after['predecessor.group'] == expected['predecessor.group'] and \
-                   'successor.group' not in added_after, \
-                "Case 2.2 group dependent removal result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after['predecessor.group'] == expected['predecessor.group'] and \
+                       'successor.group' not in added_after, \
+                    "Case 2.2 group dependent removal result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 2.2 group dependent removal successful:")
             print("DEPENDENT GROUPS TO BE REMOVE:", update_gpks)
@@ -598,13 +645,13 @@ def main():
             expected = {'predecessor.group': expected_predecessor_group_str,
                         'predecessor.dataset': expected_predecessor_dataset_str
                         }
-
-            assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                   added_after['predecessor.group'] == expected['predecessor.group'] and \
-                   'successor.group' not in added_after and \
-                   'successor.dataset' not in added_after, \
-                "Case 4.3 group dependent addition result is not as expected: {}.\n" \
-                "Expected: {}".format(added_after, expected)
+            if enable_assertion:
+                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
+                       added_after['predecessor.group'] == expected['predecessor.group'] and \
+                       'successor.group' not in added_after and \
+                       'successor.dataset' not in added_after, \
+                    "Case 4.3 group dependent addition result is not as expected: {}.\n" \
+                    "Expected: {}".format(added_after, expected)
 
             print("Case 2.3 group dependent removal successful:")
             print("DEPENDENT GROUPS TO BE REMOVED:", update_gpks)
