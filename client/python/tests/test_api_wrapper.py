@@ -287,8 +287,7 @@ def main():
 
             if enable_assertion:
                 assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                       added_after['predecessor.group'] == expected['predecessor.group'] and \
-                       'successor.group' not in added_after, \
+                       added_after['predecessor.group'] == expected['predecessor.group'],\
                     "Case 4.3 group dependent addition result is not as expected: {}.\n" \
                     "Expected: {}".format(added_after, expected)
 
@@ -404,8 +403,7 @@ def main():
                         'predecessor.group': expected_predecessor_group_str}
             if enable_assertion:
                 assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                       added_after['predecessor.group'] == expected['predecessor.group'] and \
-                       'successor.group' not in added_after, \
+                       added_after['predecessor.group'] == expected['predecessor.group'], \
                     "Case 5.3 group dependent addition result is not as expected: {}.\n" \
                     "Expected: {}".format(added_after, expected)
 

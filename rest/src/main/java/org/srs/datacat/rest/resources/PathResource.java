@@ -39,6 +39,7 @@ import org.srs.datacat.model.security.CallContext;
 
 import org.srs.datacat.rest.BaseResource;
 import org.srs.datacat.shared.DatacatObject;
+import org.srs.datacat.shared.DatasetGroup;
 import org.srs.datacat.shared.FlatDataset;
 import org.srs.datacat.shared.RequestView;
 import static org.srs.datacat.rest.BaseResource.OPTIONAL_EXTENSIONS;
@@ -181,12 +182,17 @@ public class PathResource extends BaseResource {
                     if(rv.containsKey("metadata") && ret instanceof HasMetadata){
                         entries = MetadataEntry.toList(((HasMetadata) ret).getMetadataMap());
                         List<String> dep = matrixParams.get("metadata");
-                        if (!dep.isEmpty() && dep.get(0).contains("dependents")){
+                        String dependentType = "";
+                        if (!dep.isEmpty()){
+                            dependentType = "*";
+                            if (dep.get(0).contains("dependents.")){
+                                dependentType = dep.get(0).replace("dependents.", "");
+                            }else if (dep.get(0).contains("dependency.")){
+                                dependentType = dep.get(0).replace("dependency.", "");
+                            }
+                        }
+                        if (!dependentType.isEmpty()){
                             try {
-                                String dependentType = "*";
-                                if (dep.get(0).contains(".")){
-                                    dependentType = dep.get(0).replace("dependents.", "");
-                                }
                                 DatacatObject.Builder builder = new DatacatObject.Builder();
                                 if (ret instanceof  FlatDataset) {
                                     builder.pk(((FlatDataset) ret).getVersionPk());
@@ -203,10 +209,11 @@ public class PathResource extends BaseResource {
                                              (String) retmap.get("dependencyGroups"));
                                          entries.add(entry);
                                      }
-                                } else{
-                                    retmap = SearchUtils.getDependentsByType(conn, "dependency",
+                                } else {
+                                    String depContainer = ret instanceof DatasetGroup ? "dependencyGroup":"dependency";
+                                    retmap = SearchUtils.getDependentsByType(conn, depContainer,
                                         "dependent", builder.pk, dependentType);
-                                    retmap2 =SearchUtils.getDependentsByType(conn, "dependency",
+                                    retmap2 =SearchUtils.getDependentsByType(conn, depContainer,
                                         "dependentGroup", builder.pk, dependentType);
                                     if (!retmap2.isEmpty()){
                                         retmap.putAll(retmap2);

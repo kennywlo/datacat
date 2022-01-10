@@ -211,7 +211,7 @@ public class DatasetSearch {
         
         if(retrieveFields.isPresent()){
             for(String s: retrieveFields.get()){
-                if (s.contains("dependents")) {
+                if (s.contains("dependents") || s.contains("dependency")) {
                     String[] deps = s.split("\\.");
                     if (deps.length == 1) {
                         // default: All

@@ -99,7 +99,7 @@ public final class SearchUtils {
         ArrayList<DatasetLocationModel> locations = new ArrayList<>();
         HashMap<String, Object> metadata = new HashMap<>();
         for(String s: includedMetadata){
-            if (s.contains("dependency")){
+            if (s.contains("dependency") || s.contains("dependents")){
                 String[] deps = s.split("\\.");
                 Map<String, Object> retmap, retmap2;
                 if (deps[1].equals("groups")){
