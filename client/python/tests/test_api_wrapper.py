@@ -492,14 +492,14 @@ def main():
             remove_gpks = []
             for dependent in remove_dependents:
                 remove_gpks.append(dependent.pk)
-            added_after = client.path(path=dataset001_1.path, versionId="current")
+            added_after = client.path(path=dataset001_3.path, versionId="current")
             expected = {
-                'dependencyName': '/testpath/testfolder/dataset001_1.dat;v=0'
+                'dependencyName': '/testpath/testfolder/dataset001_3.dat;v=0'
             }
             if enable_assertion:
                 assert 'predecessor.group' not in added_after.versionMetadata and \
                        'successor.dataset' not in added_after.versionMetadata, \
-                    "Case 1.1 dependent removal result is not as expected: {}.\n" \
+                    "Case 1.3 dependent removal result is not as expected: {}.\n" \
                     "Expected: {}".format(added_after.versionMetadata, expected)
 
             print("Case 1.3 dependent removal successful:")
