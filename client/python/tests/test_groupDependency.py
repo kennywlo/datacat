@@ -337,7 +337,7 @@ if __name__ == "__main__":
     # Now we will use .search to try and retrieve the dependent group using "dependency.groups" and a query.
     # This will be the issue as the return value is empty
 
-    searchResults = client.search(target="/testpath/testfolder/dataset001_82f24.dat;v=current",
+    searchResults = client.search(target=ds_searchTest.path + ";v=current",
                                   show="dependency.groups",
                                   query='dependentGroups in ({''})'.format(dep_group_searchTest.pk),
                                   ignoreShowKeyError=True)
