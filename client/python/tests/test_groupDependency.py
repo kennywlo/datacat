@@ -316,7 +316,7 @@ if __name__ == "__main__":
             client.rmdir(container_path1, type="group")
 
         client.mkgroup(container_path1)
-        dep_group_searchTest = client.path(path='/testpath/group_searchTest;v=current')
+        dep_group_searchTest = client.path(path='/testpath/group_searchTest', versionId='current')
         print("created group: ", dep_group_searchTest.name, "(VersionPK = ",dep_group_searchTest.pk, ")")
     except:
         assert False, "Group creation failed"
@@ -325,21 +325,22 @@ if __name__ == "__main__":
 
     print("\nAdding group dependents")
     added_before = client.path(path=ds_searchTest.path, versionId="current")
-    print("\t",added_before.versionMetadata)
+    print("\t", added_before.versionMetadata)
 
     update_dependents = [dep_group_searchTest]
     client.add_dependents(dep_container=ds_searchTest, dep_type="predecessor",
                           dep_groups=update_dependents)
 
     added_after = client.path(path=ds_searchTest.path, versionId="current")
-    print("\t",added_after.versionMetadata)
+    print("\t", added_after.versionMetadata)
 
     # Now we will use .search to try and retrieve the dependent group using "dependency.groups" and a query.
     # This will be the issue as the return value is empty
 
-    searchResults = client.search(target=ds_searchTest.path + ";v=current",
+    searchResults = client.search(target=ds_searchTest.path,
+                                  versionId="current",
                                   show="dependency.groups",
-                                  query='dependentGroups in ({''})'.format(dep_group_searchTest.pk),
+                                  query='dependentGroups in ({})'.format(dep_group_searchTest.pk),
                                   ignoreShowKeyError=True)
 
     print("\nReturn value of .search call:", searchResults)
