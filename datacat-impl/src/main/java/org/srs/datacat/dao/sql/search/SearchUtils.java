@@ -167,14 +167,26 @@ public final class SearchUtils {
 
         HashMap<String, Object> metadata = new HashMap<>();
         for(String s: includedMetadata){
-            if (s.contains("dependency")){
+            if (s.contains("dependency") || s.contains("dependents")){
                 String[] deps = s.split("\\.");
                 Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, "dependency",
                     "dependent", rs.getLong("pk"), deps[1]);
-                metadata.putAll(depmap);
-                depmap = SearchUtils.getDependentsByType(conn, "dependency",
-                    "dependentGroup", rs.getLong("pk"), deps[1]);
-                metadata.putAll(depmap);
+                depmap.putAll(SearchUtils.getDependentsByType(conn, "dependency",
+                    "dependentGroup", rs.getLong("pk"), deps[1]));
+                if (!depmap.isEmpty()){
+                    metadata.putAll(depmap);
+                    String path;
+                    if (s.contains("groups")) {
+                        path = SearchUtils.getDependencyGroupPath(conn, rs.getLong("pk"));
+                        builder.type(RecordType.GROUP);
+                    } else{
+                        path = SearchUtils.getDependencyPath(conn, rs.getLong("pk"));
+                    }
+                    if (!path.isEmpty()) {
+                        builder.path(path);
+                        metadata.put("dependencyName", path);
+                    }
+                }
                 continue;
             }
             Object o = rs.getObject(s);
@@ -508,12 +520,25 @@ public final class SearchUtils {
             if (rs.next()){
                 dependencyPath = rs.getString("dependencyName");
             }
-            if (!rs.next()){
-                rs.close();
-            }
+            rs.close();
         }
         return dependencyPath;
     }
+
+    public static String getDependencyGroupPath(Connection conn, long dependency) throws SQLException {
+        String sql = "SELECT dependencyName from DatasetDependency WHERE DependencyGroup = ?";
+        String dependencyPath = "";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, dependency);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()){
+                dependencyPath = rs.getString("dependencyName");
+            }
+            rs.close();
+        }
+        return dependencyPath;
+    }
+
 
     public static boolean checkDependents(Connection conn,
                                           String dependencyContainer,
@@ -533,9 +558,7 @@ public final class SearchUtils {
                     break;
                 }
             }
-            if(!rs.next()){
-                rs.close();
-            }
+            rs.close();
         }
         return found;
     }
@@ -557,7 +580,7 @@ public final class SearchUtils {
     public static Map<String, Object> getDependentsByType(Connection conn, String dependencyContainer,
                                                           String dependent,  Long dependency,
                                                           String type) throws SQLException {
-        if (type.isEmpty() || type.equals("*")) {
+        if (type.isEmpty() || type.equals("*") || type.equals("groups")) {
             return SearchUtils.getDependents(conn, dependencyContainer, dependent, dependency);
         }
         String sql = "SELECT dependencyName, " + dependent + " FROM DatasetDependency WHERE " +
@@ -571,6 +594,7 @@ public final class SearchUtils {
             while (rs.next()) {
                 dependents.add(rs.getLong(dependent));
             }
+            rs.close();
             // locate more dependents by the reciprocal nature of the relation
             if (Arrays.asList("predecessor", "successor").contains(type)) {
                 Long[] moreDependents = SearchUtils.getReciprocalDependents(conn, dependencyContainer, dependent,
@@ -614,6 +638,7 @@ public final class SearchUtils {
             while (rs.next()) {
                 dependents.add(rs.getLong(dependencyContainer));
             }
+            rs.close();
             return dependents.toArray(new Long[0]);
         }
     }
@@ -631,6 +656,7 @@ public final class SearchUtils {
                     dependentTypes.add(dt);
                 }
             }
+            rs.close();
             // Check other types by reciprocal relation
             String[] moreDependentTypes = SearchUtils.getDependentTypeReciprocal(conn, "dependent", dependency);
             for (String dt: moreDependentTypes) {
@@ -662,6 +688,7 @@ public final class SearchUtils {
                     types.add(dtR);
                 }
             }
+            rs.close();
             return types.toArray(new String[types.size()]);
         }
     }
@@ -678,6 +705,7 @@ public final class SearchUtils {
                 String sep = dependencyGroups.length() == 0 ? "":",";
                 dependencyGroups.append(sep).append(rs.getString("dependencyName"));
             }
+            rs.close();
             if (!dependencyGroups.toString().equals("")){
                 verMetadata.put("dependencyGroups", dependencyGroups.toString());
             }

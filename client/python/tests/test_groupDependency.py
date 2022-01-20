@@ -317,7 +317,7 @@ if __name__ == "__main__":
 
         client.mkgroup(container_path1)
         dep_group_searchTest = client.path(path='/testpath/group_searchTest', versionId='current')
-        print("created group: ", dep_group_searchTest.name, "(VersionPK = ",dep_group_searchTest.pk, ")")
+        print("created group: ", dep_group_searchTest.name, "(pk = ", dep_group_searchTest.pk, ")")
     except:
         assert False, "Group creation failed"
 
@@ -338,13 +338,12 @@ if __name__ == "__main__":
     # This will be the issue as the return value is empty
 
     searchResults = client.search(target=ds_searchTest.path,
-                                  versionId="current",
                                   show="dependency.groups",
-                                  query='dependentGroups in ({})'.format(dep_group_searchTest.pk),
+                                  containerFilter='dependentGroups in ({})'.format(dep_group_searchTest.pk),
                                   ignoreShowKeyError=True)
 
-    print("\nReturn value of .search call:", searchResults)
+    print("\nReturn value of client.search call:", searchResults)
 
     expectedValue = dep_group_searchTest.pk
-    assert(searchResults.pk == expectedValue), "Expected value not equal to returned value"
+    assert(searchResults[0].pk == expectedValue), "Expected value not equal to returned value"
 

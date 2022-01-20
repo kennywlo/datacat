@@ -76,7 +76,7 @@ public class DatasetSearch {
                     ignoreShowKeyError);
             if (!dependentSearch.isEmpty()){
                 // if no containers, skip the dependency check
-                boolean found = containers.iterator().hasNext()? false: true;
+                boolean found = !containers.iterator().hasNext();
                 for(DatacatNode container: containers) {
                     String dependent = dependentSearch.equals("dependents")? "dependent": "dependentGroup";
                     if (SearchUtils.checkDependents(this.conn, "dependencyGroup", dependent,
@@ -302,7 +302,7 @@ public class DatasetSearch {
                 return "datasetVersion";
             case "dependentGroups":
                 this.dependentSearch = ident;
-                return "datasetGroup";
+                return "pk";
             default:
                 return ident;
         }

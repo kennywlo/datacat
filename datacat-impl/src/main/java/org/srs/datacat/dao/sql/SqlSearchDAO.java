@@ -43,9 +43,9 @@ public class SqlSearchDAO extends SqlBaseDAO implements org.srs.datacat.dao.Sear
     @Override
     public DirectoryStream<DatasetContainer> searchContainers(DirectoryStream<DatacatNode> containers,
             String query, String[] retrieveFields,
-            String[] sortFields) throws ParseException, IOException{
+            String[] sortFields, boolean ignoreShowKeyError) throws ParseException, IOException{
         ContainerSearch search = new ContainerSearch(super.getConnection(), new Provider());
-        return search.search(containers, query, retrieveFields, sortFields);
+        return search.search(containers, query, retrieveFields, sortFields, ignoreShowKeyError);
     }
 
 }

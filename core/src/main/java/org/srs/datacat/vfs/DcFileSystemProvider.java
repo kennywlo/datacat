@@ -510,15 +510,13 @@ public class DcFileSystemProvider {
      * @throws ParseException 
      */
     public DirectoryStream<DatasetModel> search(List<String> pathPatterns, CallContext context,
-            DatasetView datasetView, String query,
-            String containerQuery,
-            String[] retrieveFields, String[] sortFields,
-                                                boolean ignoreShowKeyError) throws IOException, ParseException{
+            DatasetView datasetView, String query, String containerQuery, String[] retrieveFields, String[] sortFields,
+            boolean ignoreShowKeyError) throws IOException, ParseException{
 
         final DirectoryStream<? extends DatacatNode> targetContainers;
         if(containerQuery != null){
-            targetContainers =
-                    searchContainers(pathPatterns, context, containerQuery, null, null);
+            targetContainers = searchContainers(pathPatterns, context, containerQuery, null, null,
+                        ignoreShowKeyError);
         } else {
             targetContainers = Utils.getStream(walk(pathPatterns, context));
         }
@@ -570,21 +568,21 @@ public class DcFileSystemProvider {
      * @param query A Query String
      * @param retrieveFields Metadata fields to retrieve
      * @param sortFields Fields to sort on.
+     * @param ignoreShowKeyError flag for displaying error in Retrieve fields
      * @return Stream of datasets. Make sure to close the stream when done.
      */
-    public DirectoryStream<DatasetContainer> searchContainers(List<String> pathPatterns,
-            CallContext context,
-            String query, String[] retrieveFields, String[] sortFields) throws IOException, ParseException{
+    public DirectoryStream<DatasetContainer> searchContainers(List<String> pathPatterns, CallContext context,
+            String query, String[] retrieveFields, String[] sortFields, boolean ignoreShowKeyError)
+        throws IOException, ParseException{
         
         LinkedList<DatacatNode> results = walk(pathPatterns, context);
-        
         final SearchDAO dao = daoFactory.newSearchDAO();
-
         final DirectoryStream<DatasetContainer> search;
 
         // The retrieval of the DirectoryStream can fail, so we should clean up if that happens
         try {
-            search = dao.searchContainers(Utils.getStream(results), query, retrieveFields, sortFields);
+            search = dao.searchContainers(Utils.getStream(results), query, retrieveFields, sortFields,
+                ignoreShowKeyError);
         } catch(ParseException | IllegalArgumentException | IOException ex) {
             dao.close();
             throw ex;
@@ -616,7 +614,8 @@ public class DcFileSystemProvider {
             if(searchBase.equals(pathPattern)){
                 results.add(getFile(getPath(searchBase), context).getObject());
             } else {
-                ContainerVisitor visitor = new ContainerVisitor(pathPattern, false, true, results);
+                boolean searchGroups = pathPattern.equals("/**^");
+                ContainerVisitor visitor = new ContainerVisitor(pathPattern, searchGroups, true, results);
                 DirectoryWalker walker = new DirectoryWalker(this, visitor, 100 /* max depth */);
                 walker.walk(getPath(searchBase), context);
             }

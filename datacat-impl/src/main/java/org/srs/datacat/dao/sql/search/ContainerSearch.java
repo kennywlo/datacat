@@ -29,6 +29,8 @@ import org.srs.datacat.model.DatasetContainer;
 import org.srs.datacat.model.ModelProvider;
 import org.zerorm.core.Column;
 import static org.zerorm.core.Op.$;
+
+import org.zerorm.core.Op;
 import org.zerorm.core.Select;
 import org.zerorm.core.Table;
 import org.zerorm.core.interfaces.MaybeHasAlias;
@@ -45,6 +47,7 @@ public class ContainerSearch {
     private Connection conn;
     private Select selectStatement;
     private ModelProvider modelProvider;
+    private String dependentSearch = "";
 
     public ContainerSearch(Connection conn, ModelProvider modelProvider,
             Class<? extends DatacatPlugin>... plugins) throws IOException{
@@ -55,12 +58,14 @@ public class ContainerSearch {
     }
 
     public DirectoryStream<DatasetContainer> search(DirectoryStream<DatacatNode> containers, String query,
-            String[] metaFieldsToRetrieve, String[] sortFields) throws ParseException, IOException{
+            String[] metaFieldsToRetrieve, String[] sortFields, boolean ignoreShowKeyError)
+        throws ParseException, IOException{
         try {
             compileStatement(containers,
                     Optional.fromNullable(query),
                     Optional.fromNullable(metaFieldsToRetrieve),
-                    Optional.fromNullable(sortFields));
+                    Optional.fromNullable(sortFields),
+                    ignoreShowKeyError);
             return retrieveContainers();
         } catch(SQLException ex) {
             throw new IOException("Error retrieving results", ex);
@@ -78,7 +83,8 @@ public class ContainerSearch {
     protected Select compileStatement(DirectoryStream<DatacatNode> containers,
             Optional<String> query,
             Optional<String[]> retrieveFields,
-            Optional<String[]> sortFields) throws ParseException, SQLException, IOException{
+            Optional<String[]> sortFields,
+            boolean ignoreShowKeyError) throws ParseException, SQLException, IOException{
         DatasetContainers dsc = prepareDatasetContainers();
         // Prepare Search Context
         DatacatSearchContext sd = new DatacatSearchContext(dsc, plugins, dmc);
@@ -102,14 +108,15 @@ public class ContainerSearch {
         }
 
         Table containerSearch = new Table("ContainerSearch", "cp");
-
-        this.selectStatement = containerSearch
-                .select(containerSearch.$("ContainerPath"))
-                .join(dsc, $("dsc.pk").eq(containerSearch.$("DatasetLogicalFolder"))) // TODO: fix bug in zerorm
-                .selection(dsc.getColumns());
+        this.selectStatement = containerSearch.select(containerSearch.$("ContainerPath")).join(dsc,
+            Op.or(
+                $("dsc.pk").eq(containerSearch.$("DatasetLogicalFolder")),
+                $("dsc.pk").eq(containerSearch.$("DatasetGroup"))
+            )
+        ).selection(dsc.getColumns());
 
         //handleSortFields(sd, dsc, sortFields);
-        handleRetrieveFields(sd, dsc, retrieveFields);
+        handleRetrieveFields(sd, dsc, retrieveFields, ignoreShowKeyError);
 
         return selectStatement;
     }
@@ -146,10 +153,12 @@ public class ContainerSearch {
                 return "path";
             case "size":
                 return "fileSizeBytes";
-            case "dependentGroups":
-                return "datasetGroup";
             case "dependents":
+                this.dependentSearch = ident;
                 return "datasetVersion";
+            case "dependentGroups":
+                this.dependentSearch = ident;
+                return "pk";
             default:
                 return ident;
         }
@@ -199,11 +208,11 @@ public class ContainerSearch {
     }
 
     private void handleRetrieveFields(DatacatSearchContext sd, MetajoinedStatement dsv,
-            Optional<String[]> retrieveFields){
+            Optional<String[]> retrieveFields, boolean ignoreShowKeyError){
 
         if(retrieveFields.isPresent()){
             for(String s: retrieveFields.get()){
-                if (s.contains("dependents")) {
+                if (s.contains("dependents") || s.contains("dependency")) {
                     String[] deps = s.split("\\.");
                     if (deps.length == 1) {
                         // default: predecessors
@@ -248,12 +257,16 @@ public class ContainerSearch {
                     metadataFields.add(s);
                 } else {
                     retrieve = getColumnFromSelectionScope(dsv, s);
-                    metadataFields.add(s);
+                    if (retrieve != null) {
+                        metadataFields.add(s);
+                    }
                 }
-                if(retrieve == null){
+                if(retrieve == null && !ignoreShowKeyError){
                     throw new IllegalArgumentException("Unable to find retrieval field: " + s);
                 }
-                selectStatement.selection(retrieve);
+                if (retrieve != null) {
+                    selectStatement.selection(retrieve);
+                }
             }
         }
     }

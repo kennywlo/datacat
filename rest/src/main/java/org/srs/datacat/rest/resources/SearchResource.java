@@ -26,15 +26,19 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
 import org.srs.datacat.model.DatasetModel;
 import org.srs.datacat.model.DatasetResultSetModel;
 import org.srs.datacat.model.DatasetView;
+import org.srs.datacat.model.DatasetContainer;
+import org.srs.datacat.model.ContainerResultSetModel;
+import org.srs.datacat.model.RecordType;
+
 import org.srs.datacat.shared.RequestView;
 import org.srs.datacat.rest.BaseResource;
 import static org.srs.datacat.rest.BaseResource.OPTIONAL_EXTENSIONS;
 import org.srs.datacat.rest.SearchPluginProvider;
 import org.srs.datacat.rest.RestException;
-import org.srs.datacat.model.RecordType;
 
 /**
  *
@@ -85,10 +89,31 @@ public class SearchResource extends BaseResource {
 
         DatasetView dv = getDatasetView();
 
-        DatasetResultSetModel searchResults = null;
-        try(DirectoryStream<DatasetModel> stream
-                = getProvider().search(Arrays.asList(pathPattern), buildCallContext(), 
-                        dv, filter, containerFilter, metafields, sortFields, ignoreShowKeyError)) {
+        try {
+            // fetch the groups in dependency search
+            if (containerFilter != null && containerFilter.contains("dependentGroups")){
+                DirectoryStream<DatasetContainer> stream = getProvider().searchContainers(Arrays.asList("/**^"),
+                    buildCallContext(), containerFilter, metafields, sortFields, ignoreShowKeyError);
+                List<DatasetContainer> groups = new ArrayList<>();
+                int count = 0;
+                Iterator<DatasetContainer> iter = stream.iterator();
+                for(int i = 0; iter.hasNext(); i++, count++){
+                    if(i >= offset && i < (offset + max)){
+                        groups.add(iter.next());
+                    } else {
+                        iter.next();
+                    }
+                }
+                stream.close();
+                ContainerResultSetModel searchResults = getProvider().getModelProvider().getContainerResultSetBuilder()
+                    .results(groups).count(count).build();
+                return Response.ok(new GenericEntity<ContainerResultSetModel>(searchResults) {}).build();
+            }
+
+            // fetch datasets
+            DirectoryStream<DatasetModel> stream = getProvider().search(Arrays.asList(pathPattern), buildCallContext(),
+                dv, filter, containerFilter, metafields, sortFields, ignoreShowKeyError);
+
             List<DatasetModel> datasets = new ArrayList<>();
             int count = 0;
             Iterator<DatasetModel> iter = stream.iterator();
@@ -99,8 +124,10 @@ public class SearchResource extends BaseResource {
                     iter.next();
                 }
             }
-            searchResults = getProvider().getModelProvider().getDatasetResultSetBuilder()
+            stream.close();
+            DatasetResultSetModel searchResults = getProvider().getModelProvider().getDatasetResultSetBuilder()
                     .results(datasets).count(count).build();
+            return Response.ok(new GenericEntity<DatasetResultSetModel>(searchResults) {}).build();
         } catch(IllegalArgumentException ex) {
             throw new RestException(ex, 400, "Unable to process query, see message", ex.getMessage());
         } catch(NoSuchFileException ex) {
@@ -112,7 +139,7 @@ public class SearchResource extends BaseResource {
         } catch(ParseException ex) {
             throw new RestException(ex, 422, "Unable to parse filter", ex.getMessage());
         }
-        return Response.ok(new GenericEntity<DatasetResultSetModel>(searchResults) {}).build();
+
     }
 
     @POST

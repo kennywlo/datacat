@@ -66,6 +66,10 @@ public class Provider implements ModelProvider {
     }
 
     @Override
+    public ContainerResultSet.Builder getContainerResultSetBuilder(){
+        return new ContainerResultSet.Builder();
+    }
+    @Override
     public Map<Class, Class> modelProviders(){
         HashMap<Class, Class> providers = new HashMap<>();
         providers.put(DatacatNode.class, DatacatObject.class);

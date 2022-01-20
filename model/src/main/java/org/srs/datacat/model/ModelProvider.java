@@ -21,7 +21,8 @@ public interface ModelProvider {
     DatasetVersionModel.Builder getVersionBuilder();
     DatasetLocationModel.Builder getLocationBuilder();
     DatasetResultSetModel.Builder getDatasetResultSetBuilder();
-    
+    ContainerResultSetModel.Builder getContainerResultSetBuilder();
+
     Map<Class, Class> modelProviders();
     
 }

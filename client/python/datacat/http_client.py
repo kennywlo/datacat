@@ -175,6 +175,8 @@ class HttpClient:
         params = {param_map[k]: v for k, v in list(locals().items()) if k in param_map and v is not None}
         if "ignoreShowKeyError" in kwargs:
             params["ignoreShowKeyError"] = kwargs["ignoreShowKeyError"]
+        if "containerFilter" in kwargs:
+            params["containerFilter"] = kwargs["containerFilter"]
         return self._req("get", self._target(endpoint, target, versionId, site), params, **kwargs)
 
     def permissions(self, path, group=None):
