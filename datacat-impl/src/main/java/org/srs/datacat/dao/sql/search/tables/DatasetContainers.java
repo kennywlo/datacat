@@ -3,6 +3,7 @@ package org.srs.datacat.dao.sql.search.tables;
 
 import java.sql.Timestamp;
 import java.util.Map;
+
 import org.zerorm.core.Column;
 import org.zerorm.core.Select;
 
@@ -12,10 +13,18 @@ import org.zerorm.core.Select;
  */
 public class DatasetContainers extends MetajoinedStatement {
     public LogicalFolder lf = new LogicalFolder().as("lf", LogicalFolder.class );
+    public DatasetGroup dsg = new DatasetGroup().as("dsg", DatasetGroup.class );
+    boolean isGroup;
 
-    public DatasetContainers(){
-        lf.datasetLogicalFolder.as("pk");
-        from(lf).selection(lf.getColumns());                
+    public DatasetContainers(boolean isGroup){
+        this.isGroup = isGroup;
+        if (!this.isGroup) {
+            lf.datasetLogicalFolder.as("pk");
+            from(lf).selection(lf.getColumns());
+        } else {
+            dsg.datasetGroup.as("pk");
+            from(dsg).selection(dsg.getColumns());
+        }
     }
 
     @Override
@@ -38,7 +47,11 @@ public class DatasetContainers extends MetajoinedStatement {
 
     @Override
     public Column getMetajoinColumn(){
-        return lf.datasetLogicalFolder;
+        if (this.isGroup){
+            return dsg.datasetGroup;
+        } else {
+            return lf.datasetLogicalFolder;
+        }
     }
     
     @Override

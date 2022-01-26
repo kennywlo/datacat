@@ -161,7 +161,12 @@ public final class SearchUtils {
 
         String name = rs.getString("name");
         builder.pk(rs.getLong("pk"));
-        builder.parentPk(rs.getLong("parent"));
+        try {
+            builder.parentPk(rs.getLong("parent"));
+        } catch (SQLException e){
+            // just ignore, as groups do not have parents
+            builder.parentPk(null);
+        }
         builder.name(name);
         builder.path(rs.getString("containerpath"));
 

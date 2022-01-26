@@ -85,7 +85,8 @@ public class ContainerSearch {
             Optional<String[]> retrieveFields,
             Optional<String[]> sortFields,
             boolean ignoreShowKeyError) throws ParseException, SQLException, IOException{
-        DatasetContainers dsc = prepareDatasetContainers();
+        boolean isGroup = query.isPresent() && query.get().contains("dependentGroups");
+        DatasetContainers dsc = prepareDatasetContainers(isGroup);
         // Prepare Search Context
         DatacatSearchContext sd = new DatacatSearchContext(dsc, plugins, dmc);
 
@@ -118,13 +119,18 @@ public class ContainerSearch {
         //handleSortFields(sd, dsc, sortFields);
         handleRetrieveFields(sd, dsc, retrieveFields, ignoreShowKeyError);
 
-        return selectStatement;
+        return this.selectStatement;
     }
 
-    private DatasetContainers prepareDatasetContainers(){
-        DatasetContainers containers = new DatasetContainers();
+    private DatasetContainers prepareDatasetContainers(boolean isGroup){
+        DatasetContainers containers = new DatasetContainers(isGroup);
         containers.as("dsc");
-        containers.selection(containers.lf.datasetLogicalFolder.as("pk"));
+        if (isGroup){
+            containers.selection(containers.dsg.datasetGroup.as("pk"));
+        } else{
+            containers.selection(containers.lf.datasetLogicalFolder.as("pk"));
+        }
+
         return containers;
     }
 
