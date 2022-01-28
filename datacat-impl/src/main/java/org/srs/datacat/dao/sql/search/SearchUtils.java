@@ -174,9 +174,10 @@ public final class SearchUtils {
         for(String s: includedMetadata){
             if (s.contains("dependency") || s.contains("dependents")){
                 String[] deps = s.split("\\.");
-                Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, "dependency",
+                String depContainer = s.contains("groups") ? "dependencyGroup": "dependency";
+                Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, depContainer,
                     "dependent", rs.getLong("pk"), deps[1]);
-                depmap.putAll(SearchUtils.getDependentsByType(conn, "dependency",
+                depmap.putAll(SearchUtils.getDependentsByType(conn, depContainer,
                     "dependentGroup", rs.getLong("pk"), deps[1]));
                 if (!depmap.isEmpty()){
                     metadata.putAll(depmap);
@@ -641,7 +642,10 @@ public final class SearchUtils {
             ResultSet rs = stmt.executeQuery();
             ArrayList<Long> dependents = new ArrayList<>();
             while (rs.next()) {
-                dependents.add(rs.getLong(dependencyContainer));
+                long d = rs.getLong(dependencyContainer);
+                if (d != 0) {
+                    dependents.add(d);
+                }
             }
             rs.close();
             return dependents.toArray(new Long[0]);

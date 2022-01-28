@@ -145,7 +145,7 @@ def main():
     # If the last level retrieved matches with the last level saved during the creation of dependencies then we know
     # that the retrievals are working as intended
 
-    datasets_for_stress_test = generate_datasets(101)
+    """ datasets_for_stress_test = generate_datasets(101)
     last_level_returned = generate_dependencies_stress_test(datasets_for_stress_test)
     last_level_calculated = []
     last_level_calculated_datasets = []
@@ -175,44 +175,66 @@ def main():
     print("\nComparing expected value to returned value... If no assert failure occurs then the values are a match. ")
     assert (last_level_calculated == last_level_returned), "Last level not matching... Dependent retrieval incorrect"
 
-
-
-
-
+    """
     # Case D2:
     # This test case should make sure that if given a DATASET container we can retrieve ONLY GROUP dependents from it
     # This test case will also make sure that we can continue to retrieve using .get_next_dependents
 
-    # Case D3:
-    # /* This test case should make sure that if given a DATASET container we can retrieve A COMBINATION of GROUP and
-    # DATASET dependents from it */
+    # Create Dataset
+    print("Creating Datasets: ")
+    list_of_datasets = generate_datasets(6)
 
-    # **** (GROUP CONTAINER) ****
-    # Case G1:
-    # This test case should make sure that if given a GROUP container we can retrieve ONLY DATASET dependents from it
-    # This test case will also make sure that we can continue to retrieve using .get_next_dependents
+    # Create Group
+    print("\nCreating Groups: ")
+    test_group = create_groups(4)
+    for x in test_group:
+        print("Created Group: " + x.name + " " + x.path)
 
-    # Case G2:
-    # This test case should make sure that if given a GROUP container we can retrieve ONLY GROUP dependents from it
-    # This test case will also make sure that we can continue to retrieve using .get_next_dependents
+    print()
 
-    # Case G3:
-    # /* This test case should make sure that if given a GROUP container we can retrieve A COMBINATION of GROUP and
-    # DATASET dependents from it */
+    # Add the Group as dependent of Dataset
+    dataset_to_patch = client.path(path=list_of_datasets[0].path, versionId="current")
+    update_dependents = [test_group[0]]
+    patched_dataset0 = client.add_dependents(dep_container=dataset_to_patch, dep_type="predecessor",
+                                                   dep_groups=update_dependents)
+    # Add 2 datasets to be dependents of a group
+    group_to_patch = client.path(path=test_group[0].path, versionId="current")
+    update_dependent2 = [list_of_datasets[1], list_of_datasets[2]]
+    patched_group0 = client.add_dependents(dep_container=group_to_patch, dep_type="predecessor",
+                                           dep_datasets=update_dependent2)
 
-    # *************************************************************************************************************
-    # *************************************************************************************************************
-    # In order to verify the accuracy of the retrievals being provided by .get_dependents and get_next_dependents I
-    # propose the following test.
-    #
-    # Because the structure of dependency follows that of a tree, we can assume that if we retrieve the wrong
-    # dependents at a lower level then all of the retrieved dependents at a higher level will be incorrect. This
-    # allows us to test the accuracy of retrieval by comparing the last level retrieved to a stored instance of the
-    # last level saved upon addition of the dependencies. If these two match then we know that the algorithm devised
-    # is indeed following the proper paths and returning all the dependents in the correct order.
-    # *************************************************************************************************************
-    # *************************************************************************************************************
+    # Add a group to be a dependent of the datasets made dependents, creating another level
+    dataset_to_patch = client.path(path=list_of_datasets[1].path, versionId="current")
+    update_dependents3 = [test_group[1]]
+    patched_dataset1 = client.add_dependents(dep_container=dataset_to_patch, dep_type="predecessor",
+                                            dep_groups=update_dependents3)
 
+    # Add 2 datasets to be dependents of a group
+    group_to_patch2 = client.path(path=test_group[1].path, versionId="current")
+    update_dependent3 = [list_of_datasets[3], list_of_datasets[4]]
+    patched_group1 = client.add_dependents(dep_container=group_to_patch2, dep_type="predecessor",
+                                           dep_datasets=update_dependent3)
+
+    final_container = client.path(path=patched_dataset0.path, versionId="current")
+
+    # Retrieve said dependent using the api wrapper.
+    search_result = client.get_dependents(dep_container=final_container, dep_type="predecessor", max_depth=10, chunk_size=6)
+
+    for x in search_result:
+        print(x)
+
+    #   Corner case bug, was able to replicate the issue here.
+    #   As you can see by printing the content of searchResults, the last item does not contain a path.
+    #   Inputs: Target = dependencyName from depGroup0 = /testpath/depGroup0,
+    #   Dependents = Dependents found in depGroup0's metadata field predecessor.dataset
+
+    print("\nCorner Case Testing:")
+    searchResults = client.search(target=patched_group0.metadata.dct["dependencyName"],
+                                show="dependents",
+                                query='dependents in ({''})'.format(patched_group0.metadata.dct["predecessor.dataset"]),
+                                ignoreShowKeyError=True)
+    for x in searchResults:
+        print(x)
 
 def generate_datasets(number_to_generate):
 
@@ -236,7 +258,7 @@ def generate_datasets(number_to_generate):
                             resource=full_file_generic,
                             site='SLAC')
         ds_generic_version_pk = ds_generic.versionPk
-        print("created dataset: ", filename_generic, "(VersionPK = ", ds_generic_version_pk, ")")
+        print("created dataset: ", filename_generic, "(VersionPK = ", ds_generic_version_pk, ")" , ds_generic.path)
 
         dataset_return.append(ds_generic)
 
@@ -307,19 +329,25 @@ def generate_dependencies_stress_test(list_of_datasets):
     return last_level_of_dependents
 
 
-def create_groups():
-    container_path1 = "/testpath/depGroup1"
+def create_groups(number_of_groups):
+    list_of_groups = []
+    container_path_general = "/testpath/depGroup"
 
-    try:
-        if client.exists(container_path1):
-            client.rmdir(container_path1, type="group")
+    for x in range(0, number_of_groups):
+        container_path = container_path_general + str(x)
 
-        client.mkgroup(container_path1)
-        dep_group1 = client.path(path='/testpath/depGroup1;v=current')
-        return dep_group1
+        try:
+            if client.exists(container_path):
+                client.rmdir(container_path, type="group")
 
-    except:
-        assert False, "Group creation failed"
+            client.mkgroup(container_path)
+            dep_group = client.path(path=container_path + ";v=current")
+            list_of_groups.append(dep_group)
+
+        except:
+            assert False, "Group creation failed"
+
+    return list_of_groups
 
 
 

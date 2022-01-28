@@ -356,10 +356,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             String depContainer;
             long dependencyPk;
             if (metaData.containsKey("dependencyGroup")) {
-                depContainer = "DependencyGroup";
+                depContainer = "dependencyGroup";
                 dependencyPk = (long) metaData.get("dependencyGroup");
             } else{
-                depContainer = "Dependency";
+                depContainer = "dependency";
                 dependencyPk = (long) metaData.get("dependency");
             }
             if (type.equals("*")){
