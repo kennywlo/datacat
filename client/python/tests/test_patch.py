@@ -1,6 +1,6 @@
 import os, sys
 from datacat import client_from_config, config_from_file
-from datacat.model import Metadata
+from datacat.model import Metadata, DatasetLocation
 
 
 def main():
@@ -54,6 +54,18 @@ def main():
     ds002VersionPk = ds002.versionPk
     print("\ncreated dataset: ", filename, "(For Utility Testing) (VersionPK = ", ds002VersionPk,")")
 
+    # creation of dataset003
+    filename = "dataset003.dat"
+    if client.exists(datacat_path + '/' + filename):
+        client.rmds(datacat_path + '/' + filename)
+
+    full_file003 = file_path + '/' + filename
+    ds003 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=metadata,
+                        resource=full_file003,
+                        site='SLAC')
+    ds003VersionPk = ds003.versionPk
+    print("\ncreated dataset: ", filename, "(For mkloc Testing) (VersionPK = ", ds003VersionPk,")")
     # **************************************************
     # **************************************************
     # ********** DIRECTORY CREATION STARTS HERE ********
@@ -118,6 +130,29 @@ def main():
     returnedGroup = client.patchdir(path=container_path_predecessor, container=group, type="group")
     print(returnedGroup)
 
+    # *********** Testing mkloc ***********
+    print("client.mkloc test begins")
+    client.mkloc(path="/testpath/testfolder/dataset003.dat", site="OSN", resource=full_file003)
+    ds003_return = client.path(path="/testpath/testfolder/dataset003.dat", versionId="current")
+    print("client.mkloc test result:")
+    print("dataset003 location:",ds003_return.locations)
+
+
+    # *********** Testing creating dataset with 2 locations ***********
+    filename = "dataset004.dat"
+    if client.exists(datacat_path + '/' + filename):
+        client.rmds(datacat_path + '/' + filename)
+
+    full_file004 = file_path + '/' + filename
+
+    location1 = DatasetLocation(resource=full_file004, site='SLAC')
+    location2 = DatasetLocation(resource=full_file004, site='OSN')
+    ds004 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
+                        versionMetadata=metadata,
+                        resource=full_file004,
+                        locations=[location1,location2])
+    ds004_return = client.path(path="/testpath/testfolder/dataset004.dat", versionId="current")
+    print("dataset004 location:", ds004_return.location)
 
 
 def print_dependency_before(client):

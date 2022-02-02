@@ -20,6 +20,8 @@ insert ignore into DatasetSite (DatasetSite) values ('SLAC');
 insert ignore into DatasetLogicalFolder (Name, Parent) values  ('testpath', (select DatasetLogicalFolder from (select * from DatasetLogicalFolder) as x where Name = 'ROOT'));
 insert ignore into DatasetLogicalFolder (Name, Parent) values ('testfolder',(select DatasetLogicalFolder from (select * from DatasetLogicalFolder) as x where Name = 'testpath'));
 insert ignore into DatasetGroup (Name, DatasetLogicalFolder) values ('testgroup',(select DatasetLogicalFolder from (select * from DatasetLogicalFolder) as x where Name = 'testpath'));
+insert ignore into DatasetSite (DatasetSite) values ('OSN');
+
 
 insert ignore into VerDataset (DatasetName, DataSetFileFormat, DataSetDataType, DatasetLogicalFolder, DatasetGroup)
         values ('testds1', 'junit.test', 'JUNIT_TEST', null, (select DatasetGroup from (select * from DatasetGroup) as x where Name = 'testgroup'));
