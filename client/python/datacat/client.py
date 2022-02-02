@@ -433,12 +433,12 @@ class Client(object):
                     # For each container retrieve its dependents
                     try:
 
-                        nextContainersToProcess = []
+
                         # returns 2 values, datasets retrieved and groups retrieved
                         next_container, next_container_Group = retrieveContainerDependents(container)
 
                         nextContainersToProcess.extend(next_container + next_container_Group)
-                        retrieved_dependents = retrieved_dependents + nextContainersToProcess
+                        retrieved_dependents.extend(next_container + next_container_Group)
                     except Exception as e:
                         del process_queue[0]
                         continue
@@ -446,7 +446,6 @@ class Client(object):
                     # if we have not exceeded the chunk limit
                     if remaining_chunk_size > 0:
                         # Remove current container from queue
-                        del process_queue[0]
 
                         # Remove current container from individual queues
                         if isinstance(container, Dataset):
@@ -500,7 +499,7 @@ class Client(object):
             self.dependency_cache[dependencyName]["dependents_retrieved_so_far_datasets"] = []
             self.dependency_cache[dependencyName]["dependents_retrieved_so_far_groups"] = []
 
-            if not containersToProcess or currentDepth == (max_depth-1):
+            if (not next_container_Group and not next_container) or currentDepth == (max_depth-1):
                 print("Finished Processing the following dependency --> ", dependencyName,
                       "\nReturning last batch of dependents, if any... ")
                 self.dependency_cache.pop(dependencyName)
