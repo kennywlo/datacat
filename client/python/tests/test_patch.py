@@ -132,9 +132,9 @@ def main():
 
     # *********** Testing mkloc ***********
     print("client.mkloc test begins")
-    client.mkloc(path="/testpath/testfolder/dataset003.dat", site="OSN", resource=full_file003)
+    ds003 = client.mkloc(path="/testpath/testfolder/dataset003.dat", site="OSN", resource=full_file003)
     ds003_return = client.path(path="/testpath/testfolder/dataset003.dat", versionId="current")
-    print("client.mkloc test result:")
+    print("client.mkloc test result:", ds003)
     print("dataset003 location:",ds003_return.locations)
 
 
@@ -150,6 +150,8 @@ def main():
     ds004 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
                         versionMetadata=metadata,
                         locations=[location1, location2])
+
+    print("locations creation result:", ds004)
     ds004_return = client.path(path="/testpath/testfolder/dataset004.dat", versionId="current")
     print("dataset004 location:", ds004_return.locations)
 
