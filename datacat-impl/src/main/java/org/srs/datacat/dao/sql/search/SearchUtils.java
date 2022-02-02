@@ -173,24 +173,25 @@ public final class SearchUtils {
         HashMap<String, Object> metadata = new HashMap<>();
         for(String s: includedMetadata){
             if (s.contains("dependency") || s.contains("dependents")){
-                String[] deps = s.split("\\.");
-                String depContainer = s.contains("groups") ? "dependencyGroup": "dependency";
-                Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, depContainer,
-                    "dependent", rs.getLong("pk"), deps[1]);
-                depmap.putAll(SearchUtils.getDependentsByType(conn, depContainer,
-                    "dependentGroup", rs.getLong("pk"), deps[1]));
-                if (!depmap.isEmpty()){
-                    metadata.putAll(depmap);
-                    String path;
-                    if (s.contains("groups")) {
-                        path = SearchUtils.getDependencyGroupPath(conn, rs.getLong("pk"));
-                        builder.type(RecordType.GROUP);
-                    } else{
-                        path = SearchUtils.getDependencyPath(conn, rs.getLong("pk"));
-                    }
-                    if (!path.isEmpty()) {
-                        builder.path(path);
-                        metadata.put("dependencyName", path);
+                String path;
+                if (s.contains("groups")) {
+                    path = SearchUtils.getDependencyGroupPath(conn, rs.getLong("pk"));
+                    builder.type(RecordType.GROUP);
+                } else{
+                    // default type set to RecordType.FOLDER
+                    path = SearchUtils.getDependencyPath(conn, rs.getLong("pk"));
+                }
+                if (!path.isEmpty()) {
+                    builder.path(path);
+                    metadata.put("dependencyName", path);
+                    String[] deps = s.split("\\.");
+                    String depContainer = s.contains("groups") ? "dependencyGroup" : "dependency";
+                    Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, depContainer,
+                        "dependent", rs.getLong("pk"), deps[1]);
+                    depmap.putAll(SearchUtils.getDependentsByType(conn, depContainer,
+                        "dependentGroup", rs.getLong("pk"), deps[1]));
+                    if (!depmap.isEmpty()) {
+                        metadata.putAll(depmap);
                     }
                 }
                 continue;
