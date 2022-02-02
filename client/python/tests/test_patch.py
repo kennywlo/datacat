@@ -149,10 +149,9 @@ def main():
     location2 = DatasetLocation(resource=full_file004, site='OSN')
     ds004 = client.mkds(datacat_path, filename, 'JUNIT_TEST', 'junit.test',
                         versionMetadata=metadata,
-                        resource=full_file004,
-                        locations=[location1,location2])
+                        locations=[location1, location2])
     ds004_return = client.path(path="/testpath/testfolder/dataset004.dat", versionId="current")
-    print("dataset004 location:", ds004_return.location)
+    print("dataset004 location:", ds004_return.locations)
 
 
 def print_dependency_before(client):
