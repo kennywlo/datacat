@@ -12,7 +12,7 @@ Open the newly downloaded docker desktop and leave it running in the background.
 
 ### Step 3) - Build the image using the provided Dockerfile:
 Open a linux based terminal and build the required image using the following command line: 
-`docker build -t slac-lab/datacat:INT_TESTING .`
+`docker build -t slaclab/datacat:INT_TESTING .`
 
 *----- Make sure this command line is run at the root level of the /slaclab-datacat repo. -----*
 

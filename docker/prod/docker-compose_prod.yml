@@ -25,7 +25,7 @@
 version: '3'
 services:
   datacat:
-    image: slac-lab/datacat:v0.6-dep
+    image: slaclab/datacat:v0.6-dep
     container_name: datacat
     volumes:
       - /tmp:/tmp

@@ -40,7 +40,7 @@ services:
       - "3306:3306"
 
   datacat:
-    image: slac-lab/datacat:INT_TESTING
+    image: slaclab/datacat:INT_TESTING
     container_name: datacat
     volumes:
       - /tmp:/tmp

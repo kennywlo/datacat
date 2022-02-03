@@ -16,7 +16,7 @@
 # - Kenny Lo <kennywlo@slac.stanford.edu>, 2021
 
 # To build this image to use with docker-compose:
-#   docker build -f ./Dockerfile2 -t slac-lab/datacat:v0.6-dep .
+#   docker build -f ./Dockerfile2 -t slaclab/datacat:v0.6-dep .
 
 FROM centos:7
 

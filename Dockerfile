@@ -16,7 +16,7 @@
 # - Kenny Lo <kennywlo@slac.stanford.edu>, 2021
 
 # To build this image to use with docker-compose:
-#   docker build -t slac-lab/datacat:INT_TESTING .
+#   docker build -t slaclab/datacat:INT_TESTING .
 
 FROM centos:7
 
