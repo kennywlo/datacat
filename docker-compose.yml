@@ -61,6 +61,7 @@ services:
     volumes:
       - /tmp/server.xml:/usr/local/tomcat/conf/server.xml
       - /tmp/datacat.war:/usr/local/tomcat/webapps/datacat.war
+      - /tmp/keystore.jks:/usr/local/tomcat/conf/keystore.jks
       - /tmp/mysql-connector-java-8.0.16.jar:/usr/local/tomcat/lib/mysql-connector-java-8.0.16.jar
       - /tmp/java.security:/usr/local/openjdk-8/jre/lib/security/java.security
       - /tmp:/tmp

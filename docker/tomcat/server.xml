@@ -97,12 +97,16 @@
         -->
         <Connector port="8443"
                    protocol="org.apache.coyote.http11.Http11NioProtocol"
+                   sslImplementationName="org.apache.tomcat.util.net.jsse.JSSEImplementation"
                    maxThreads="150"
+                   scheme="https"
+                   secure="true"
                    SSLEnabled="true">
             <SSLHostConfig>
-                <Certificate certificateKeystoreFile="/tmp/stash.jks"
-                             certificateKeystorePassword="kenny123"
-                             type="RSA" />
+                <Certificate certificateKeyAlias="tomcat"
+                             certificateKeystoreFile="conf/keystore.jks"
+                             certificateKeystorePassword="changeit"
+                             type="RSA"/>
             </SSLHostConfig>
         </Connector>
         <!-- Define an SSL/TLS HTTP/1.1 Connector on port 8443 with HTTP/2
