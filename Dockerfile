@@ -41,6 +41,5 @@ RUN python3 -m pytest client/python/tests
 RUN yum -y install maven
 RUN mvn package -DskipTests
 
-RUN chmod +x /opt/datacat/docker/cp_config_files.sh
 ENTRYPOINT ["/bin/bash", "/opt/datacat/docker/cp_config_files.sh"]
 
