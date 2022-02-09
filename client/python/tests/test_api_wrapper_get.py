@@ -197,7 +197,6 @@ def main():
     print("\nComparing expected value to returned value... If no assert failure occurs then the values are a match. ")
     assert (last_level_calculated == last_level_returned), "Last level not matching... Dependent retrieval incorrect"
 
-
     # ******************************************************************
     # ******************************************************************
     # Case D2:
@@ -208,7 +207,7 @@ def main():
 
     # Create Datasets
     print("Creating Datasets: ")
-    list_of_datasets = generate_datasets(5)
+    list_of_datasets = generate_datasets(10)
 
     # Create Groups
     print("\nCreating Groups: ")
@@ -247,16 +246,40 @@ def main():
     patched_group_01 = client.add_dependents(dep_container=group_01, dep_type="predecessor",
                                            dep_datasets=datasets_dependents_03_04)
 
+    # Add 2 datasets(05, 06) to be dependents of dataset 3
+    dataset_03 = client.path(path=list_of_datasets[3].path, versionId="current")
+    datasets_dependents_05_06 = [list_of_datasets[5], list_of_datasets[6]]
+    patched_dataset_03 = client.add_dependents(dep_container=dataset_03, dep_type="predecessor",
+                                               dep_datasets=datasets_dependents_05_06)
+
+    dataset_04 = client.path(path=list_of_datasets[4].path, versionId="current")
+    datasets_dependents_07_08 = [list_of_datasets[7], list_of_datasets[8]]
+    patched_dataset_04 = client.add_dependents(dep_container=dataset_04, dep_type="predecessor",
+                                               dep_datasets=datasets_dependents_07_08)
+
     # Retrieve the entire dependency tree using the api wrapper.
     root_container = client.path(path=patched_dataset0.path, versionId="current")
-    search_result = client.get_dependents(dep_container=root_container, dep_type="predecessor", max_depth=10, chunk_size=10)
+    dependents = client.get_dependents(dep_container=root_container, dep_type="predecessor", max_depth=10, chunk_size=2)
+
 
     print("Dependents =")
     try:
-        for item in search_result:
+        for item in dependents:
             print("\t" + item.name)
     except:
         pass
+    print()
+
+
+    while dependents != []:
+        dependents = (client.get_next_dependents(root_container))
+        print("Dependents =")
+        try:
+            for item in dependents:
+                print("\t" + item.name)
+        except:
+            pass
+        print("")
 
 
 def generate_datasets(number_to_generate):

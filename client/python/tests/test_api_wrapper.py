@@ -34,6 +34,11 @@ def main():
     dataset002_5 = case5_datasets[1]
     dataset003_5 = case5_datasets[2]
 
+    # Datasets for Case2 removal starting as case 6
+    case6_datasets = create_datasets(6, 3)
+    dataset001_6 = case6_datasets[0]
+
+
     case3_groups = create_groups(3, 2)
     group1_3 = case3_groups[0]
     group2_3 = case3_groups[1]
@@ -49,6 +54,27 @@ def main():
     group1_5 = case5_groups[0]
     group2_5 = case5_groups[1]
     group3_5 = case5_groups[2]
+
+    # Groups for Case2 removal starting as case 6
+
+    case6_groups = create_groups(6, 3)
+    group1_6 = case6_groups[0]
+
+    def check_match(expect, actual):
+        """
+        Check if the comma delimated string contains the same elements.
+        :param expect: expected comma delimiated string
+        :param actual: the returned comma delimiated string
+        :return: If the numbers present are the same but just in different ordered
+        return true, otherwise, return false.
+        """
+        expect_list = expect.split(",")
+        actual_list = actual.split(",")
+
+        if len(expect_list) != len(actual_list):
+            return False
+
+        return set(expect_list) == set(actual_list)
 
     print("\n")
 
@@ -320,12 +346,10 @@ def main():
             expected_predecessor_dataset_str = '{}'.format(added_before.metadata['predecessor.dataset']) + ','\
                                                + '{},{}'.format(update_dpks[0], update_dpks[1])
 
-            expected = {
-                'dependencyName': '{}'.format(group_to_patch.path),
-                'predecessor.dataset': expected_predecessor_dataset_str
-            }
+            predecessor_check = check_match(expected_predecessor_dataset_str, added_after['predecessor.dataset'])
+
             if enable_assertion:
-                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
+                assert predecessor_check and \
                        'successor.dataset' not in added_after, \
                     "Case 5.1 group dependent addition result is not as expected: {}.\n" \
                     "Expected: {}".format(added_after, expected)
@@ -354,7 +378,6 @@ def main():
 
         if add_dependents:
             update_dpks = client.get_dependent_id(update_dependents)
-
             expected = {'predecessor.group': '{},{}'.format(group_md['predecessor.group'], update_dpks[0])}
             expected_v2 = {'predecessor.group': '{},{}'.format(update_dpks[0], group_md['predecessor.group'])}
             added_after = client.path(path='/testpath/depGroup2_4;metadata=dependents')
@@ -399,11 +422,12 @@ def main():
             expected_predecessor_dataset_str = '{}'.format(group_md['predecessor.dataset']) + ',' + '{}'.format(update_dpks[0])
             expected_predecessor_group_str = '{}'.format(update_gpks[0]) + ',' + '{}'.format(group_md['predecessor.group'])
 
-            expected = {'predecessor.dataset': expected_predecessor_dataset_str,
-                        'predecessor.group': expected_predecessor_group_str}
             if enable_assertion:
-                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                       added_after['predecessor.group'] == expected['predecessor.group'], \
+                predecessor_group_check = check_match(expected_predecessor_group_str, added_after['predecessor.group'])
+                predecessor_dataset_check = check_match(expected_predecessor_dataset_str, added_after['predecessor.dataset'])
+
+                assert predecessor_group_check and \
+                       predecessor_dataset_check , \
                     "Case 5.3 group dependent addition result is not as expected: {}.\n" \
                     "Expected: {}".format(added_after, expected)
 
@@ -584,9 +608,11 @@ def main():
 
     # Case 2.2 remove group from group container
     try:
-        added_before = client.path(path='/testpath/depGroup2_4')
-        group_to_patch = client.path(path='/testpath/depGroup2_4')
-        remove_dependents = [group3_4]
+        container_group = client.path(path='/testpath/depGroup2_6')
+        client.add_dependents(dep_container=container_group, dep_type="predecessor", dep_groups=[group1_6])
+        added_before = client.path(path='/testpath/depGroup2_6')
+        group_to_patch = client.path(path='/testpath/depGroup2_6')
+        remove_dependents = [group1_6]
         add_dependents = client.remove_dependents(dep_container=group_to_patch, dep_type="predecessor",
                                                   dep_groups=remove_dependents)
         group_md = None
@@ -594,13 +620,13 @@ def main():
             group_md = added_before.metadata
         if add_dependents:
             update_gpks = client.get_dependent_id(remove_dependents)
-            added_after = client.path(path='/testpath/depGroup2_4;metadata=dependents')
+            added_after = client.path(path='/testpath/depGroup2_6;metadata=dependents')
             added_after = dict(added_after)
 
-            expected_predecessor_group_str = group_md['predecessor.group'].replace(str(update_gpks[0]) + ',', '')
-            expected = {'predecessor.group': expected_predecessor_group_str}
             if enable_assertion:
-                assert added_after['predecessor.group'] == expected['predecessor.group'] and \
+
+
+                assert 'predecessor.group' not in added_after and \
                        'successor.group' not in added_after, \
                     "Case 2.2 group dependent removal result is not as expected: {}.\n" \
                     "Expected: {}".format(added_after, expected)
@@ -617,11 +643,15 @@ def main():
 
     # Case 2.3 remove datasets AND group from group container
     try:
-
-        added_before = client.path(path='/testpath/depGroup3_4')
-        group_to_patch = client.path(path='/testpath/depGroup3_4')
-        remove_dependent_groups = [group4_4]
-        remove_dependent_datasets = [dataset003_4, dataset004_4]
+        container_group = client.path(path='/testpath/depGroup2_6')
+        client.add_dependents(dep_container=container_group,
+                              dep_type="predecessor",
+                              dep_groups=[group1_6],
+                              dep_datasets=[dataset001_6])
+        added_before = client.path(path='/testpath/depGroup2_6')
+        group_to_patch = client.path(path='/testpath/depGroup2_6')
+        remove_dependent_groups = [group1_6]
+        remove_dependent_datasets = [dataset001_6]
         add_dependents = client.remove_dependents(dep_container=group_to_patch,
                                                   dep_type="predecessor",
                                                   dep_groups=remove_dependent_groups,
@@ -632,20 +662,13 @@ def main():
         if add_dependents:
             update_gpks = client.get_dependent_id(remove_dependent_groups)
             update_dpks = client.get_dependent_id(remove_dependent_datasets)
-            added_after = client.path(path='/testpath/depGroup3_4;metadata=dependents')
+            added_after = client.path(path='/testpath/depGroup2_6;metadata=dependents')
             added_after = dict(added_after)
-            # print(str(update_gpks[0]))
-            # predecessor_group_list = group_md['predecessor.group'].split(',')
-            # predecessor_group_list.remove('{}'.format(update_gpks[0]))
-            # print("'{}'".format(','.join(predecessor_group_list)))
-            expected_predecessor_group_str = group_md['predecessor.group'].replace(',' + str(update_gpks[0]), '')
-            expected_predecessor_dataset_str = group_md['predecessor.dataset'].replace(str(update_dpks[0]) + ',' + str(update_dpks[1]) + ',', "")
-            expected = {'predecessor.group': expected_predecessor_group_str,
-                        'predecessor.dataset': expected_predecessor_dataset_str
-                        }
+
             if enable_assertion:
-                assert added_after['predecessor.dataset'] == expected['predecessor.dataset'] and \
-                       added_after['predecessor.group'] == expected['predecessor.group'] and \
+
+                assert 'predecessor.group' not in added_after and \
+                        'predecessor.dataset' not in added_after and \
                        'successor.group' not in added_after and \
                        'successor.dataset' not in added_after, \
                     "Case 4.3 group dependent addition result is not as expected: {}.\n" \
