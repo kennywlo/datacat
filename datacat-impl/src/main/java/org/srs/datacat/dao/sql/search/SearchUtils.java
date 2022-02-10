@@ -98,8 +98,10 @@ public final class SearchUtils {
 
         ArrayList<DatasetLocationModel> locations = new ArrayList<>();
         HashMap<String, Object> metadata = new HashMap<>();
+        boolean isDependency = false;
         for(String s: includedMetadata){
             if (s.contains("dependency") || s.contains("dependents")){
+                isDependency = true;
                 String[] deps = s.split("\\.");
                 Map<String, Object> retmap, retmap2;
                 if (deps[1].equals("groups")){
@@ -123,7 +125,9 @@ public final class SearchUtils {
                         retmap.putAll(retmap2);
                     }
                 }
-                metadata.putAll(retmap);
+                if (!retmap.isEmpty()) {
+                    metadata.putAll(retmap);
+                }
                 continue;
             }
             try {
@@ -151,7 +155,11 @@ public final class SearchUtils {
             }
         }
         builder.locations(locations);
-        builder.metadata(metadata);
+        if (isDependency){
+            builder.versionMetadata(metadata);
+        } else{
+            builder.metadata(metadata);
+        }
         return builder.build();
     }
 

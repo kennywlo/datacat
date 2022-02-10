@@ -170,62 +170,25 @@ class Client(object):
 
             # The provided container is a Dataset
             # if isinstance(dep_container_processed, Dataset):
-            if currentDepth == 0:
-
-                no_response = True
-
-                if isinstance(dep_container_processed, Dataset):
-                    try:
-                        dependentsToRetrieve = dep_container_processed.versionMetadata[dep_type + '.dataset']
-                        no_response = False
-                    except:
-                        pass
-                    try:
-                        dependentsToRetrieve_Group = dep_container_processed.versionMetadata[dep_type + '.group']
-                        no_response = False
-                    except:
-                        pass
-
-                    if no_response == True:
-                        return
-
-                elif isinstance(dep_container_processed, Group):
-                    try:
-                        dependentsToRetrieve = dep_container_processed.metadata.dct[dep_type + '.dataset']
-                        no_response = False
-                    except:
-                        pass
-                    try:
-                        dependentsToRetrieve_Group = dep_container_processed.metadata.dct[dep_type + '.group']
-                        no_response = False
-                    except:
-                        pass
-
-                    if no_response == True:
-                        return
-
-                else:
-                    raise ValueError("Unrecognized dependency container")
-
             try:
-                if currentDepth > 0:
+                if currentDepth >= 0:
 
                     no_response = True
 
                     if isinstance(dep_container_processed, Dataset):
                         try:
-                            dependentsToRetrieve = dep_container_processed.metadata.dct[dep_type + '.dataset']
+                            dependentsToRetrieve = dep_container_processed.versionMetadata[dep_type + '.dataset']
                             no_response = False
                         except:
                             pass
                         try:
-                            dependentsToRetrieve_Group = dep_container_processed.metadata.dct[dep_type + '.group']
+                            dependentsToRetrieve_Group = dep_container_processed.versionMetadata[dep_type + '.group']
                             no_response = False
                         except:
                             pass
 
-                        if no_response == True:
-                            return
+                        if no_response:
+                            return [], []
 
                     elif isinstance(dep_container_processed, Group):
                         try:
@@ -239,13 +202,16 @@ class Client(object):
                         except:
                             pass
 
-                        if no_response == True:
-                            return
+                        if no_response:
+                            return [], []
 
                     else:
                         raise ValueError("Unrecognized dependency container")
             except:
-                pass
+                if currentDepth > 0:
+                    pass
+                else:
+                    return [], []
 
             no_response = True
 
@@ -253,7 +219,7 @@ class Client(object):
             try:
                 searchResults = self.search(target=dependencyName,
                                             show="dependents",
-                                            query='dependents in ({''})'.format(dependentsToRetrieve),
+                                            query='dependents in ({})'.format(dependentsToRetrieve),
                                             ignoreShowKeyError=True)
                 no_response = False
             except:
@@ -271,8 +237,8 @@ class Client(object):
                 searchResults_Groups = []
                 pass
 
-            if no_response == True:
-                return
+            if no_response:
+                return [], []
 
             # Creating 2 separate queues, one for dataset and one for GROUP
             dependent_queue_Dataset = copy.deepcopy(searchResults)
@@ -414,6 +380,7 @@ class Client(object):
         # Iterates through each level starting at level 1 ( index 0 ) and ending at the user providing max_depth.
         for currentDepth in range(max_depth):
             # Retrieve dependents from each of the containers in containersToProcess
+            next_container, next_container_Group = [], []
             for container in containersToProcess:
                 try:
                     try:
@@ -531,7 +498,7 @@ class Client(object):
             if type == "dataset":
                 decodeResults = self.search(target=dependencyName,
                                             show="dependents",
-                                            query='dependents in ({''})'.format(ToDecodeCommaDelimited),
+                                            query='dependents in ({})'.format(ToDecodeCommaDelimited),
                                             ignoreShowKeyError=True)
             if type == "group":
                 decodeResults = self.search(target=dependencyName,
@@ -581,19 +548,9 @@ class Client(object):
 
                 # if we have retrieved no dependents and have no dependents to retrieve, get dependents to retrieve
                 if not dependents_retrieved_current_container:
-                    if currentDepth == 0:
+                    if currentDepth >= 0:
                         try:
                             dependentsToRetrieve = dep_container_processed.versionMetadata[dep_type + '.dataset']
-                        except:
-                            pass
-                        try:
-                            dependentsToRetrieveGroups = dep_container_processed.metadata.dct[dep_type + '.group']
-                        except:
-                            pass
-
-                    if currentDepth > 0:
-                        try:
-                            dependentsToRetrieve = dep_container_processed.metadata.dct[dep_type + '.dataset']
                         except:
                             pass
                         try:
@@ -620,7 +577,7 @@ class Client(object):
                 try:
                     searchResults = self.search(target=dependencyName,
                                                 show="dependents",
-                                                query='dependents in ({''})'.format(dependentsToRetrieve),
+                                                query='dependents in ({})'.format(dependentsToRetrieve),
                                                 ignoreShowKeyError=True)
                 except:
                     searchResults = []
