@@ -326,6 +326,8 @@ class Client(object):
         containersToProcess_Group = []  # Containers we still need to process - Groups
 
         nextContainersToProcess = []  # The next level of containers to process, both DS and GROUPS.
+        nextContainersToProcess_Dataset = []
+        nextContainersToProcess_Group = []
         retrieved_dependents = []  # arraylist for returned dependents to be stored
 
         # Will keep track of all the DATASET dependents already retrieved
@@ -388,6 +390,9 @@ class Client(object):
                         next_container, next_container_Group = retrieveContainerDependents(container)
 
                         nextContainersToProcess.extend(next_container + next_container_Group)
+                        nextContainersToProcess_Dataset.extend(next_container)
+                        nextContainersToProcess_Group.extend(next_container_Group)
+
                         retrieved_dependents.extend(next_container + next_container_Group)
                     except Exception as e:
                         del process_queue[0]
@@ -432,8 +437,8 @@ class Client(object):
             # Set next level of containers to process
             # Make a freely mutable copy of that list
             containersToProcess = dependents_already_retrieved + nextContainersToProcess
-            containersToProcess_Dataset = dependents_already_retrieved + next_container
-            containersToProcess_Group = dependents_already_retrieved + next_container_Group
+            containersToProcess_Dataset = dependents_already_retrieved + nextContainersToProcess_Dataset
+            containersToProcess_Group = dependents_already_retrieved + nextContainersToProcess_Group
 
             # Clear current level of dependents already retrieved
             # Clear queue
@@ -447,14 +452,15 @@ class Client(object):
             self.dependency_cache[dependencyName]["dependents_retrieved_so_far_datasets"] = []
             self.dependency_cache[dependencyName]["dependents_retrieved_so_far_groups"] = []
 
-            if (not next_container_Group and not next_container) or currentDepth == (max_depth-1):
+            if (not nextContainersToProcess_Dataset and not nextContainersToProcess_Group) or currentDepth == (max_depth-1):
                 print("Finished Processing the following dependency --> ", dependencyName,
                       "\nReturning last batch of dependents, if any... ")
                 self.dependency_cache.pop(dependencyName)
                 return retrieved_dependents
             else:
                 nextContainersToProcess.clear()
-
+                nextContainersToProcess_Dataset.clear()
+                nextContainersToProcess_Group.clear()
         return retrieved_dependents
 
     @checked_error
@@ -550,11 +556,18 @@ class Client(object):
                 if not dependents_retrieved_current_container:
                     if currentDepth >= 0:
                         try:
-                            dependentsToRetrieve = dep_container_processed.versionMetadata[dep_type + '.dataset']
+                            if isinstance(dep_container_processed, Dataset):
+                                dependentsToRetrieve = dep_container_processed.versionMetadata.dct[dep_type + '.dataset']
+                            if isinstance(dep_container_processed, Group):
+                                dependentsToRetrieve = dep_container_processed.metadata.dct[dep_type + '.dataset']
                         except:
                             pass
                         try:
-                            dependentsToRetrieveGroups = dep_container_processed.metadata.dct[dep_type + '.group']
+                            if isinstance(dep_container_processed, Dataset):
+                                dependentsToRetrieveGroups = dep_container_processed.versionMetadata.dct[dep_type + '.group']
+                            if isinstance(dep_container_processed, Group):
+                                dependentsToRetrieve = dep_container_processed.metadata.dct[dep_type + '.group']
+
                         except:
                             pass
 

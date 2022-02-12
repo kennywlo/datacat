@@ -8,25 +8,22 @@ def main():
     # Testing setup ==========================================================================
     # ========================================================================================
 
-
     # Create datasets needed for testing
     created_datasets = generate_datasets(10)
 
     # Create the needed dependencies
     generate_dependencies(created_datasets)
 
-
-
     # **** For (DATASET CONTAINER) ****
     parent_container = client.path(path=created_datasets[0].path, versionId="current")
 
     # ******************************************************************
     # ******************************************************************
-    # Case D1: Retrieving with a chunk size of 1, one dependent at a time
+    # Case 1: Retrieving with a chunk size of 1, one dependent at a time
     # ******************************************************************
     # ******************************************************************
-    print("--------------------------------------------------------------------------------\n")
-    print("(Case D1): Retrieving dependents using a chunk size of 1\n")
+    print("--------------------------------------------------------------------------------")
+    print("(Case 1): Retrieving dependents using a chunk size of 1\n")
 
     # Start dependent retrieval using .get_dependents
     dependents = (client.get_dependents(parent_container, "predecessor", max_depth=10, chunk_size=1))
@@ -48,14 +45,14 @@ def main():
         except:
             pass
         print("")
-    print("--------------------------------------------------------------------------------\n")
 
     # ******************************************************************
     # ******************************************************************
-    # Case D2: Retrieving with a chunk size of n, In this case three dependents at a time
+    # Case 2: Retrieving with a chunk size of n, In this case three dependents at a time
     # ******************************************************************
     # ******************************************************************
-    print("(Case D2): Retrieving dependents using a chunk size of 3\n")
+    print("--------------------------------------------------------------------------------")
+    print("(Case 2): Retrieving dependents using a chunk size of 3\n")
     # Start dependent retrieval using .get_dependents
     dependents = (client.get_dependents(parent_container, "predecessor", max_depth=5, chunk_size=3))
     print("Dependents =")
@@ -76,15 +73,15 @@ def main():
         except:
             pass
         print("")
-    print("--------------------------------------------------------------------------------\n")
 
     # ******************************************************************
     # ******************************************************************
-    # Case D3: Retrieving dependents while only going 1 level deep in depth
+    # Case 3: Retrieving dependents while only going 1 level deep in depth
     # ******************************************************************
     # ******************************************************************
+    print("--------------------------------------------------------------------------------")
     parent_container = client.path(path=created_datasets[0].path, versionId="current")
-    print("(Case D3): Retrieving dependents while only going 1 level deep in depth\n")
+    print("(Case 3): Retrieving dependents while only going 1 level deep in depth\n")
     # Start dependent retrieval using .get_dependents
     dependents = (client.get_dependents(parent_container, "predecessor", max_depth=1, chunk_size=1))
     print("Dependents =")
@@ -106,15 +103,14 @@ def main():
             pass
         print("")
 
-    print("--------------------------------------------------------------------------------\n")
-
     # ******************************************************************
     # ******************************************************************
-    # Case D4: Retrieving from a dependency that is currently not in cache
+    # Case 4: Retrieving from a dependency that is currently not in cache
     # ******************************************************************
     # ******************************************************************
+    print("--------------------------------------------------------------------------------")
     parent_container = client.path(path=created_datasets[0].path, versionId="current")
-    print("(Case D4): Retrieving dependents while only going 'n' levels deep in depth, in this case 3\n")
+    print("(Case 4): Retrieving dependents while only going 'n' levels deep in depth, in this case 3\n")
     # Start dependent retrieval using .get_dependents
     dependents = (client.get_dependents(parent_container, "predecessor", max_depth=3, chunk_size=1))
     print("Dependents =")
@@ -136,8 +132,6 @@ def main():
             pass
         print("")
 
-    print("--------------------------------------------------------------------------------\n")
-
     last_dataset = len(created_datasets) - 1
 
     # ******************************************************************
@@ -145,8 +139,10 @@ def main():
     # Case D5: Retrieving from a dependency that is currently not in cache
     # ******************************************************************
     # ******************************************************************
+
+    print("--------------------------------------------------------------------------------")
     parent_container = client.path(path=created_datasets[last_dataset].path, versionId="current")
-    print("(Case D5): Retrieving from a dependency that is currently not in cache\n")
+    print("(Case 5): Retrieving from a dependency that is currently not in cache\n")
     # Start dependent retrieval using .get_dependents
     dependents = (client.get_dependents(parent_container, "predecessor", max_depth=5, chunk_size=3))
     print("Dependents =")
@@ -157,11 +153,9 @@ def main():
         pass
     print("")
 
-    print("--------------------------------------------------------------------------------\n")
-
     # ******************************************************************
     # ******************************************************************
-    # Case D6: 50 Levels each with 2 datasets each.
+    # Case 6: 50 Levels each with 2 datasets each.
     # If the last level retrieved matches with the last level saved during the creation of dependencies then we know
     # that the retrievals are working as intended
     # ******************************************************************
@@ -172,7 +166,8 @@ def main():
     last_level_calculated = []
     last_level_calculated_datasets = []
 
-    print("(Case D6): Generating 50 levels each with two dependent datasets, testing for proper retrieval of last level ")
+    print("--------------------------------------------------------------------------------\n")
+    print("(Case 6): Generating 50 levels each with two dependent datasets, testing for proper retrieval of last level ")
 
     parent_container = client.path(path=datasets_for_stress_test[0].path, versionId="current")
     dependents = client.get_dependents(parent_container, "predecessor", max_depth=150, chunk_size=2)
@@ -199,23 +194,19 @@ def main():
 
     # ******************************************************************
     # ******************************************************************
-    # Case D2:
+    # Case 7:
     # This test case should make sure that if given a DATASET container we can retrieve ONLY GROUP dependents from it
     # This test case will also make sure that we can continue to retrieve using .get_next_dependents
     # ******************************************************************
     # ******************************************************************
+    print("--------------------------------------------------------------------------------")
+    print("(Case 7): Testing retrieval of both dataset and groups from a dependency")
 
     # Create Datasets
-    print("Creating Datasets: ")
     list_of_datasets = generate_datasets(10)
 
     # Create Groups
-    print("\nCreating Groups: ")
     test_group = create_groups(5)
-    for x in test_group:
-        print("Created Group: " + x.name + " " + x.path)
-
-    print()
 
     # Add Group_00 as dependent of Dataset_00
     dataset_00 = client.path(path=list_of_datasets[0].path, versionId="current")
@@ -259,7 +250,7 @@ def main():
 
     # Retrieve the entire dependency tree using the api wrapper.
     root_container = client.path(path=patched_dataset0.path, versionId="current")
-    dependents = client.get_dependents(dep_container=root_container, dep_type="predecessor", max_depth=10, chunk_size=2)
+    dependents = client.get_dependents(dep_container=root_container, dep_type="predecessor", max_depth=10, chunk_size=3)
 
 
     print("Dependents =")
@@ -269,7 +260,6 @@ def main():
     except:
         pass
     print()
-
 
     while dependents != []:
         dependents = (client.get_next_dependents(root_container))
@@ -304,7 +294,7 @@ def generate_datasets(number_to_generate):
                             resource=full_file_generic,
                             site='SLAC')
         ds_generic_version_pk = ds_generic.versionPk
-        print("created dataset: ", filename_generic, "(VersionPK = ", ds_generic_version_pk, ")" , ds_generic.path)
+        # print("created dataset: ", filename_generic, "(VersionPK = ", ds_generic_version_pk, ")" , ds_generic.path)
 
         dataset_return.append(ds_generic)
 
@@ -316,7 +306,7 @@ def generate_dependencies(list_of_datasets):
     level_counter = 1
 
     # Level 1
-    print(len(list_of_datasets))
+    # print(len(list_of_datasets))
     for dataset in range(len(list_of_datasets)-1):
 
         try:
@@ -331,8 +321,8 @@ def generate_dependencies(list_of_datasets):
                 add_dpks = []
                 for dependent in dependents:
                     add_dpks.append(dependent.versionPk)
-                print("\nLevel: " + str(level_counter))
-                print("Dependents added:", add_dpks, "\n@ " + list_of_datasets[dataset].path + ";v=current\n")
+                # print("\nLevel: " + str(level_counter))
+                # print("Dependents added:", add_dpks, "\n@ " + list_of_datasets[dataset].path + ";v=current\n")
                 level_counter = level_counter + 1
         except:
             assert False, "dependent addition unsuccessful"
@@ -346,7 +336,7 @@ def generate_dependencies_stress_test(list_of_datasets):
     level_counter = 1
 
     # Level 1
-    print(len(list_of_datasets))
+    # print(len(list_of_datasets))
     for datasetIndex in range(0, len(list_of_datasets)-1, 2):
 
         try:
@@ -365,8 +355,8 @@ def generate_dependencies_stress_test(list_of_datasets):
                 for dependent in dependents:
                     add_dpks.append(dependent.versionPk)
 
-                print("\nLevel: " + str(level_counter))
-                print("Dependents added:", add_dpks, "\n@ " + list_of_datasets[datasetIndex].path + ";v=current\n")
+                # print("\nLevel: " + str(level_counter))
+                # print("Dependents added:", add_dpks, "\n@ " + list_of_datasets[datasetIndex].path + ";v=current\n")
                 level_counter = level_counter + 1
 
         except:
