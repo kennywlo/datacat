@@ -36,7 +36,7 @@ def main():
     print("")
 
     # Continue to retrieve dependents until there are no more left to retrieve
-    while dependents != []:
+    while dependents:
         dependents = (client.get_next_dependents(parent_container))
         print("Dependents =")
         try:
@@ -64,7 +64,7 @@ def main():
     print("")
 
     # Continue to retrieve dependents until there are no more left to retrieve
-    while dependents != []:
+    while dependents:
         dependents = (client.get_next_dependents(parent_container))
         print("Dependents =")
         try:
@@ -93,7 +93,7 @@ def main():
     print("")
 
     # Continue to retrieve dependents until there are no more left to retrieve
-    while dependents != []:
+    while dependents:
         dependents = (client.get_next_dependents(parent_container))
         print("Dependents =")
         try:
@@ -122,7 +122,7 @@ def main():
     print("")
 
     # Continue to retrieve dependents until there are no more left to retrieve
-    while dependents != []:
+    while dependents:
         dependents = (client.get_next_dependents(parent_container))
         print("Dependents =")
         try:
@@ -167,15 +167,15 @@ def main():
     last_level_calculated_datasets = []
 
     print("--------------------------------------------------------------------------------\n")
-    print("(Case 6): Generating 50 levels each with two dependent datasets, testing for proper retrieval of last level ")
+    print("(Case 6): Generating 50 levels each with two dependent datasets, testing for proper retrieval of last level")
 
     parent_container = client.path(path=datasets_for_stress_test[0].path, versionId="current")
     dependents = client.get_dependents(parent_container, "predecessor", max_depth=150, chunk_size=2)
 
-    while dependents != []:
+    while dependents:
         dependents = (client.get_next_dependents(parent_container))
 
-        if dependents != []:
+        if dependents:
             last_level_calculated.clear()
             last_level_calculated_datasets.clear()
         try:
@@ -211,19 +211,20 @@ def main():
     # Add Group_00 as dependent of Dataset_00
     dataset_00 = client.path(path=list_of_datasets[0].path, versionId="current")
     group_dependents_00 = [test_group[0]]
-    patched_dataset0 = client.add_dependents(dep_container=dataset_00, dep_type="predecessor", dep_groups=group_dependents_00)
+    patched_dataset0 = client.add_dependents(dep_container=dataset_00, dep_type="predecessor",
+                                             dep_groups=group_dependents_00)
 
     # Add 2 datasets (01, 02) to be dependents of Group00
     group_00 = client.path(path=test_group[0].path, versionId="current")
     dataset_dependents_01_02 = [list_of_datasets[1], list_of_datasets[2]]
     patched_group_00 = client.add_dependents(dep_container=group_00, dep_type="predecessor",
-                                           dep_datasets=dataset_dependents_01_02)
+                                             dep_datasets=dataset_dependents_01_02)
 
     # Add group_01 to be a dependent of dataset_01
     dataset_01 = client.path(path=list_of_datasets[1].path, versionId="current")
     group_dependents_01 = [test_group[1]]
     patched_dataset_01 = client.add_dependents(dep_container=dataset_01, dep_type="predecessor",
-                                            dep_groups=group_dependents_01)
+                                               dep_groups=group_dependents_01)
 
     # Add group_02 to be a dependent of dataset_02
     dataset_02 = client.path(path=list_of_datasets[2].path, versionId="current")
@@ -235,7 +236,7 @@ def main():
     group_01 = client.path(path=test_group[1].path, versionId="current")
     datasets_dependents_03_04 = [list_of_datasets[3], list_of_datasets[4]]
     patched_group_01 = client.add_dependents(dep_container=group_01, dep_type="predecessor",
-                                           dep_datasets=datasets_dependents_03_04)
+                                             dep_datasets=datasets_dependents_03_04)
 
     # Add 2 datasets(05, 06) to be dependents of dataset 3
     dataset_03 = client.path(path=list_of_datasets[3].path, versionId="current")
@@ -252,7 +253,6 @@ def main():
     root_container = client.path(path=patched_dataset0.path, versionId="current")
     dependents = client.get_dependents(dep_container=root_container, dep_type="predecessor", max_depth=10, chunk_size=3)
 
-
     print("Dependents =")
     try:
         for item in dependents:
@@ -261,7 +261,7 @@ def main():
         pass
     print()
 
-    while dependents != []:
+    while dependents:
         dependents = (client.get_next_dependents(root_container))
         print("Dependents =")
         try:
@@ -316,7 +316,7 @@ def generate_dependencies(list_of_datasets):
             add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                    dep_datasets=dependents)
 
-            if(add_dependents):
+            if add_dependents:
                 added_after = client.path(path=list_of_datasets[dataset].path, versionId="current")
                 add_dpks = []
                 for dependent in dependents:
@@ -349,7 +349,7 @@ def generate_dependencies_stress_test(list_of_datasets):
             add_dependents = client.add_dependents(dep_container=dataset_to_Patch, dep_type="predecessor",
                                                    dep_datasets=dependents)
 
-            if(add_dependents):
+            if add_dependents:
                 added_after = client.path(path=list_of_datasets[datasetIndex].path, versionId="current")
                 add_dpks = []
                 for dependent in dependents:
@@ -386,13 +386,10 @@ def create_groups(number_of_groups):
     return list_of_groups
 
 
-
-
-
 if __name__ == "__main__":
 
     # datacat
-    config_file ='./config_srs.ini'
+    config_file = './config_srs.ini'
     config = config_from_file(config_file)
     client = client_from_config(config)
 
