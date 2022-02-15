@@ -6,7 +6,7 @@ requires = [
 
 setup(
     name='datacat',
-    version='0.6.dev2',
+    version='0.6',
     packages=['datacat'],
     url='http://srs.slac.stanford.edu',
     license='SLAC BSD',

@@ -181,54 +181,6 @@ public class PathResource extends BaseResource {
                     List<MetadataEntry> entries = null;
                     if(rv.containsKey("metadata") && ret instanceof HasMetadata){
                         entries = MetadataEntry.toList(((HasMetadata) ret).getMetadataMap());
-                        List<String> dep = matrixParams.get("metadata");
-                        String dependentType = "";
-                        if (!dep.isEmpty()){
-                            dependentType = "*";
-                            if (dep.get(0).contains("dependents.")){
-                                dependentType = dep.get(0).replace("dependents.", "");
-                            }else if (dep.get(0).contains("dependency.")){
-                                dependentType = dep.get(0).replace("dependency.", "");
-                            }
-                        }
-                        if (!dependentType.isEmpty()){
-                            try {
-                                DatacatObject.Builder builder = new DatacatObject.Builder();
-                                if (ret instanceof  FlatDataset) {
-                                    builder.pk(((FlatDataset) ret).getVersionPk());
-                                } else {
-                                    builder.pk(ret.getPk());
-                                }
-                                builder.path(ret.getPath());
-                                Connection conn = getConnection();
-                                Map<String, Object> retmap, retmap2;
-                                if (dependentType.equals("groups")){
-                                     retmap = SearchUtils.getDependencyGroups(conn, builder.pk);
-                                     if (!retmap.isEmpty()) {
-                                         MetadataEntry entry = new MetadataEntry("dependencyGroups",
-                                             (String) retmap.get("dependencyGroups"));
-                                         entries.add(entry);
-                                     }
-                                } else {
-                                    String depContainer = ret instanceof DatasetGroup ? "dependencyGroup":"dependency";
-                                    retmap = SearchUtils.getDependentsByType(conn, depContainer,
-                                        "dependent", builder.pk, dependentType);
-                                    retmap2 =SearchUtils.getDependentsByType(conn, depContainer,
-                                        "dependentGroup", builder.pk, dependentType);
-                                    if (!retmap2.isEmpty()){
-                                        retmap.putAll(retmap2);
-                                    }
-                                    if (!retmap.isEmpty()) {
-                                        for (String type: retmap.keySet()) {
-                                            MetadataEntry entry = new MetadataEntry(type, (String) retmap.get(type));
-                                            entries.add(entry);
-                                        }
-                                    }
-                                }
-                                conn.close();
-                            } catch (SQLException ex) {
-                            }
-                        }
                     } else if(rv.containsKey("versionMetadata") && ret instanceof DatasetWithViewModel){
                         entries = MetadataEntry.toList(((DatasetWithViewModel) ret).getViewInfo()
                                 .getVersion().getMetadataMap());
