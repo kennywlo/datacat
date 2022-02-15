@@ -37,6 +37,7 @@ def main():
     # Datasets for Case2 removal starting as case 6
     case6_datasets = create_datasets(6, 3)
     dataset001_6 = case6_datasets[0]
+    dataset002_6 = case6_datasets[1]
 
 
     case3_groups = create_groups(3, 2)
@@ -57,8 +58,11 @@ def main():
 
     # Groups for Case2 removal starting as case 6
 
-    case6_groups = create_groups(6, 3)
+    case6_groups = create_groups(6, 4)
     group1_6 = case6_groups[0]
+    group2_6 = case6_groups[1]
+    group3_6 = case6_groups[2]
+    group4_6 = case6_groups[3]
 
     def check_match(expect, actual):
         """
@@ -624,10 +628,11 @@ def main():
             added_after = dict(added_after)
 
             if enable_assertion:
-
-
+                expected = {}
                 assert 'predecessor.group' not in added_after and \
-                       'successor.group' not in added_after, \
+                       'successor.group' not in added_after and \
+                       'predecessor.dataset' not in added_after and \
+                       'successor.dataset' not in added_after, \
                     "Case 2.2 group dependent removal result is not as expected: {}.\n" \
                     "Expected: {}".format(added_after, expected)
 
@@ -643,15 +648,16 @@ def main():
 
     # Case 2.3 remove datasets AND group from group container
     try:
-        container_group = client.path(path='/testpath/depGroup2_6')
+        container_group = client.path(path='/testpath/depGroup4_6')
         client.add_dependents(dep_container=container_group,
                               dep_type="predecessor",
-                              dep_groups=[group1_6],
-                              dep_datasets=[dataset001_6])
-        added_before = client.path(path='/testpath/depGroup2_6')
-        group_to_patch = client.path(path='/testpath/depGroup2_6')
-        remove_dependent_groups = [group1_6]
-        remove_dependent_datasets = [dataset001_6]
+                              dep_groups=[group3_6],
+                              dep_datasets=[dataset002_6])
+
+        added_before = client.path(path='/testpath/depGroup4_6')
+        group_to_patch = client.path(path='/testpath/depGroup4_6')
+        remove_dependent_groups = [group3_6]
+        remove_dependent_datasets = [dataset002_6]
         add_dependents = client.remove_dependents(dep_container=group_to_patch,
                                                   dep_type="predecessor",
                                                   dep_groups=remove_dependent_groups,
@@ -662,16 +668,16 @@ def main():
         if add_dependents:
             update_gpks = client.get_dependent_id(remove_dependent_groups)
             update_dpks = client.get_dependent_id(remove_dependent_datasets)
-            added_after = client.path(path='/testpath/depGroup2_6;metadata=dependents')
+            added_after = client.path(path='/testpath/depGroup4_6;metadata=dependents')
             added_after = dict(added_after)
 
             if enable_assertion:
-
+                expected = {}
                 assert 'predecessor.group' not in added_after and \
-                        'predecessor.dataset' not in added_after and \
+                       'predecessor.dataset' not in added_after and \
                        'successor.group' not in added_after and \
                        'successor.dataset' not in added_after, \
-                    "Case 4.3 group dependent addition result is not as expected: {}.\n" \
+                    "Case 2.3 group dependent removal result is not as expected: {}.\n" \
                     "Expected: {}".format(added_after, expected)
 
             print("Case 2.3 group dependent removal successful:")
