@@ -10,7 +10,7 @@ DATATYPES = "json xml txt".split(" ")
 
 _logger = logging.getLogger(__name__)
 
-__version__ = "0.6-DEPENDENCY"
+__version__ = "0.6.dev2"
 
 
 def config_from_file(path=None, override_section=None, override_url=None):
