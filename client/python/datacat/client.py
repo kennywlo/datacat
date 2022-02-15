@@ -93,33 +93,6 @@ class Client(object):
         return self.mkdir(path, "group", parents, metadata, **kwargs)
 
     @checked_error
-    def get_dependent_id(self, dependents):
-        """
-        Fetch the identifiers used for dataset dependency.
-        :param dependents: one or more dependents, of Dataset or Group
-        :return: the identifiers of the input dependents
-        """
-        ids = []
-        if not dependents:
-            return None
-        if isinstance(dependents, Dataset):
-            return dependents.versionPk
-        elif isinstance(dependents, Group):
-            return dependents.pk
-        for dep in dependents:
-            if isinstance(dep, Dataset):
-                if hasattr(dep, "versionPk"):
-                    ids.append(dep.versionPk)
-                else:
-                    raise ValueError("Could not retrieve dependent dataset versionPK.")
-            elif isinstance(dep, Group):
-                if hasattr(dep, "pk"):
-                    ids.append(dep.pk)
-            else:
-                raise ValueError("Unrecognized dependent type")
-        return ids
-
-    @checked_error
     def get_dependents(self, dep_container, dep_type, max_depth, chunk_size):
         """
         Retrieves dependents up to the provided "chunk_size" at a time, subject to "max_depth".

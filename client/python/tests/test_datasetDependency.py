@@ -62,7 +62,7 @@ if __name__ == "__main__":
     # use the client to create dataset003 - DOES initialize dependency metadata
     full_file003 = file_path + '/' + filename
     # Add Dependency metadata to dataset003 - Will list dataset001 and dataset002 as predecessors of dataset003
-    dependents = client.get_dependent_id([ds001, ds002])
+    dependents = client.client_helper.get_dependent_id([ds001, ds002])
     dep_metadata = {"dependencyName": "test_data",
                     "dependents": str(dependents),
                     "dependentType": "predecessor"}
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     # use the client to create dataset006 - DOES initialize dependency metadata
     full_file006 = file_path + '/' + filename
     # Add Dependency metadata to dataset006 - Will list dataset004 and dataset005 as successors of dataset003
-    dependents = client.get_dependent_id([ds004, ds005])
+    dependents = client.client_helper.get_dependent_id([ds004, ds005])
     dep_metadata = {"dependencyName": "test_data",
                     "dependents": str(dependents),
                     "dependentType": "successor"}
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     if client.exists(datacat_path_general + '/' + filename):
         client.rmds(datacat_path_general + '/' + filename)
 
-    dependents = client.get_dependent_id([ds001, ds002])
+    dependents = client.client_helper.get_dependent_id([ds001, ds002])
     dep_metadata = {"dependencyName": "test_data",
                     "dependents": str(dependents),
                     "dependentType": "predecessor"}
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     if client.exists(datacat_path + "/" + filename):
         client.rmds(datacat_path + "/" + filename)
 
-    dependents = client.get_dependent_id([dsCustom001])
+    dependents = client.client_helper.get_dependent_id([dsCustom001])
     dep_metadata = {"dependencyName": "test_data",
                     "dependents": str(dependents),
                     "dependentType": "analysis__XXX"}

@@ -103,18 +103,18 @@ if __name__ == "__main__":
     print("\nCreated dataset:\n{}\n{}\nMetadata: {}".format(filename, ds004, dict(ds_metadata)))
 
     # Putting together a list to be used as predecessor dependents
-    dependentsPredecessor = client.get_dependent_id([ds001,ds002])
+    dependentsPredecessor = client.client_helper.get_dependent_id([ds001,ds002])
     print("\nPredecessor dependents genereated as:\n{}".format(dependentsPredecessor))
 
     # Putting together a list to be used as successor dependents
-    dependentsSuccessor = client.get_dependent_id([ds003,ds004])
+    dependentsSuccessor = client.client_helper.get_dependent_id([ds003,ds004])
     print("\nSuccessor dependents genereated as:\n{}".format(dependentsSuccessor))
 
     # Putting together a list of dependents that are located in multiple groups
-    dependentsSameDatasetDifferentGroups = client.get_dependent_id([ds001,ds002])
+    dependentsSameDatasetDifferentGroups = client.client_helper.get_dependent_id([ds001,ds002])
 
     # Putting together a list to be used as predecessor dependents
-    customDependents = client.get_dependent_id([ds001,ds002,ds003,ds004])
+    customDependents = client.client_helper.get_dependent_id([ds001,ds002,ds003,ds004])
     print("\nCustom dependents genereated as:\n{}".format(customDependents))
 
     # adding the datasets with their new dependentType to a groups metadata (predecessor)

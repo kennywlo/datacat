@@ -100,7 +100,7 @@ def main():
                                                dep_datasets=dependents)
         if add_dependents:
             added_after = client.path(path=dataset001_1.path, versionId="current")
-            add_dpks = client.get_dependent_id(dependents)
+            add_dpks = client.client_helper.get_dependent_id(dependents)
             print("DATASET DEPENDENTS TO UPDATE:", add_dpks)
             print("Case 1.1 dependent addition successful:")
             print("** add datasets to dataset container **")
@@ -133,7 +133,7 @@ def main():
         add_dependents = client.add_dependents(dep_container=dataset_to_patch, dep_type="predecessor",
                                                dep_datasets=update_dependents)
         if add_dependents:
-            update_dpks = client.get_dependent_id(update_dependents)
+            update_dpks = client.client_helper.get_dependent_id(update_dependents)
             print("Case 2.1 dependent update successful:")
             print("DATASET DEPENDENTS TO UPDATE:", update_dpks)
             added_after = client.path(path=dataset001_1.path, versionId="current")
@@ -151,7 +151,7 @@ def main():
         add_dependents = client.add_dependents(dep_container=dataset_to_patch, dep_type="successor",
                                                dep_datasets=update_dependents)
         if add_dependents:
-            update_dpks = client.get_dependent_id(update_dependents)
+            update_dpks = client.client_helper.get_dependent_id(update_dependents)
             print("Case 2.2 dependent update successful:")
             print("CONTAINER DATASET NAME:", dataset_to_patch.name)
             print("DATASET DEPENDENTS TO UPDATE:", update_dpks)
@@ -180,7 +180,7 @@ def main():
                                                                                                           expected)
 
         if add_dependents:
-            update_gpks = client.get_dependent_id(update_dependents)
+            update_gpks = client.client_helper.get_dependent_id(update_dependents)
             print("Case 3.1 dependent update successful:")
             print("CONTAINER DATASET NAME:", dataset_to_patch.name)
             print("GROUP DEPENDENTS TO UPDATE:", update_gpks)
@@ -202,8 +202,8 @@ def main():
                                                dep_groups=update_dependent_groups)
 
         if add_dependents:
-            update_dpks = client.get_dependent_id(update_dependent_datasets)
-            update_gpks = client.get_dependent_id(update_dependent_groups)
+            update_dpks = client.client_helper.get_dependent_id(update_dependent_datasets)
+            update_gpks = client.client_helper. get_dependent_id(update_dependent_groups)
             expected = {'successor.dataset': '{}'.format(update_dpks[0]),
                         'successor.group': '{}'.format(update_gpks[0])}
             added_after = client.path(path=dataset_to_patch.path + ";versionMetadata=dependents",
@@ -240,7 +240,7 @@ def main():
         if hasattr(added_before, "metadata"):
             group_md = added_before.metadata
         if add_dependents:
-            update_dpks = client.get_dependent_id(update_dependents)
+            update_dpks = client.client_helper.get_dependent_id(update_dependents)
             expected = {'predecessor.dataset': '{},{}'.format(update_dpks[0], update_dpks[1])}
             added_after = client.path(path='/testpath/depGroup1_4;metadata=dependents')
             added_after = dict(added_after)
@@ -271,7 +271,7 @@ def main():
         if hasattr(added_before, "metadata"):
             group_md = added_before.metadata
         if add_dependents:
-            update_gpks = client.get_dependent_id(update_dependents)
+            update_gpks = client.client_helper.get_dependent_id(update_dependents)
             added_after = client.path(path='/testpath/depGroup2_4;metadata=dependents')
             added_after = dict(added_after)
             expected = {
@@ -307,8 +307,8 @@ def main():
         if hasattr(added_before, "metadata"):
             group_md = added_before.metadata
         if add_dependents:
-            update_gpks = client.get_dependent_id(update_dependent_groups)
-            update_dpks = client.get_dependent_id(update_dependent_datasets)
+            update_gpks = client.client_helper.get_dependent_id(update_dependent_groups)
+            update_dpks = client.client_helper.get_dependent_id(update_dependent_datasets)
             added_after = client.path(path='/testpath/depGroup3_4;metadata=dependents')
             added_after = dict(added_after)
             expected = {'predecessor.dataset': '{},{}'.format(update_dpks[0], update_dpks[1]),
@@ -344,7 +344,7 @@ def main():
             group_md = dict(added_before.metadata)
 
         if add_dependents:
-            update_dpks = client.get_dependent_id(update_dependents)
+            update_dpks = client.client_helper.get_dependent_id(update_dependents)
             added_after = client.path(path='/testpath/depGroup1_4;metadata=dependents')
             added_after = dict(added_after)
             expected_predecessor_dataset_str = '{}'.format(added_before.metadata['predecessor.dataset']) + ','\
@@ -381,7 +381,7 @@ def main():
             group_md = added_before.metadata
 
         if add_dependents:
-            update_dpks = client.get_dependent_id(update_dependents)
+            update_dpks = client.client_helper.get_dependent_id(update_dependents)
             expected = {'predecessor.group': '{},{}'.format(group_md['predecessor.group'], update_dpks[0])}
             expected_v2 = {'predecessor.group': '{},{}'.format(update_dpks[0], group_md['predecessor.group'])}
             added_after = client.path(path='/testpath/depGroup2_4;metadata=dependents')
@@ -419,8 +419,8 @@ def main():
             group_md = added_before.metadata
 
         if add_dependents:
-            update_gpks = client.get_dependent_id(update_dependent_groups)
-            update_dpks = client.get_dependent_id(update_dependent_datasets)
+            update_gpks = client.client_helper.get_dependent_id(update_dependent_groups)
+            update_dpks = client.client_helper.get_dependent_id(update_dependent_datasets)
             added_after = client.path(path='/testpath/depGroup3_4;metadata=dependents')
             added_after = dict(added_after)
             expected_predecessor_dataset_str = '{}'.format(group_md['predecessor.dataset']) + ',' + '{}'.format(update_dpks[0])
@@ -464,7 +464,13 @@ def main():
             for dependent in remove_dependents:
                 remove_dpks.append(dependent.versionPk)
             added_after = client.path(path=dataset001_1.path, versionId="current")
-            expected_predecessor_dataset_str = added_before.versionMetadata['predecessor.dataset'].replace(str(remove_dpks[0]) + ',', '')
+
+            expected_predecessor_dataset_l = added_before.versionMetadata['predecessor.dataset'].split(",")
+            remove_dpks_s = str(remove_dpks[0])
+            if remove_dpks_s in expected_predecessor_dataset_l:
+                expected_predecessor_dataset_l.remove(remove_dpks_s)
+            expected_predecessor_dataset_str = ",".join(expected_predecessor_dataset_l)
+
             expected = {
                 'successor.dataset': added_before.versionMetadata['successor.dataset'],
                 'predecessor.dataset': expected_predecessor_dataset_str
@@ -492,7 +498,7 @@ def main():
         add_dependents = client.remove_dependents(dep_container=dataset_to_patch, dep_type="predecessor",
                                                   dep_datasets=remove_dependents)
         if add_dependents:
-            remove_dpks = client.get_dependent_id(remove_dependents)
+            remove_dpks = client.client_helper.get_dependent_id(remove_dependents)
             added_after = client.path(path=dataset001_1.path, versionId="current")
             print("Dataset dependents to be removed:", remove_dpks)
             if enable_assertion:
@@ -588,9 +594,14 @@ def main():
         if hasattr(added_before, "metadata"):
             group_md = added_before.metadata
         if add_dependents:
-            update_dpks = client.get_dependent_id(remove_dependents)
+            update_dpks = client.client_helper.get_dependent_id(remove_dependents)
 
-            expected_predecessor_dataset_str = group_md['predecessor.dataset'].replace(str(update_dpks[0]) + ',', '')
+            expected_predecessor_dataset_l = group_md['predecessor.dataset'].split(",")
+            update_dpks_s = str(update_dpks[0])
+            if update_dpks_s in expected_predecessor_dataset_l:
+                expected_predecessor_dataset_l.remove(update_dpks_s)
+            expected_predecessor_dataset_str = ",".join(expected_predecessor_dataset_l)
+
             expected = {'predecessor.dataset': expected_predecessor_dataset_str}
 
             added_after = client.path(path='/testpath/depGroup1_4;metadata=dependents')
@@ -623,7 +634,7 @@ def main():
         if hasattr(added_before, "metadata"):
             group_md = added_before.metadata
         if add_dependents:
-            update_gpks = client.get_dependent_id(remove_dependents)
+            update_gpks = client.client_helper.get_dependent_id(remove_dependents)
             added_after = client.path(path='/testpath/depGroup2_6;metadata=dependents')
             added_after = dict(added_after)
 
@@ -666,8 +677,8 @@ def main():
         if hasattr(added_before, "metadata"):
             group_md = added_before.metadata
         if add_dependents:
-            update_gpks = client.get_dependent_id(remove_dependent_groups)
-            update_dpks = client.get_dependent_id(remove_dependent_datasets)
+            update_gpks = client.client_helper.get_dependent_id(remove_dependent_groups)
+            update_dpks = client.client_helper.get_dependent_id(remove_dependent_datasets)
             added_after = client.path(path='/testpath/depGroup4_6;metadata=dependents')
             added_after = dict(added_after)
 
