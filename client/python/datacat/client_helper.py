@@ -81,6 +81,7 @@ class ClientHelper(object):
         except Exception as e:
             print(e)
 
+        decodeResults = []
         if type == "dataset":
             decodeResults = self.parent.search(target=self.dep_name,
                                                show="dependents",
@@ -91,8 +92,7 @@ class ClientHelper(object):
                                                show="dependency.groups",
                                                containerFilter='dependentGroups in ({})'.format(ToDecodeCommaDelimited),
                                                ignoreShowKeyError=True)
-        else:
-            return []
+
         return decodeResults
 
     def retrieveContainerDependents(self, dep_container_processed):
@@ -146,8 +146,6 @@ class ClientHelper(object):
             else:
                 return [], []
 
-        no_response = True
-
         # Searching for all dataset dependents
         searchResults = []
         try:
@@ -165,7 +163,8 @@ class ClientHelper(object):
             if dependentsToRetrieve_Group:
                 searchResults_Groups = self.parent.search(target=self.dep_name,
                                                           show="dependency.groups",
-                                                          containerFilter='dependentGroups in ({})'.format(dependentsToRetrieve_Group),
+                                                          containerFilter='dependentGroups in ({})'
+                                                          .format(dependentsToRetrieve_Group),
                                                           ignoreShowKeyError=True)
         except:
             pass
@@ -201,7 +200,8 @@ class ClientHelper(object):
 
                     # Convert to versionPK list - dependents_retrieved_so_far_datasets
                     datasets_retrieved_enc = self.encodeForCache(dependent)
-                    self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_datasets"].extend(datasets_retrieved_enc)
+                    self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_datasets"]\
+                        .extend(datasets_retrieved_enc)
 
                     dependent_queue_Dataset.pop(0)
                     self.remaining_chunk_size -= 1
@@ -232,7 +232,8 @@ class ClientHelper(object):
 
                     # Convert to versionPK list - dependents_retrieved_so_far_datasets
                     groups_retrieved_enc = self.encodeForCache(dependent)
-                    self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_groups"].extend(groups_retrieved_enc)
+                    self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_groups"]\
+                        .extend(groups_retrieved_enc)
 
                     dependent_queue_Group.pop(0)
                     self.remaining_chunk_size -= 1
@@ -257,13 +258,15 @@ class ClientHelper(object):
             # - Dependents Left (Datasets)
             # - Dependents Left (Groups)
             # If "None" is returned for either, replace with an
-            dependentsToRetrieve = str(self.get_dependent_id(self.decodeFromCache(self.currentDependency.get("dependents_left_datasets"), "dataset")))
+            dependentsToRetrieve = str(self.get_dependent_id(self.decodeFromCache(
+                self.currentDependency.get("dependents_left_datasets"), "dataset")))
             if dependentsToRetrieve == "None":
                 dependentsToRetrieve = "[]"
             dependentsToRetrieve = dependentsToRetrieve.replace('[', '')
             dependentsToRetrieve = dependentsToRetrieve.replace(']', '')
 
-            dependentsToRetrieveGroups = str(self.get_dependent_id(self.decodeFromCache(self.currentDependency.get("dependents_left_groups"), "group")))
+            dependentsToRetrieveGroups = str(self.get_dependent_id(self.decodeFromCache(
+                self.currentDependency.get("dependents_left_groups"), "group")))
             if dependentsToRetrieveGroups == "None":
                 dependentsToRetrieveGroups = "[]"
             dependentsToRetrieveGroups = dependentsToRetrieveGroups.replace('[', '')
@@ -274,14 +277,16 @@ class ClientHelper(object):
                 if self.currentDepth >= 0:
                     try:
                         if isinstance(dep_container_processed, Dataset):
-                            dependentsToRetrieve = dep_container_processed.versionMetadata.dct[self.dep_type + '.dataset']
+                            dependentsToRetrieve = dep_container_processed.versionMetadata.dct[self.dep_type
+                                                                                               + '.dataset']
                         elif isinstance(dep_container_processed, Group):
                             dependentsToRetrieve = dep_container_processed.metadata.dct[self.dep_type + '.dataset']
                     except:
                         pass
                     try:
                         if isinstance(dep_container_processed, Dataset):
-                            dependentsToRetrieveGroups = dep_container_processed.versionMetadata.dct[self.dep_type + '.group']
+                            dependentsToRetrieveGroups = dep_container_processed.versionMetadata.dct[self.dep_type
+                                                                                                     + '.group']
                         elif isinstance(dep_container_processed, Group):
                             dependentsToRetrieve = dep_container_processed.metadata.dct[self.dep_type + '.group']
 
@@ -294,10 +299,12 @@ class ClientHelper(object):
                 self.dependency_cache[self.dep_name][
                     "all_dependents_for_current_container_groups"] = dependentsToRetrieveGroups
 
-            converted_list_datasets = [str(element) for element in self.currentDependency.get('dependents_retrieved_so_far_datasets')]
+            converted_list_datasets = [str(element) for element in
+                                       self.currentDependency.get('dependents_retrieved_so_far_datasets')]
             joined_string_datasets = ",".join(converted_list_datasets)
 
-            converted_list_groups = [str(element) for element in self.currentDependency.get('dependents_retrieved_so_far_groups')]
+            converted_list_groups = [str(element) for element in
+                                     self.currentDependency.get('dependents_retrieved_so_far_groups')]
             joined_string_groups = ",".join(converted_list_groups)
 
             if dependentsToRetrieve == joined_string_datasets:
@@ -319,7 +326,8 @@ class ClientHelper(object):
                 if dependentsToRetrieveGroups:
                     searchResults_group = self.parent.search(target=self.dep_name,
                                                              show="dependency.groups",
-                                                             containerFilter='dependentGroups in ({})'.format(dependentsToRetrieveGroups),
+                                                             containerFilter='dependentGroups in ({})'
+                                                             .format(dependentsToRetrieveGroups),
                                                              ignoreShowKeyError=True)
             except:
                 pass
@@ -346,7 +354,8 @@ class ClientHelper(object):
 
                         # Encode to versionPK list - dependents_retrieved_so_far_datasets
                         dep_datasets_retrieved_enc = self.encodeForCache(dependent)
-                        self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_datasets"].extend(dep_datasets_retrieved_enc)
+                        self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_datasets"]\
+                            .extend(dep_datasets_retrieved_enc)
                         dependent_queue_dataset.pop(0)
                         dependents_left_enc = self.encodeForCache(dependent_queue_dataset)
                         self.dependency_cache[self.dep_name]['dependents_left_datasets'] = dependents_left_enc
@@ -372,7 +381,8 @@ class ClientHelper(object):
 
                         # Convert to versionPK list - dependents_retrieved_so_far_groups
                         dep_groups_retrieved_enc = self.encodeForCache(dependent)
-                        self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_groups"].extend(dep_groups_retrieved_enc)
+                        self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_groups"]\
+                            .extend(dep_groups_retrieved_enc)
 
                         dependent_queue_group.pop(0)
 
@@ -500,17 +510,19 @@ class ClientHelper(object):
 
                         # Convert to versionPK list then store in cache, for both groups and datasets
                         datasets_to_process_enc = self.encodeForCache(containersToProcess_Dataset)
-                        self.dependency_cache[self.dep_name]["all_containers_at_current_depth_datasets"].extend(
-                            datasets_to_process_enc)
+                        self.dependency_cache[self.dep_name]["all_containers_at_current_depth_datasets"]\
+                            .extend(datasets_to_process_enc)
                         groups_to_process_enc = self.encodeForCache(containersToProcess_Group)
-                        self.dependency_cache[self.dep_name]["all_containers_at_current_depth_groups"].extend(
-                            groups_to_process_enc)
+                        self.dependency_cache[self.dep_name]["all_containers_at_current_depth_groups"]\
+                            .extend(groups_to_process_enc)
 
                         # Convert to versionPK list then store in cache, for both groups and datasets
                         datasets_left_enc = self.encodeForCache(containersToProcess_Dataset)
-                        self.dependency_cache[self.dep_name]["containers_left_to_process_datasets"].extend(datasets_left_enc)
+                        self.dependency_cache[self.dep_name]["containers_left_to_process_datasets"]\
+                            .extend(datasets_left_enc)
                         groups_left_enc = self.encodeForCache(containersToProcess_Group)
-                        self.dependency_cache[self.dep_name]["containers_left_to_process_groups"].extend(groups_left_enc)
+                        self.dependency_cache[self.dep_name]["containers_left_to_process_groups"]\
+                            .extend(groups_left_enc)
 
                         return retrieved_dependents
                 except:
@@ -539,7 +551,8 @@ class ClientHelper(object):
             self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_datasets"] = []
             self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_groups"] = []
 
-            if (not nextContainersToProcess_Dataset and not nextContainersToProcess_Group) or self.currentDepth == (max_depth-1):
+            if (not nextContainersToProcess_Dataset and not nextContainersToProcess_Group) \
+                    or self.currentDepth == (max_depth-1):
                 print("Finished Processing the following dependency --> ", self.dep_name,
                       "\nReturning last batch of dependents, if any... ")
                 self.dependency_cache.pop(self.dep_name)
@@ -579,21 +592,29 @@ class ClientHelper(object):
         current_depth = self.currentDependency.get("current_depth")
         self.remaining_chunk_size = self.currentDependency.get("chunk_size")
 
-        all_containers_at_current_depth = self.decodeFromCache(self.currentDependency.get("all_containers_at_current_depth_datasets"), "dataset") + \
+        all_containers_at_current_depth = self.decodeFromCache(self.currentDependency.get(
+            "all_containers_at_current_depth_datasets"), "dataset") + \
             self.decodeFromCache(self.currentDependency.get("all_containers_at_current_depth_groups"), "group")
 
-        containersToProcess = self.decodeFromCache(self.currentDependency.get("containers_left_to_process_datasets"), "dataset") + \
-                              self.decodeFromCache(self.currentDependency.get("containers_left_to_process_groups"), "group")
+        containersToProcess = self.decodeFromCache(self.currentDependency.get("containers_left_to_process_datasets"),
+                                                   "dataset") + self.decodeFromCache(self.currentDependency.get(
+                                                   "containers_left_to_process_groups"), "group")
 
-        containersToProcess_Dataset = self.decodeFromCache(self.currentDependency.get("containers_left_to_process_datasets"), "dataset")
-        containersToProcess_Group = self.decodeFromCache(self.currentDependency.get("containers_left_to_process_groups"), "group")
+        containersToProcess_Dataset = self.decodeFromCache(self.currentDependency.get(
+            "containers_left_to_process_datasets"), "dataset")
+        containersToProcess_Group = self.decodeFromCache(self.currentDependency.get(
+            "containers_left_to_process_groups"), "group")
         self.process_queue = copy.deepcopy(containersToProcess)
 
-        dependents_retrieved_current_container = self.decodeFromCache(self.currentDependency.get("dependents_retrieved_so_far_datasets"), "dataset") + \
-                                                 self.decodeFromCache(self.currentDependency.get("dependents_retrieved_so_far_groups"), "group")
+        dependents_retrieved_current_container = self.decodeFromCache(self.currentDependency.get(
+                                                 "dependents_retrieved_so_far_datasets"), "dataset") + \
+                                                 self.decodeFromCache(self.currentDependency.get(
+                                                 "dependents_retrieved_so_far_groups"), "group")
 
-        dependents_retrieved_current_level = self.decodeFromCache(self.currentDependency.get("dependents_retrieved_so_far_datasets"), "dataset") + \
-                                             self.decodeFromCache(self.currentDependency.get("dependents_retrieved_so_far_groups"), "group")
+        dependents_retrieved_current_level = self.decodeFromCache(self.currentDependency.get(
+                                             "dependents_retrieved_so_far_datasets"), "dataset") + \
+                                             self.decodeFromCache(self.currentDependency.get(
+                                             "dependents_retrieved_so_far_groups"), "group")
 
         # Iterates through each level, resuming according to cache, and ending at the user providing max_depth.
         for self.currentDepth in range(self.max_depth)[current_depth:]:
@@ -645,15 +666,19 @@ class ClientHelper(object):
 
                         # Convert to versionPK list then store in cache, for both groups and datasets
                         containers_to_process_Dataset_enc = self.encodeForCache(temp_containersToProcess_Dataset)
-                        self.dependency_cache[self.dep_name]["all_containers_at_current_depth_datasets"] = containers_to_process_Dataset_enc
+                        self.dependency_cache[self.dep_name]["all_containers_at_current_depth_datasets"] \
+                            = containers_to_process_Dataset_enc
                         containers_to_process_Group_enc = self.encodeForCache(temp_containersToProcess_Group)
-                        self.dependency_cache[self.dep_name]["all_containers_at_current_depth_groups"] = containers_to_process_Group_enc
+                        self.dependency_cache[self.dep_name]["all_containers_at_current_depth_groups"] \
+                            = containers_to_process_Group_enc
 
                         # Convert to versionPK list then store in cache, for both groups and datasets
                         containers_to_process_Dataset_enc = self.encodeForCache(containersToProcess_Dataset)
-                        self.dependency_cache[self.dep_name]["containers_left_to_process_datasets"] = containers_to_process_Dataset_enc
+                        self.dependency_cache[self.dep_name]["containers_left_to_process_datasets"] \
+                            = containers_to_process_Dataset_enc
                         containers_to_process_Group_enc = self.encodeForCache(containersToProcess_Group)
-                        self.dependency_cache[self.dep_name]["containers_left_to_process_groups"] = containers_to_process_Group_enc
+                        self.dependency_cache[self.dep_name]["containers_left_to_process_groups"] \
+                            = containers_to_process_Group_enc
 
                         return retrieved_dependents
                 except:
@@ -670,10 +695,13 @@ class ClientHelper(object):
 
             # Set next level of containers to process
             # Make a freely mutable copy of that list
-            containersToProcess = self.decodeFromCache(self.currentDependency.get("dependents_retrieved_so_far_datasets"), "dataset") \
-                                  + self.decodeFromCache(self.currentDependency.get("dependents_retrieved_so_far_groups"), "group")
-            containersToProcess_Dataset = self.decodeFromCache(self.currentDependency.get("dependents_retrieved_so_far_datasets"), "dataset")
-            containersToProcess_Group = self.decodeFromCache(self.currentDependency.get("dependents_retrieved_so_far_groups"), "group")
+            containersToProcess = self.decodeFromCache(self.currentDependency.get(
+                    "dependents_retrieved_so_far_datasets"), "dataset") + self.decodeFromCache(
+                self.currentDependency.get("dependents_retrieved_so_far_groups"), "group")
+            containersToProcess_Dataset = self.decodeFromCache(self.currentDependency.get(
+                "dependents_retrieved_so_far_datasets"), "dataset")
+            containersToProcess_Group = self.decodeFromCache(self.currentDependency.get(
+                "dependents_retrieved_so_far_groups"), "group")
 
             self.process_queue = copy.deepcopy(containersToProcess)
 
