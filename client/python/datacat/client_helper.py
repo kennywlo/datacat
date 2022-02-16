@@ -27,13 +27,15 @@ class ClientHelper(object):
         :param dependents: one or more dependents, of Dataset or Group
         :return: the identifiers of the input dependents
         """
-        ids = []
         if not dependents:
             return None
+
         if isinstance(dependents, Dataset):
             return dependents.versionPk
         elif isinstance(dependents, Group):
             return dependents.pk
+
+        ids = []
         for dep in dependents:
             if isinstance(dep, Dataset):
                 if hasattr(dep, "versionPk"):
@@ -84,12 +86,13 @@ class ClientHelper(object):
                                                show="dependents",
                                                query='dependents in ({})'.format(ToDecodeCommaDelimited),
                                                ignoreShowKeyError=True)
-        if type == "group":
+        elif type == "group":
             decodeResults = self.parent.search(target=self.dep_name,
                                                show="dependency.groups",
                                                containerFilter='dependentGroups in ({})'.format(ToDecodeCommaDelimited),
                                                ignoreShowKeyError=True)
-
+        else:
+            return []
         return decodeResults
 
     def retrieveContainerDependents(self, dep_container_processed):
@@ -272,14 +275,14 @@ class ClientHelper(object):
                     try:
                         if isinstance(dep_container_processed, Dataset):
                             dependentsToRetrieve = dep_container_processed.versionMetadata.dct[self.dep_type + '.dataset']
-                        if isinstance(dep_container_processed, Group):
+                        elif isinstance(dep_container_processed, Group):
                             dependentsToRetrieve = dep_container_processed.metadata.dct[self.dep_type + '.dataset']
                     except:
                         pass
                     try:
                         if isinstance(dep_container_processed, Dataset):
                             dependentsToRetrieveGroups = dep_container_processed.versionMetadata.dct[self.dep_type + '.group']
-                        if isinstance(dep_container_processed, Group):
+                        elif isinstance(dep_container_processed, Group):
                             dependentsToRetrieve = dep_container_processed.metadata.dct[self.dep_type + '.group']
 
                     except:
@@ -301,24 +304,28 @@ class ClientHelper(object):
                 if dependentsToRetrieveGroups == joined_string_groups:
                     raise "Done"
 
+            searchResults = []
             try:
-                searchResults = self.parent.search(target=self.dep_name,
-                                                   show="dependents",
-                                                   query='dependents in ({})'.format(dependentsToRetrieve),
-                                                   ignoreShowKeyError=True)
+                if dependentsToRetrieve:
+                    searchResults = self.parent.search(target=self.dep_name,
+                                                       show="dependents",
+                                                       query='dependents in ({})'.format(dependentsToRetrieve),
+                                                       ignoreShowKeyError=True)
             except:
-                searchResults = []
+               pass
 
+            searchResults_group = []
             try:
-                searchResults_group = self.parent.search(target=self.dep_name,
-                                                         show="dependency.groups",
-                                                         containerFilter='dependentGroups in ({})'.format(dependentsToRetrieveGroups),
-                                                         ignoreShowKeyError=True)
+                if dependentsToRetrieveGroups:
+                    searchResults_group = self.parent.search(target=self.dep_name,
+                                                             show="dependency.groups",
+                                                             containerFilter='dependentGroups in ({})'.format(dependentsToRetrieveGroups),
+                                                             ignoreShowKeyError=True)
             except:
-                searchResults_group = []
+                pass
 
             if searchResults == [] and searchResults_group == []:
-                return
+                return [], []
 
             dependent_queue_dataset = copy.deepcopy(searchResults)
             dependent_queue_group = copy.deepcopy(searchResults_group)
@@ -328,11 +335,9 @@ class ClientHelper(object):
 
                     # We have reached the chunk size limit, return dependents for this container
                     if self.remaining_chunk_size <= 0:
-
                         # Encode to versionPK list - dependents_left_datasets
                         dep_datasets_left_enc = self.encodeForCache(dependent_queue_dataset)
                         self.dependency_cache[self.dep_name]["dependents_left_datasets"] = dep_datasets_left_enc
-
                         return dependents_dataset, dependents_group
 
                     # We have available chunks remaining:
@@ -342,9 +347,7 @@ class ClientHelper(object):
                         # Encode to versionPK list - dependents_retrieved_so_far_datasets
                         dep_datasets_retrieved_enc = self.encodeForCache(dependent)
                         self.dependency_cache[self.dep_name]["dependents_retrieved_so_far_datasets"].extend(dep_datasets_retrieved_enc)
-
                         dependent_queue_dataset.pop(0)
-
                         dependents_left_enc = self.encodeForCache(dependent_queue_dataset)
                         self.dependency_cache[self.dep_name]['dependents_left_datasets'] = dependents_left_enc
                         self.remaining_chunk_size -= 1
@@ -610,7 +613,7 @@ class ClientHelper(object):
 
                         if isinstance(container, Dataset):
                             del containersToProcess_Dataset[0]
-                        if isinstance(container, Group):
+                        elif isinstance(container, Group):
                             del containersToProcess_Group[0]
 
                         dependents_retrieved_current_container.clear()
@@ -621,7 +624,7 @@ class ClientHelper(object):
 
                         if isinstance(container, Dataset):
                             del containersToProcess_Dataset[0]
-                        if isinstance(container, Group):
+                        elif isinstance(container, Group):
                             del containersToProcess_Group[0]
 
                         dependents_retrieved_current_container.clear()
@@ -778,7 +781,6 @@ class ClientHelper(object):
                 assert False, "Failed to add dependents"
 
             return ret
-
         # Group as Container
         elif isinstance(dep_container, Group):
             container = Group(**dep_container.__dict__)
