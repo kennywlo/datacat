@@ -25,11 +25,15 @@ def main():
     print("--------------------------------------------------------------------------------")
     print("(Case 1): Retrieving dependents using a chunk size of 1\n")
 
+    all_dependents = []
+    expected_dependents = ['dataset_1.dat', 'dataset_2.dat' , 'dataset_3.dat' , 'dataset_4.dat', 'dataset_5.dat']
+
     # Start dependent retrieval using .get_dependents
-    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=10, chunk_size=1))
+    dependents = (client.get_dependents(parent_container, "predecessor", max_depth=5, chunk_size=1))
     print("Dependents =")
     try:
         for item in dependents:
+            all_dependents.append(item.name)
             print("\t" + item.name)
     except:
         pass
@@ -41,10 +45,16 @@ def main():
         print("Dependents =")
         try:
             for item in dependents:
+                all_dependents.append(item.name)
                 print("\t" + item.name)
         except:
             pass
         print("")
+
+    assert(all_dependents == expected_dependents),\
+        "(Case 1 Failure : Expected dependents don't match returned dependents)"
+    all_dependents.clear()
+
 
     # ******************************************************************
     # ******************************************************************
@@ -53,15 +63,25 @@ def main():
     # ******************************************************************
     print("--------------------------------------------------------------------------------")
     print("(Case 2): Retrieving dependents using a chunk size of 3\n")
+
+    all_dependents = []
+    expected_dependents_get = ['dataset_1.dat', 'dataset_2.dat', 'dataset_3.dat']
+    expected_dependents_get_next = ['dataset_4.dat', 'dataset_5.dat']
+
     # Start dependent retrieval using .get_dependents
     dependents = (client.get_dependents(parent_container, "predecessor", max_depth=5, chunk_size=3))
     print("Dependents =")
     try:
         for item in dependents:
+            all_dependents.append(item.name)
             print("\t" + item.name)
     except:
         pass
     print("")
+
+    assert(expected_dependents_get == all_dependents),\
+        "(Case 2 Failure : Expected dependents don't match returned dependents)"
+    all_dependents.clear()
 
     # Continue to retrieve dependents until there are no more left to retrieve
     while dependents:
@@ -69,10 +89,15 @@ def main():
         print("Dependents =")
         try:
             for item in dependents:
+                all_dependents.append(item.name)
                 print("\t" + item.name)
         except:
             pass
         print("")
+
+    assert(expected_dependents_get_next == all_dependents), \
+        "(Case 2 Failure : Expected dependents don't match returned dependents)"
+    all_dependents.clear()
 
     # ******************************************************************
     # ******************************************************************
@@ -82,11 +107,16 @@ def main():
     print("--------------------------------------------------------------------------------")
     parent_container = client.path(path=created_datasets[0].path, versionId="current")
     print("(Case 3): Retrieving dependents while only going 1 level deep in depth\n")
+
+    all_dependents = []
+    expected_dependents = ['dataset_1.dat']
+
     # Start dependent retrieval using .get_dependents
     dependents = (client.get_dependents(parent_container, "predecessor", max_depth=1, chunk_size=1))
     print("Dependents =")
     try:
         for item in dependents:
+            all_dependents.append(item.name)
             print("\t" + item.name)
     except:
         pass
@@ -98,24 +128,34 @@ def main():
         print("Dependents =")
         try:
             for item in dependents:
+                all_dependents.append(item.name)
                 print("\t" + item.name)
         except:
             pass
         print("")
 
+    assert(expected_dependents == all_dependents), \
+        "(Case 3 Failure : Expected dependents don't match returned dependents)"
+    all_dependents.clear()
+
     # ******************************************************************
     # ******************************************************************
-    # Case 4: Retrieving from a dependency that is currently not in cache
+    # Case 4: Retrieving dependents while only going 'n' levels deep in depth, in this case 3
     # ******************************************************************
     # ******************************************************************
     print("--------------------------------------------------------------------------------")
     parent_container = client.path(path=created_datasets[0].path, versionId="current")
     print("(Case 4): Retrieving dependents while only going 'n' levels deep in depth, in this case 3\n")
+
+    all_dependents = []
+    expected_dependents = ['dataset_1.dat', 'dataset_2.dat', 'dataset_3.dat']
+
     # Start dependent retrieval using .get_dependents
     dependents = (client.get_dependents(parent_container, "predecessor", max_depth=3, chunk_size=1))
     print("Dependents =")
     try:
         for item in dependents:
+            all_dependents.append(item.name)
             print("\t" + item.name)
     except:
         pass
@@ -127,18 +167,23 @@ def main():
         print("Dependents =")
         try:
             for item in dependents:
+                all_dependents.append(item.name)
                 print("\t" + item.name)
         except:
             pass
         print("")
 
-    last_dataset = len(created_datasets) - 1
+    assert(expected_dependents == all_dependents), \
+        "(Case 4 Failure : Expected dependents don't match returned dependents)"
+    all_dependents.clear()
 
     # ******************************************************************
     # ******************************************************************
     # Case D5: Retrieving from a dependency that is currently not in cache
     # ******************************************************************
     # ******************************************************************
+
+    last_dataset = len(created_datasets) - 1
 
     print("--------------------------------------------------------------------------------")
     parent_container = client.path(path=created_datasets[last_dataset].path, versionId="current")
@@ -152,6 +197,9 @@ def main():
     except:
         pass
     print("")
+
+    assert(dependents == []),\
+        "(Case 5 Failure : Returned dependents should be [])"
 
     # ******************************************************************
     # ******************************************************************
@@ -195,8 +243,9 @@ def main():
     # ******************************************************************
     # ******************************************************************
     # Case 7:
-    # This test case should make sure that if given a DATASET container we can retrieve ONLY GROUP dependents from it
-    # This test case will also make sure that we can continue to retrieve using .get_next_dependents
+    # This test case is a HYBRID retrieval.
+    # It will ensure that a dependency which contains both datasets and groups can be traversed properly
+    # while also being able to process both DATASETS and  without issue
     # ******************************************************************
     # ******************************************************************
     print("--------------------------------------------------------------------------------")
@@ -204,7 +253,6 @@ def main():
 
     # Create Datasets
     list_of_datasets = generate_datasets(10)
-
     # Create Groups
     test_group = create_groups(5)
 
@@ -213,37 +261,32 @@ def main():
     group_dependents_00 = [test_group[0]]
     patched_dataset0 = client.add_dependents(dep_container=dataset_00, dep_type="predecessor",
                                              dep_groups=group_dependents_00)
-
     # Add 2 datasets (01, 02) to be dependents of Group00
     group_00 = client.path(path=test_group[0].path, versionId="current")
     dataset_dependents_01_02 = [list_of_datasets[1], list_of_datasets[2]]
     patched_group_00 = client.add_dependents(dep_container=group_00, dep_type="predecessor",
                                              dep_datasets=dataset_dependents_01_02)
-
     # Add group_01 to be a dependent of dataset_01
     dataset_01 = client.path(path=list_of_datasets[1].path, versionId="current")
     group_dependents_01 = [test_group[1]]
     patched_dataset_01 = client.add_dependents(dep_container=dataset_01, dep_type="predecessor",
                                                dep_groups=group_dependents_01)
-
     # Add group_02 to be a dependent of dataset_02
     dataset_02 = client.path(path=list_of_datasets[2].path, versionId="current")
     group_dependents_02 = [test_group[2]]
     patched_dataset_02 = client.add_dependents(dep_container=dataset_02, dep_type="predecessor",
                                                dep_groups=group_dependents_02)
-
     # Add 2 datasets(03, 04) to be dependents of group_01
     group_01 = client.path(path=test_group[1].path, versionId="current")
     datasets_dependents_03_04 = [list_of_datasets[3], list_of_datasets[4]]
     patched_group_01 = client.add_dependents(dep_container=group_01, dep_type="predecessor",
                                              dep_datasets=datasets_dependents_03_04)
-
     # Add 2 datasets(05, 06) to be dependents of dataset 3
     dataset_03 = client.path(path=list_of_datasets[3].path, versionId="current")
     datasets_dependents_05_06 = [list_of_datasets[5], list_of_datasets[6]]
     patched_dataset_03 = client.add_dependents(dep_container=dataset_03, dep_type="predecessor",
                                                dep_datasets=datasets_dependents_05_06)
-
+    # Add 2 datasets(07, 08) to be dependents of dataset 4
     dataset_04 = client.path(path=list_of_datasets[4].path, versionId="current")
     datasets_dependents_07_08 = [list_of_datasets[7], list_of_datasets[8]]
     patched_dataset_04 = client.add_dependents(dep_container=dataset_04, dep_type="predecessor",
@@ -253,9 +296,18 @@ def main():
     root_container = client.path(path=patched_dataset0.path, versionId="current")
     dependents = client.get_dependents(dep_container=root_container, dep_type="predecessor", max_depth=10, chunk_size=3)
 
+
+    all_dependents = []
+    expected_dependents = ['depGroup0', 'dataset_1.dat', 'dataset_2.dat',
+                           'depGroup1', 'depGroup2', 'dataset_3.dat',
+                           'dataset_4.dat', 'dataset_5.dat', 'dataset_6.dat',
+                           'dataset_7.dat', 'dataset_8.dat'
+                           ]
+
     print("Dependents =")
     try:
         for item in dependents:
+            all_dependents.append(item.name)
             print("\t" + item.name)
     except:
         pass
@@ -266,10 +318,17 @@ def main():
         print("Dependents =")
         try:
             for item in dependents:
-                print("\t" + item.name)
+                if not (item.name in all_dependents):
+                    all_dependents.append(item.name)
+                    print("\t" + item.name)
         except:
             pass
         print("")
+
+    assert(all_dependents == expected_dependents),\
+        "(Case 7 Failure : Expected dependents don't match returned dependents)"
+
+
 
 
 def generate_datasets(number_to_generate):

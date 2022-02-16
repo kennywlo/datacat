@@ -606,12 +606,12 @@ class ClientHelper(object):
             "containers_left_to_process_groups"), "group")
         self.process_queue = copy.deepcopy(containersToProcess)
 
-        dependents_retrieved_current_container = self.decodeFromCache(self.currentDependency.get(
+        self.dependents_retrieved_current_container = self.decodeFromCache(self.currentDependency.get(
                                                  "dependents_retrieved_so_far_datasets"), "dataset") + \
                                                  self.decodeFromCache(self.currentDependency.get(
                                                  "dependents_retrieved_so_far_groups"), "group")
 
-        dependents_retrieved_current_level = self.decodeFromCache(self.currentDependency.get(
+        self.dependents_retrieved_current_level = self.decodeFromCache(self.currentDependency.get(
                                              "dependents_retrieved_so_far_datasets"), "dataset") + \
                                              self.decodeFromCache(self.currentDependency.get(
                                              "dependents_retrieved_so_far_groups"), "group")
@@ -625,7 +625,7 @@ class ClientHelper(object):
                         # For each container retrieve its dependents
                         next_container_Dataset, next_container_Group = self.retrieveContainerDependentsNext(container)
 
-                        dependents_retrieved_current_level.append(next_container_Dataset + next_container_Group)
+                        self.dependents_retrieved_current_level.append(next_container_Dataset + next_container_Group)
                         retrieved_dependents.extend(next_container_Dataset + next_container_Group)
                         nextContainersToProcess.extend(next_container_Dataset + next_container_Group)
 
@@ -637,7 +637,7 @@ class ClientHelper(object):
                         elif isinstance(container, Group):
                             del containersToProcess_Group[0]
 
-                        dependents_retrieved_current_container.clear()
+                        self.dependents_retrieved_current_container.clear()
                         continue
 
                     if self.remaining_chunk_size > 0:
@@ -648,7 +648,7 @@ class ClientHelper(object):
                         elif isinstance(container, Group):
                             del containersToProcess_Group[0]
 
-                        dependents_retrieved_current_container.clear()
+                        self.dependents_retrieved_current_container.clear()
 
                     if self.remaining_chunk_size <= 0:
                         self.dependency_cache[self.dep_name]["current_depth"] = self.currentDepth
@@ -659,9 +659,7 @@ class ClientHelper(object):
                         for x in containersToProcess:
                             if isinstance(x, Dataset):
                                 temp_containersToProcess_Dataset.append(x)
-
-                        for x in containersToProcess:
-                            if isinstance(x, Group):
+                            elif isinstance(x, Group):
                                 temp_containersToProcess_Group.append(x)
 
                         # Convert to versionPK list then store in cache, for both groups and datasets
@@ -689,8 +687,8 @@ class ClientHelper(object):
             containersToProcess_Dataset.clear()
             containersToProcess_Group.clear()
 
-            dependents_retrieved_current_level.clear()
-            dependents_retrieved_current_container.clear()
+            self.dependents_retrieved_current_level.clear()
+            self.dependents_retrieved_current_container.clear()
             nextContainersToProcess.clear()
 
             # Set next level of containers to process
@@ -735,6 +733,9 @@ class ClientHelper(object):
         """
         patchds = kwargs.get('patchds')
         patchdir = kwargs.get('patchdir')
+
+        if not dep_datasets and not dep_groups:
+            return None
 
         def convert_dependent_to_list(dependents):
             """
