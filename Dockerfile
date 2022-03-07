@@ -16,7 +16,7 @@
 # - Kenny Lo <kennywlo@slac.stanford.edu>, 2021
 
 # To build this image to use with docker-compose:
-#   docker build -t slaclab/datacat:INT_TESTING .
+#   docker build --no-cache -t slaclab/datacat:INT_TESTING .
 
 FROM centos:7
 
@@ -24,7 +24,6 @@ MAINTAINER kennylo@slac.stanford.edu
 
 RUN yum -y install vim python3 python3-pip
 RUN pip3 install --user pytest
-
 
 ENV DCHOME=/opt/datacat
 RUN mkdir -p $DCHOME

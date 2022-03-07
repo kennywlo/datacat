@@ -44,6 +44,7 @@ services:
     container_name: datacat
     volumes:
       - /tmp:/tmp
+      - datacat-volume:/opt/datacat/
 
   tomcat:
     image: tomcat:8.5-jdk8-openjdk
@@ -53,19 +54,19 @@ services:
        JDBC_PASS: dcpass
        JPDA_ADDRESS: 8000
        JPDA_TRANSPORT: dt_socket
-    entrypoint: /usr/local/tomcat/bin/catalina.sh jpda run
+    entrypoint: /opt/datacat/docker/tomcat/datacat.sh jpda run
     container_name: tomcat
     depends_on:
       - dcdb
       - datacat
     volumes:
-      - /tmp/server.xml:/usr/local/tomcat/conf/server.xml
-      - /tmp/datacat.war:/usr/local/tomcat/webapps/datacat.war
-      - /tmp/keystore.jks:/usr/local/tomcat/conf/keystore.jks
-      - /tmp/mysql-connector-java-8.0.16.jar:/usr/local/tomcat/lib/mysql-connector-java-8.0.16.jar
-      - /tmp/java.security:/usr/local/openjdk-8/jre/lib/security/java.security
       - /tmp:/tmp
+      - datacat-volume:/opt/datacat/
     ports:
       - "8080:8080"
       - "8443:8443"
       - "8000:8000"
+
+volumes:
+  # creates the named volume 'datacat-volume'
+  datacat-volume:
