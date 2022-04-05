@@ -14,7 +14,7 @@ import java.text.ParsePosition;
  */
 public class ByteFormat extends Format {
 
-    private final static String[] mags = {" B", " kB", " MB", " GB", " TB", " PB"};
+    private final static String[] mags = {" B", " KiB", " MiB", " GiB", " TiB", " PiB"};
     private final static DecimalFormat formatter = new DecimalFormat("#,##0.0");
 
     /**
