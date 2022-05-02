@@ -127,6 +127,12 @@ public final class SearchUtils {
                 }
                 if (!retmap.isEmpty()) {
                     metadata.putAll(retmap);
+                } else{
+                    // Not a dependent dataset, try next
+                    if(!rs.next()){
+                        rs.close();
+                    }
+                    return null;
                 }
                 continue;
             }
@@ -200,6 +206,12 @@ public final class SearchUtils {
                         "dependentGroup", rs.getLong("pk"), deps[1]));
                     if (!depmap.isEmpty()) {
                         metadata.putAll(depmap);
+                    }else{
+                        // Not a dependent container, try next
+                        if(!rs.next()){
+                            rs.close();
+                        }
+                        return null;
                     }
                 }
                 continue;
@@ -410,12 +422,11 @@ public final class SearchUtils {
                         @Override
                         public boolean hasNext(){
                             try {
-                                if(ds == null){
+                                while(ds == null){
                                     if(rs.isClosed()){
                                         return false;
                                     }
                                     ds = SearchUtils.datasetFactory(conn, rs, modelProvider, metadataNames);
-                                    return true;
                                 }
                                 return true;
                             } catch(NoSuchElementException ex) {
@@ -479,12 +490,11 @@ public final class SearchUtils {
                         @Override
                         public boolean hasNext(){
                             try {
-                                if(container == null){
+                                while(container == null){
                                     if(rs.isClosed()){
                                         return false;
                                     }
                                     container = SearchUtils.containerFactory(conn, rs, modelProvider, metadataNames);
-                                    return true;
                                 }
                                 return true;
                             } catch(NoSuchElementException ex) {

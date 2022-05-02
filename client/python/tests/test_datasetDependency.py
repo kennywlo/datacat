@@ -155,8 +155,10 @@ if __name__ == "__main__":
         print("exception caught here")
 
     # Use the client to create the folders
-    client.mkfolder(datacat_path_dependent)
-    client.mkfolder(datacat_path_general)
+    if not client.exists(datacat_path_dependent):
+        client.mkfolder(datacat_path_dependent)
+    if not client.exists(datacat_path_general):
+        client.mkfolder(datacat_path_general)
 
     # in dependents folder
     filename = "dataset001_dp_b9253.dat"
@@ -458,9 +460,9 @@ if __name__ == "__main__":
     try:
         for dataset in client.search(target='/testpath/testfolder', show="dependents.analysis__XXX", ignoreShowKeyError=True):
             try:
-                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.metadata)))
+                print(f"Name: %s metadata: %s" %(dataset.name, dict(dataset.versionMetadata)))
             except:
-                print(f"Name: %s" %(dataset.name))
+                print(f"Error (should NOT be here): Name: %s" %(dataset.name))
     except:
         assert False, "Error. search unsuccessful. Case 5.1"
 
