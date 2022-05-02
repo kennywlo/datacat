@@ -612,8 +612,8 @@ public final class SearchUtils {
             rs.close();
             // locate more dependents by the reciprocal nature of the relation
             if (Arrays.asList("predecessor", "successor").contains(type)) {
-                Long[] moreDependents = SearchUtils.getReciprocalDependents(conn, dependencyContainer, dependency,
-                    type.equals("predecessor") ? "successor" : "predecessor");
+                Long[] moreDependents = SearchUtils.getReciprocalDependents(conn, dependencyContainer, dependent,
+                    dependency, type.equals("predecessor") ? "successor" : "predecessor");
                 for (Long d: moreDependents) {
                     if (!dependents.contains(d)){
                         dependents.add(d);
@@ -641,11 +641,10 @@ public final class SearchUtils {
         }
     }
 
-    public static Long[] getReciprocalDependents(Connection conn, String dependencyContainer,
+    public static Long[] getReciprocalDependents(Connection conn, String dependencyContainer, String dependent,
                                                  Long dependentid, String type) throws SQLException {
         String sql = "SELECT " + dependencyContainer + ", dependencyName FROM DatasetDependency WHERE " +
-            (dependencyContainer.equals("dependency") ? "dependent": "dependentGroup") + " = ? " +
-            "AND dependentType = ?";
+            dependent + " = ? AND dependentType = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, dependentid);
             stmt.setString(2, type);
