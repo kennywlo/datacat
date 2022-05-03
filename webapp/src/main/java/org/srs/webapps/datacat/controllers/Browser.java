@@ -1,6 +1,7 @@
 package org.srs.webapps.datacat.controllers;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +37,7 @@ public class Browser {
         requestModel.setContainers(client.getContainers("/"));
         return requestModel;
     }
-    
+
     @GET
     @Path("{id: [%\\w\\d\\-_\\./]*}")
     @Template(name = "/display/browser.jsp")

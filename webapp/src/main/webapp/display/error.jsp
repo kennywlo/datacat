@@ -44,8 +44,8 @@
                         </button>
                         <div class="collapse" id="collapseExample"> <div class="well">
                                 <h2>Cause Message: </h2>
-                                <pre>
-                                    ${model.cause.message}
+                                <pre>:
+                                    ${model}
                                 </pre>
                                 <h2>Cause</h2> <br>
                                 <pre>
