@@ -4,7 +4,7 @@
     Author     : Brian Van Klaveren<bvan@slac.stanford.edu>
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" isErrorPage="true" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
@@ -45,8 +45,9 @@
                         <div class="collapse" id="collapseExample"> <div class="well">
                                 <h2>Cause Message: </h2>
                                 <pre>:
-                                    ${model}
+                                    ${model.cause.message}
                                 </pre>
+                                <pre>${pageContext.out.flush();exception.printStackTrace(pageContext.response.writer)}</pre>
                                 <h2>Cause</h2> <br>
                                 <pre>
                                     ${model.cause}
