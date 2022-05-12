@@ -54,7 +54,7 @@ services:
        JDBC_PASS: dcpass
        JPDA_ADDRESS: 8000
        JPDA_TRANSPORT: dt_socket
-    entrypoint: /opt/datacat/docker/tomcat/datacat.sh jpda run
+    entrypoint: ["bash", "/opt/datacat/docker/tomcat/datacat.sh", "jpda", "run"]
     container_name: tomcat
     depends_on:
       - dcdb
