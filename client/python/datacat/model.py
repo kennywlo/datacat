@@ -1,5 +1,6 @@
 
-from collections import OrderedDict, MutableMapping
+from collections import OrderedDict
+from collections.abc import MutableMapping
 from datetime import datetime
 import json
 import logging
