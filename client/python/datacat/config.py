@@ -1,9 +1,6 @@
-import logging
-try:
-    import configparser as cp
-except ImportError:
-    import ConfigParser as cp
 import os
+import logging
+import configparser as cp
 
 ENDPOINTS = "children path search datasets containers groups dependencies folders permissions".split(" ")
 DATATYPES = "json xml txt".split(" ")
@@ -24,7 +21,7 @@ def config_from_file(path=None, override_section=None, override_url=None):
     :return: Configured client
     :except: OSError if path is provided and the file doesn't exist.
     """
-    config = cp.SafeConfigParser()
+    config = cp.ConfigParser()
     if path:
         os.stat(path)  # Check path exists, will throw OSError if it doesn't.
         config.read([path])
