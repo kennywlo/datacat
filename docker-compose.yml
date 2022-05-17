@@ -42,12 +42,15 @@ services:
   datacat:
     image: slaclab/datacat:INT_TESTING
     container_name: datacat
+    restart: always
     volumes:
       - /tmp:/tmp
       - datacat-volume:/opt/datacat/
 
   tomcat:
     image: tomcat:8.5-jdk8-openjdk
+    container_name: tomcat
+    restart: always
     environment:
        JDBC_URL: jdbc:mysql://dcdb:3306/dc_db
        JDBC_USER: dcuser
@@ -55,7 +58,6 @@ services:
        JPDA_ADDRESS: 8000
        JPDA_TRANSPORT: dt_socket
     entrypoint: ["bash", "/opt/datacat/docker/tomcat/datacat.sh", "jpda", "run"]
-    container_name: tomcat
     depends_on:
       - dcdb
       - datacat
