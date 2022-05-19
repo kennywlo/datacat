@@ -160,6 +160,16 @@ This will open a text editor that you will use to add the line of text we made i
 end of the opened file and save it. This will tell system to do ``export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"``
 everytime you open a new bash instance.
 
+***MacOS setup:***
+
+To make things simple, instead of finding the location of Java you could simply paste the following line into your opened .bashrc file:
+
+```
+export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+```
+
+Where we are utilizing a command to find the path to Java1.8 on your machine and save it to JAVA_HOME directly.
+
 #### ***Step 3 ) Verifying the JAVA_HOME path***
 
 You can test that everything was done properly by entering the following echo command into your terminal.
@@ -219,3 +229,7 @@ Before we can begin testing within the IntelliJ IDE we must first set up our pro
     * Working directory -> ``\slaclab-datacat\client\python\tests``
 
   With this you should now be able to run and debug the Python Client Tests from within the IntelliJ IDE.
+* ***IntelliJ Configuration Notes***
+  * If IntelliJ is unable to recognize common python modules such as `os` and `sys`, **do not** do as IntelliJ suggests and change the entire `slaclab-datacat/client` module's SDK. 
+    * Instead, go to File -> Project Structure -> Facets, and add Python interpreter to the datacat-client module. 
+    * Invalidating Caches may also help.

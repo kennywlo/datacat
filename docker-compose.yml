@@ -26,6 +26,7 @@ version: '3'
 services:
   dcdb:
     image: mysql:5.7
+    platform: linux/amd64
     container_name: dcmysql
     restart: always
     environment:

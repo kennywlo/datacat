@@ -59,4 +59,3 @@ to a file (or vice-versa)? Check if the specified host path exists and is the ex
     3) `/bin/cp -f /opt/datacat/webapp/target/datacat.war /tmp/datacat.war`
     4) `/bin/cp -f ~/.m2/repository/mysql/mysql-connector-java/8.0.16/mysql-connector-java-8.0.16.jar /tmp/mysql-connector-java-8.0.16.jar`
 3) Restart your pc
-
