@@ -38,7 +38,10 @@ Execution of the script will automatically download the following packages onto 
 * Pytest
 
 
-As you can see, this will install all required packages except for Pytest. Not to worry though, that will be covered later down in this document.
+As you can see, this will install all required packages except for Pytest. Not to worry though, you can download pytest by navigating to the root of your directory from 
+the terminal and running the following command,
+
+``pip3 install pytest``
 
 ***Before moving on, take a second to verify that the bash script has properly installed the required packages by using the following commands.***
 
@@ -229,7 +232,19 @@ Before we can begin testing within the IntelliJ IDE we must first set up our pro
     * Working directory -> ``\slaclab-datacat\client\python\tests``
 
   With this you should now be able to run and debug the Python Client Tests from within the IntelliJ IDE.
+
+* **Important Point to Remember** 
+  * Before running the Python tests in IntelliJ, ensure that you have followed the instructions on ``DOCKER_SETUP.md``.
+  * Open your Linux terminal and run ``docker ps`` to check whether the containers are running.
+  * If not, then run the command ``docker-compose --file ./docker-compose.yml up -d`` to start the containers. 
+  * You can check the status of datacat my visiting [http://localhost:8080/datacat/display/browser](http://localhost:8080/datacat/display/browser) as mentioned in ``docker-compose.yml``.
+  * Your tests may not run properly if your containers have stopped.
+
 * ***IntelliJ Configuration Notes***
   * If IntelliJ is unable to recognize common python modules such as `os` and `sys`, **do not** do as IntelliJ suggests and change the entire `slaclab-datacat/client` module's SDK. 
     * Instead, go to File -> Project Structure -> Facets, and add Python interpreter to the datacat-client module. 
     * Invalidating Caches may also help.
+  * Before running the tests, ensure that your Python SDK has pytest package installed. To do this go to File -> Project Structure -> Platform Settings -> SDKs
+    * Choose the Python SDK you setup and go to Packages.
+    * If pytest is properly installed it should be listed.
+    * If pytest is not listed then click on the ``+`` icon, search pytest and install the package. 
