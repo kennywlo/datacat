@@ -35,7 +35,7 @@ WORKDIR $DCHOME
 
 RUN pip3 install --user client/python/.
 
-RUN python3 -m pytest client/python/tests
+RUN python3 -m pytest client/python/tests/test_config.py
 
 RUN yum -y install maven
 RUN mvn package -DskipTests
