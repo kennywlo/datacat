@@ -74,21 +74,6 @@ public class DatasetSearch {
                     Optional.fromNullable(metaFieldsToRetrieve), 
                     Optional.fromNullable(sortFields),
                     ignoreShowKeyError);
-            if (!dependentSearch.isEmpty()){
-                // if no containers, skip the dependency check
-                boolean found = !containers.iterator().hasNext();
-                for(DatacatNode container: containers) {
-                    String dependent = dependentSearch.equals("dependents")? "dependent": "dependentGroup";
-                    if (SearchUtils.checkDependents(this.conn, "dependencyGroup", dependent,
-                        container.getPk(), query)){
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    throw new IOException("Dependents not found in path");
-                }
-            }
             return retrieveDatasets();
         } catch (SQLException ex) {
             throw new IOException("Error retrieving results", ex);

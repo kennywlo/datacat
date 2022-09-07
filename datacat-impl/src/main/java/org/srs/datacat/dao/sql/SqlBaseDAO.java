@@ -77,6 +77,21 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setObject(1, o);
             stmt.executeUpdate();
+            // For MySQL
+            getConnection().commit();
+        } catch (SQLException ex){
+            if (ex.getMessage().contains("Deadlock")){
+                // this should only happen in MySQL testing
+                System.out.println("delete1(): Deadlock detected");
+                try {
+                    Thread.sleep((int)(Math.random()*1000));
+                    delete1(sql, o);
+                } catch (InterruptedException e){
+                    throw new SQLException(e);
+                }
+            } else{
+                throw new SQLException(ex);
+            }
         }
     }
 
@@ -364,15 +379,29 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             }
             if (type.equals("*")){
                 String deleteSql = "DELETE FROM DatasetDependency WHERE " + depContainer + " = ?";
-                PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
-                stmt.setLong(1, dependencyPk);
-                stmt.executeUpdate();
+                try (PreparedStatement stmt = getConnection().prepareStatement(deleteSql)){
+                    stmt.setLong(1, dependencyPk);
+                    stmt.executeUpdate();
+                }
             } else{
                 String deleteSql = "DELETE FROM DatasetDependency WHERE " + depContainer + " = ? and DependentType = ?";
-                PreparedStatement stmt = getConnection().prepareStatement(deleteSql);
-                stmt.setLong(1, dependencyPk);
-                stmt.setString(2, type);
-                stmt.executeUpdate();
+                try (PreparedStatement stmt = getConnection().prepareStatement(deleteSql)){
+                    stmt.setLong(1, dependencyPk);
+                    stmt.setString(2, type);
+                    stmt.executeUpdate();
+                } catch (SQLException ex) {
+                    if (ex.getMessage().contains("Deadlock")){
+                        // should only happen in MySQL testing
+                        System.out.println("mergeDependencyMetadata(dd): Deadlock detected");
+                        try {
+                            Thread.sleep((int)(Math.random()*1000));
+                        } catch (InterruptedException e){
+                            throw new SQLException(e);
+                        }
+                        // retry
+                        mergeDependencyMetadata(metaData);
+                    }
+                }
             }
         } else {
             // Nothing to be removed
@@ -402,53 +431,83 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         if (dependents != null && !dependents.isEmpty()) {
             String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
                 "Dependent, DependentType)" + " values (?, ?, ?, ?, ?)";
-            PreparedStatement stmt = this.conn.prepareStatement(dependencySql);
             String[] dependentList = dependents.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
-            // store each dependent info from the list
-            for (String d : dependentList) {
-                long dependent = Long.parseLong(d);
-                if (dependency != null) {
-                    stmt.setLong(1, dependency.longValue());
-                } else{
-                    stmt.setNull(1, Types.BIGINT);
+            try (PreparedStatement stmt = getConnection().prepareStatement(dependencySql)){
+                // store each dependent info from the list
+                for (String d : dependentList) {
+                    long dependent = Long.parseLong(d);
+                    if (dependency != null) {
+                        stmt.setLong(1, dependency);
+                    } else {
+                        stmt.setNull(1, Types.BIGINT);
+                    }
+                    if (dependencyGroup != null) {
+                        stmt.setLong(2, dependencyGroup);
+                    } else {
+                        stmt.setNull(2, Types.BIGINT);
+                    }
+                    stmt.setString(3, name);
+                    stmt.setLong(4, dependent);
+                    stmt.setString(5, dependentType);
+                    try {
+                        stmt.executeUpdate();
+                    } catch (SQLException ex){
+                        if (ex.getMessage().contains("Deadlock")){
+                            // should only happen in MySQL testing
+                            System.out.println("addDatasetDependency(dd): Deadlock detected");
+                            try {
+                                Thread.sleep((int) (Math.random() * 1000));
+                            } catch (InterruptedException e){
+                                throw new SQLException(e);
+                            }
+                            // retry
+                            addDatasetDependency(metaData);
+                        }
+                    }
                 }
-                if (dependencyGroup != null) {
-                    stmt.setLong(2, dependencyGroup.longValue());
-                } else{
-                    stmt.setNull(2, Types.BIGINT);
-                }
-                stmt.setString(3, name);
-                stmt.setLong(4, dependent);
-                stmt.setString(5, dependentType);
-                stmt.executeUpdate();
             }
         }
         // handle group dependents
         if (dependentGroups != null && !dependentGroups.isEmpty()) {
             String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
                 "DependentGroup, DependentType)" + " values (?, ?, ?, ?, ?)";
-            PreparedStatement stmt = this.conn.prepareStatement(dependencySql);
             String[] dependentList = dependentGroups.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
-            // store each dependent info from the list
-            for (String d : dependentList) {
-                long dependentGroup = Long.parseLong(d);
-                if (dependency != null) {
-                    stmt.setLong(1, dependency.longValue());
-                } else{
-                    stmt.setNull(1, Types.BIGINT);
+            try (PreparedStatement stmt = getConnection().prepareStatement(dependencySql)){
+                // store each dependent info from the list
+                for (String d : dependentList) {
+                    long dependentGroup = Long.parseLong(d);
+                    if (dependency != null) {
+                        stmt.setLong(1, dependency);
+                    } else {
+                        stmt.setNull(1, Types.BIGINT);
+                    }
+                    if (dependencyGroup != null) {
+                        stmt.setLong(2, dependencyGroup);
+                    } else {
+                        stmt.setNull(2, Types.BIGINT);
+                    }
+                    stmt.setString(3, name);
+                    stmt.setLong(4, dependentGroup);
+                    stmt.setString(5, dependentType);
+                    try {
+                        stmt.executeUpdate();
+                    } catch (SQLException ex){
+                        if (ex.getMessage().contains("Deadlock")){
+                            // should only happen in MySQL testing
+                            System.out.println("addDatasetDependency(gd): Deadlock detected");
+                            try {
+                                Thread.sleep((int) (Math.random() * 1000));
+                            } catch (InterruptedException e){
+                                throw new SQLException(e);
+                            }
+                            // retry
+                            addDatasetDependency(metaData);
+                        }
+                    }
                 }
-                if (dependencyGroup != null) {
-                    stmt.setLong(2, dependencyGroup.longValue());
-                } else{
-                    stmt.setNull(2, Types.BIGINT);
-                }
-                stmt.setString(3, name);
-                stmt.setLong(4, dependentGroup);
-                stmt.setString(5, dependentType);
-                stmt.executeUpdate();
             }
         }
-        this.conn.commit();
+
         // remove all dependency fields other than dependencyName, a.k.a. the dependency path
         metaData.remove("dependents");
         metaData.remove("predecessor.dataset");
@@ -510,7 +569,21 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 stmt.setString(2, metaName);
                 stmt.executeUpdate();
             }
+        } catch (SQLException ex){
+            if (ex.getMessage().contains("Deadlock")){
+                // this should only happen in MySQL testing
+                System.out.println("addDatacatObjectMetadata(): Deadlock detected");
+                try {
+                    Thread.sleep((int)(Math.random()*1000));
+                    addDatacatObjectMetadata(objectPK, metaData, tablePrefix, column);
+                } catch (InterruptedException e){
+                    throw new SQLException(e);
+                }
+            } else{
+                throw new SQLException(ex);
+            }
         }
+
     }
 
     private void mergeDatacatObjectMetadata(long objectPK, Map<String, Object> metaData, String tablePrefix,
