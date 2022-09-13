@@ -80,7 +80,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             // For MySQL
             getConnection().commit();
         } catch (SQLException ex){
-            if (ex.getMessage().contains("Deadlock")){
+            if (ex.getMessage().toLowerCase().contains("deadlock")){
                 // this should only happen in MySQL testing
                 System.out.println("delete1(): Deadlock detected");
                 try {
@@ -390,7 +390,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     stmt.setString(2, type);
                     stmt.executeUpdate();
                 } catch (SQLException ex) {
-                    if (ex.getMessage().contains("Deadlock")){
+                    if (ex.getMessage().toLowerCase().contains("deadlock")){
                         // should only happen in MySQL testing
                         System.out.println("mergeDependencyMetadata(dd): Deadlock detected");
                         try {
@@ -452,7 +452,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     try {
                         stmt.executeUpdate();
                     } catch (SQLException ex){
-                        if (ex.getMessage().contains("Deadlock")){
+                        if (ex.getMessage().toLowerCase().contains("deadlock")){
                             // should only happen in MySQL testing
                             System.out.println("addDatasetDependency(dd): Deadlock detected");
                             try {
@@ -492,7 +492,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     try {
                         stmt.executeUpdate();
                     } catch (SQLException ex){
-                        if (ex.getMessage().contains("Deadlock")){
+                        if (ex.getMessage().toLowerCase().contains("deadlock")){
                             // should only happen in MySQL testing
                             System.out.println("addDatasetDependency(gd): Deadlock detected");
                             try {
@@ -570,7 +570,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 stmt.executeUpdate();
             }
         } catch (SQLException ex){
-            if (ex.getMessage().contains("Deadlock")){
+            if (ex.getMessage().toLowerCase().contains("deadlock")){
                 // this should only happen in MySQL testing
                 System.out.println("addDatacatObjectMetadata(): Deadlock detected");
                 try {
