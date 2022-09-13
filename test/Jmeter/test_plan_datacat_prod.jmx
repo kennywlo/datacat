@@ -2,7 +2,7 @@
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.5">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan for Datacat - Production" enabled="true">
-      <stringProp name="TestPlan.comments">INput auth credentials for access to production server.</stringProp>
+      <stringProp name="TestPlan.comments">INput auth credentials for access to production server. Fetch config from CDMSDataCatalog/cfg/prod.cfg.</stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
@@ -10,12 +10,12 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="auth_key_id" elementType="Argument">
             <stringProp name="Argument.name">auth_key_id</stringProp>
-            <stringProp name="Argument.value">PASTE_KEY_ID_HERE</stringProp>
+            <stringProp name="Argument.value">PASTE_HERE</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="auth_secret_key" elementType="Argument">
             <stringProp name="Argument.name">auth_secret_key</stringProp>
-            <stringProp name="Argument.value">PASTE_SECRET_KEY_HERE</stringProp>
+            <stringProp name="Argument.value">PASTE_HERE</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="dc_server_host" elementType="Argument">
@@ -63,6 +63,12 @@
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
+      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+        <collectionProp name="CookieManager.cookies"/>
+        <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+        <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
+      </CookieManager>
+      <hashTree/>
       <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Date Header PreProcessor" enabled="true">
         <stringProp name="cacheKey">true</stringProp>
         <stringProp name="filename"></stringProp>
@@ -2146,57 +2152,6 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 1.2 test_return_single_for_base_case (2)" enabled="true">
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-            <collectionProp name="Arguments.arguments"/>
-          </elementProp>
-          <stringProp name="HTTPSampler.domain">${dc_server_host}</stringProp>
-          <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
-          <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
-          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/dataset003_0c89c.dat%3Bv%3D0?filter=dependents+in+%283514%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
-          <stringProp name="HTTPSampler.method">GET</stringProp>
-          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
-          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
-          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
-          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
-          <stringProp name="HTTPSampler.response_timeout"></stringProp>
-        </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
-            <collectionProp name="Asserion.test_strings">
-              <stringProp name="1814734654">{&quot;_type&quot;:.*,&quot;results&quot;:.*,&quot;count&quot;:.*}</stringProp>
-            </collectionProp>
-            <stringProp name="Assertion.custom_message"></stringProp>
-            <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-            <boolProp name="Assertion.assume_success">false</boolProp>
-            <intProp name="Assertion.test_type">1</intProp>
-          </ResponseAssertion>
-          <hashTree/>
-        </hashTree>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 1.2 test_return_single_for_base_case" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -2205,7 +2160,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/dataset003_0c89c.dat%3Bv%3D0?filter=dependents+in+%283514%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
+          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/${__threadNum}-dataset003_0c89c.dat%3Bv%3D0?filter=dependents+in+%283514%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2216,27 +2171,6 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert _type" enabled="true">
             <stringProp name="JSON_PATH">$._type</stringProp>
             <stringProp name="EXPECTED_VALUE">searchResults</stringProp>
@@ -2273,7 +2207,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/dataset003_0c89c.dat%3Bv%3D0?filter=dependents+in+%283536%2C3537%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
+          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/${__threadNum}-dataset003_0c89c.dat%3Bv%3D0?filter=dependents+in+%283536%2C3537%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2283,29 +2217,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 2.1 test_return_path_predecessor" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -2355,7 +2267,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/dataset003_0c89c.dat%3Bv%3D0?filter=dependents+in+%283514%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
+          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/${__threadNum}-dataset003_0c89c.dat%3Bv%3D0?filter=dependents+in+%283514%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2365,29 +2277,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 2.3 test_return_multiple_for_predecessor" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -2406,29 +2296,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 3.1 test_return_path_successor" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -2478,7 +2346,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/dataset006_07af1.dat%3Bv%3D0?filter=dependents+in+%283517%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
+          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/${__threadNum}-dataset006_07af1.dat%3Bv%3D0?filter=dependents+in+%283517%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2488,29 +2356,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 3.3 test_return_multiple_for_successor" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -2519,7 +2365,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/dataset006_07af1.dat%3Bv%3D0?filter=dependents+in+%283517%2C3518%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
+          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/${__threadNum}-dataset006_07af1.dat%3Bv%3D0?filter=dependents+in+%283517%2C3518%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2529,29 +2375,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 4 test_return_for_different_folders" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -2560,7 +2384,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/general-${__threadNum}/dataset001_gr_28e3d.dat%3Bv%3D0?filter=dependents+in+%283520%2C3521%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
+          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/general-${__threadNum}/${__threadNum}-dataset001_gr_28e3d.dat%3Bv%3D0?filter=dependents+in+%283520%2C3521%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2570,29 +2394,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 5.1 test_return_for_custom_dependency" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -2611,29 +2413,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 5.2 test_return_single_for_custom_dependency" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -2642,7 +2422,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/customDependency02.dat%3Bv%3D0?filter=dependents+in+%283523%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
+          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/search.json/${dc_path}/${dc_folder}/${__threadNum}-customDependency02.dat%3Bv%3D0?filter=dependents+in+%283523%29&amp;show=dependents&amp;ignoreShowKeyError=True</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -2652,29 +2432,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
@@ -3277,6 +3035,10 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
                   <stringProp name="Header.name">Authorization</stringProp>
                   <stringProp name="Header.value">${hmacAuth}</stringProp>
                 </elementProp>
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
               </collectionProp>
             </HeaderManager>
             <hashTree/>
@@ -3407,29 +3169,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 1.2 test_retrieving_predecessors_with_Pk " enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -3530,29 +3270,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 2.2 test_retrieving_dependents_predecessor_withPk" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -3653,29 +3371,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 3.2 test_retrieving_dependents_successors_withPk" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -3766,7 +3462,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.port">${dc_server_port}</stringProp>
           <stringProp name="HTTPSampler.protocol">${dc_server_proto}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/path.json/${dc_path}/testFolder/${__threadNum}-dataset001_82f24.dat%3Bmetadata%3Ddependents.groups;v=0</stringProp>
+          <stringProp name="HTTPSampler.path">/${dc_server_ver}/r/path.json/${dc_path}/${dc_folder}/${__threadNum}-dataset001_82f24.dat%3Bmetadata%3Ddependents.groups;v=0</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -3776,29 +3472,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 5 test_custom_field" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
@@ -3817,30 +3491,8 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 6 test_retrieving_proper_groups" enabled="true">
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Case 6 test_retrieving_proper_groups" enabled="false">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
@@ -3858,29 +3510,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
-        <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
-        </hashTree>
+        <hashTree/>
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
@@ -4440,7 +4070,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="test_query_content" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="test_query_content" enabled="false">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
@@ -6999,7 +6629,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;versionMetadata&quot;: [{&quot;key&quot;: &quot;dependents&quot;, &quot;value&quot;: &quot;${prdpk1}&quot;, &quot;type&quot;: &quot;string&quot;}, {&quot;key&quot;: &quot;nIsTest&quot;, &quot;value&quot;: 1.0, &quot;type&quot;: &quot;decimal&quot;}, {&quot;key&quot;: &quot;dependentType&quot;, &quot;value&quot;: &quot;predecessor&quot;, &quot;type&quot;: &quot;string&quot;}]}</stringProp>
+                <stringProp name="Argument.value">{&quot;versionMetadata&quot;: [{&quot;key&quot;: &quot;predecessor.dataset&quot;, &quot;value&quot;: &quot;[${prdpk1}]&quot;, &quot;type&quot;: &quot;string&quot;}, {&quot;key&quot;: &quot;nIsTest&quot;, &quot;value&quot;: 1.0, &quot;type&quot;: &quot;decimal&quot;}]}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -7047,6 +6677,12 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor" enabled="true">
+            <stringProp name="JSONPostProcessor.referenceNames">prdpk0</stringProp>
+            <stringProp name="JSONPostProcessor.jsonPathExprs">$.versionPk</stringProp>
+            <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+          </JSONPostProcessor>
           <hashTree/>
         </hashTree>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="test_case_three" enabled="true">
@@ -7068,30 +6704,9 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="JSON Assertion" enabled="true">
             <stringProp name="JSON_PATH">$.versionMetadata</stringProp>
-            <stringProp name="EXPECTED_VALUE">[{&quot;key&quot;:&quot;nIsTest&quot;,&quot;value&quot;:1,&quot;type&quot;:&quot;integer&quot;},{&quot;key&quot;:&quot;predecessor.dataset&quot;,&quot;value&quot;:&quot;${prdpk1}&quot;,&quot;type&quot;:&quot;string&quot;},{&quot;key&quot;:&quot;dependencyName&quot;,&quot;value&quot;:&quot;\/${dc_path}\/${dc_folder}\/${__threadNum}-dataset_0.dat;v=0&quot;,&quot;type&quot;:&quot;string&quot;}]</stringProp>
+            <stringProp name="EXPECTED_VALUE">[{&quot;key&quot;:&quot;nIsTest&quot;,&quot;value&quot;:1,&quot;type&quot;:&quot;integer&quot;},{&quot;key&quot;:&quot;predecessor.dataset&quot;,&quot;value&quot;:&quot;[${prdpk1}]&quot;,&quot;type&quot;:&quot;string&quot;},{&quot;key&quot;:&quot;dependency&quot;,&quot;value&quot;:${prdpk0}, &quot;type&quot;:&quot;integer&quot;},{&quot;key&quot;:&quot;dependencyName&quot;,&quot;value&quot;:&quot;\/${dc_path}\/${dc_folder}\/${__threadNum}-dataset_0.dat;v=0&quot;,&quot;type&quot;:&quot;string&quot;}]</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>
@@ -7105,7 +6720,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;versionMetadata&quot;: [{&quot;key&quot;: &quot;dependents&quot;, &quot;value&quot;: &quot;[${prdpk1}, ${prdpk2}, ${prdpk3}]&quot;, &quot;type&quot;: &quot;string&quot;}, {&quot;key&quot;: &quot;nIsTest&quot;, &quot;value&quot;: 1.0, &quot;type&quot;: &quot;decimal&quot;}, {&quot;key&quot;: &quot;dependentType&quot;, &quot;value&quot;: &quot;predecessor&quot;, &quot;type&quot;: &quot;string&quot;}]}</stringProp>
+                <stringProp name="Argument.value">{&quot;versionMetadata&quot;: [{&quot;key&quot;: &quot;predecessor.dataset&quot;, &quot;value&quot;: &quot;[${prdpk1}, ${prdpk2}, ${prdpk3}]&quot;, &quot;type&quot;: &quot;string&quot;}, {&quot;key&quot;: &quot;nIsTest&quot;, &quot;value&quot;: 1.0, &quot;type&quot;: &quot;decimal&quot;}]}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -7154,6 +6769,12 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor" enabled="true">
+            <stringProp name="JSONPostProcessor.referenceNames">prdpk0</stringProp>
+            <stringProp name="JSONPostProcessor.jsonPathExprs">$.versionPk</stringProp>
+            <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+          </JSONPostProcessor>
+          <hashTree/>
         </hashTree>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="test_case_four" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
@@ -7174,30 +6795,9 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">${hmacAuth}</stringProp>
-              </elementProp>
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Content-Type</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
-            <stringProp name="scriptLanguage">java</stringProp>
-            <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">C:/Users/Lo/IdeaProjects/slaclab-datacat/test/Jmeter/hmacauth.java</stringProp>
-            <stringProp name="cacheKey">true</stringProp>
-            <stringProp name="script"></stringProp>
-          </JSR223PreProcessor>
-          <hashTree/>
           <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="JSON Assertion" enabled="true">
             <stringProp name="JSON_PATH">$.versionMetadata</stringProp>
-            <stringProp name="EXPECTED_VALUE">[{&quot;key&quot;:&quot;nIsTest&quot;,&quot;value&quot;:1,&quot;type&quot;:&quot;integer&quot;},{&quot;key&quot;:&quot;predecessor.dataset&quot;,&quot;value&quot;:&quot;${prdpk1},${prdpk2},${prdpk3}&quot;,&quot;type&quot;:&quot;string&quot;},{&quot;key&quot;:&quot;dependencyName&quot;,&quot;value&quot;:&quot;\/${dc_path}\/${dc_folder}\/${__threadNum}-dataset_0.dat;v=0&quot;,&quot;type&quot;:&quot;string&quot;}]</stringProp>
+            <stringProp name="EXPECTED_VALUE">[{&quot;key&quot;:&quot;nIsTest&quot;,&quot;value&quot;:1,&quot;type&quot;:&quot;integer&quot;},{&quot;key&quot;:&quot;predecessor.dataset&quot;,&quot;value&quot;:&quot;[${prdpk1}, ${prdpk2}, ${prdpk3}]&quot;,&quot;type&quot;:&quot;string&quot;},{&quot;key&quot;:&quot;dependency&quot;,&quot;value&quot;:${prdpk0}, &quot;type&quot;:&quot;integer&quot;},{&quot;key&quot;:&quot;dependencyName&quot;,&quot;value&quot;:&quot;\/${dc_path}\/${dc_folder}\/${__threadNum}-dataset_0.dat;v=0&quot;,&quot;type&quot;:&quot;string&quot;}]</stringProp>
             <boolProp name="JSONVALIDATION">true</boolProp>
             <boolProp name="EXPECT_NULL">false</boolProp>
             <boolProp name="INVERT">false</boolProp>
@@ -7577,7 +7177,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">0</stringProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>

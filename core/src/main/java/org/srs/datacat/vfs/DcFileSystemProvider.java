@@ -71,7 +71,7 @@ public class DcFileSystemProvider {
     private static final long MAX_METADATA_STRING_BYTE_SIZE = 5000;
     private static final long MAX_DATASET_CACHE_SIZE = 1 << 29; // Don't blow more than about 512MB
     private static final int NO_MAX = -1;
-    private static final long MAX_CACHE_TIME = 60000L; // TODO: Get rid of this - 600 seconds
+    private static final long MAX_CACHE_TIME = 60000L; // TODO: Get rid of this - 60 seconds
 
     private final DAOFactory daoFactory;
     private final ModelProvider modelProvider;
