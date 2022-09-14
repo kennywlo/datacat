@@ -159,12 +159,11 @@ create table DatasetDependency (
         on delete cascade,
     constraint FK_Dependent foreign key (Dependent)
         references DatasetVersion (DatasetVersion)
-        on delete set null,
+        on delete cascade,
     constraint FK_DependentGroup foreign key (DependentGroup)
         references DatasetGroup (DatasetGroup)
-        on delete set null,
+        on delete cascade,
     constraint VAL_DEPENDENCY_ID check ((Dependency IS NOT null AND DependencyGroup IS null) or (Dependency IS null AND DependencyGroup IS NOT null)),
-    -- constraint VAL_DEPENDENT_ID check ((Dependent IS NOT null AND DependentGroup IS null) or (Dependent IS null AND DependentGroup IS NOT null)),
     constraint UNQ_DD_Entry1 unique (Dependency, Dependent, DependentType),
     constraint UNQ_DD_Entry2 unique (DependencyGroup, Dependent, DependentType),
     constraint UNQ_DD_Entry3 unique (Dependency, DependentGroup, DependentType),
