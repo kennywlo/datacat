@@ -711,8 +711,8 @@ public class DcFileSystemProvider {
 
         if(!DcPermissions.check(usersGroups, acl, permission)){
             String err = String.format("No permission entries for %s found", permission);
-            // Note: if no acl set, allow it, particularly for testing
-            if (!acl.isEmpty()){
+            // FIXME: for jmeter testing ONLY
+            if (!file.getPath().toString().contains("/CDMS/Test")){
                 AfsException.ACCESS_DENIED.throwError(file.getPath(), err);
             }
         }
