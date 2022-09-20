@@ -58,6 +58,16 @@
             <stringProp name="Argument.value">root</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="threads" elementType="Argument">
+            <stringProp name="Argument.name">threads</stringProp>
+            <stringProp name="Argument.value">10</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="CONFIG_PATH" elementType="Argument">
+            <stringProp name="Argument.name">CONFIG_PATH</stringProp>
+            <stringProp name="Argument.value">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </elementProp>
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
@@ -998,7 +1008,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
               <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
                 <stringProp name="scriptLanguage">java</stringProp>
                 <stringProp name="parameters"></stringProp>
-                <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+                <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
                 <stringProp name="cacheKey">true</stringProp>
                 <stringProp name="script"></stringProp>
               </JSR223PreProcessor>
@@ -1039,7 +1049,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
               <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
                 <stringProp name="scriptLanguage">java</stringProp>
                 <stringProp name="parameters"></stringProp>
-                <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+                <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
                 <stringProp name="cacheKey">true</stringProp>
                 <stringProp name="script"></stringProp>
               </JSR223PreProcessor>
@@ -1096,7 +1106,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -1137,7 +1147,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -1341,7 +1351,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
               <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
                 <stringProp name="scriptLanguage">java</stringProp>
                 <stringProp name="parameters"></stringProp>
-                <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+                <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
                 <stringProp name="cacheKey">true</stringProp>
                 <stringProp name="script"></stringProp>
               </JSR223PreProcessor>
@@ -1382,7 +1392,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
               <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
                 <stringProp name="scriptLanguage">java</stringProp>
                 <stringProp name="parameters"></stringProp>
-                <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+                <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
                 <stringProp name="cacheKey">true</stringProp>
                 <stringProp name="script"></stringProp>
               </JSR223PreProcessor>
@@ -1418,7 +1428,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -1480,7 +1490,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -1613,7 +1623,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
                 <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
                   <stringProp name="scriptLanguage">java</stringProp>
                   <stringProp name="parameters"></stringProp>
-                  <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+                  <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
                   <stringProp name="cacheKey">true</stringProp>
                   <stringProp name="script"></stringProp>
                 </JSR223PreProcessor>
@@ -1654,7 +1664,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
                 <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
                   <stringProp name="scriptLanguage">java</stringProp>
                   <stringProp name="parameters"></stringProp>
-                  <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+                  <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
                   <stringProp name="cacheKey">true</stringProp>
                   <stringProp name="script"></stringProp>
                 </JSR223PreProcessor>
@@ -1696,7 +1706,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
               <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
                 <stringProp name="scriptLanguage">java</stringProp>
                 <stringProp name="parameters"></stringProp>
-                <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+                <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
                 <stringProp name="cacheKey">true</stringProp>
                 <stringProp name="script"></stringProp>
               </JSR223PreProcessor>
@@ -1737,7 +1747,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
               <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
                 <stringProp name="scriptLanguage">java</stringProp>
                 <stringProp name="parameters"></stringProp>
-                <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+                <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
                 <stringProp name="cacheKey">true</stringProp>
                 <stringProp name="script"></stringProp>
               </JSR223PreProcessor>
@@ -1773,7 +1783,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -1835,7 +1845,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -1936,7 +1946,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -1998,7 +2008,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -2146,7 +2156,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2253,7 +2263,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2332,7 +2342,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2604,7 +2614,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2651,7 +2661,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2698,7 +2708,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2745,7 +2755,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2799,7 +2809,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -2840,7 +2850,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -2876,7 +2886,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2938,7 +2948,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -2996,7 +3006,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -3024,7 +3034,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
             <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
               <stringProp name="scriptLanguage">java</stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+              <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
               <stringProp name="cacheKey">true</stringProp>
               <stringProp name="script"></stringProp>
             </JSR223PreProcessor>
@@ -3073,7 +3083,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3135,7 +3145,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3205,7 +3215,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3246,7 +3256,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3306,7 +3316,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3347,7 +3357,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3407,7 +3417,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3448,7 +3458,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3585,7 +3595,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3639,7 +3649,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3695,7 +3705,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3757,7 +3767,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3798,7 +3808,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3901,7 +3911,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -3952,7 +3962,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4003,7 +4013,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4054,7 +4064,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4105,7 +4115,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4208,7 +4218,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4255,7 +4265,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4296,7 +4306,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4352,7 +4362,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4414,7 +4424,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4461,7 +4471,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4502,7 +4512,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4564,7 +4574,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4626,7 +4636,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4667,7 +4677,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4708,7 +4718,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4757,7 +4767,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4817,7 +4827,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4858,7 +4868,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4920,7 +4930,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -4967,7 +4977,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5029,7 +5039,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5070,7 +5080,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5117,7 +5127,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5158,7 +5168,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5220,7 +5230,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5267,7 +5277,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5314,7 +5324,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5355,7 +5365,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5417,7 +5427,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5464,7 +5474,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5505,7 +5515,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5567,7 +5577,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5608,7 +5618,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5670,7 +5680,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5717,7 +5727,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5758,7 +5768,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5814,7 +5824,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5870,7 +5880,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5926,7 +5936,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -5982,7 +5992,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6038,7 +6048,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6100,7 +6110,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6141,7 +6151,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6197,7 +6207,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6259,7 +6269,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6306,7 +6316,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6347,7 +6357,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6403,7 +6413,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6517,7 +6527,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6564,7 +6574,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6611,7 +6621,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6652,7 +6662,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6743,7 +6753,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6840,7 +6850,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6881,7 +6891,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6922,7 +6932,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -6963,7 +6973,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -7004,7 +7014,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -7045,7 +7055,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -7086,7 +7096,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
@@ -7127,7 +7137,7 @@ vars.put(&quot;dateHeader&quot;, date_header);</stringProp>
           <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="HmacAuth PreProcessor" enabled="true">
             <stringProp name="scriptLanguage">java</stringProp>
             <stringProp name="parameters"></stringProp>
-            <stringProp name="filename">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}hmacauth.java</stringProp>
+            <stringProp name="filename">${CONFIG_PATH}/hmacauth.java</stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script"></stringProp>
           </JSR223PreProcessor>
