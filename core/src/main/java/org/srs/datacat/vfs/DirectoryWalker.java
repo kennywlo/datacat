@@ -8,6 +8,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.Objects;
 import org.srs.datacat.model.DatacatNode;
@@ -87,6 +88,14 @@ public class DirectoryWalker {
         } catch(DirectoryIteratorException e) {
             // IOException will be notified to postVisitDirectory
             ioe = e.getCause();
+        } catch(ConcurrentModificationException e) {
+            try {
+                Thread.sleep((int)(Math.random()*1000));
+            } catch (InterruptedException ex){
+                throw new IOException(ex);
+            }
+            System.out.println("ConcurrentModificationException in walk()...retrying.");
+            this.walk(file, context, depth);
         }
 
         // invoke postVisitDirectory last

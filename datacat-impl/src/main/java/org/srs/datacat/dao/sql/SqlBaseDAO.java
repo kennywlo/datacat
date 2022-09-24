@@ -123,7 +123,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
         String sql = getChildSql(parentClause);
 
-        DatacatObject.Builder builder = null;
+        DatacatObject.Builder builder;
         Long pk = parent != null ? parent.getPk() : null;
         try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             if (nameParam != null) {
@@ -195,13 +195,13 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         // fetch the dependency info
         Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency",
             "dependent", builder.pk);
+        if (!dependents.isEmpty()){
+            metadata.putAll(dependents);
+        }
         Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(), "dependency",
             "dependentGroup", builder.pk);
-        if (!dependents.isEmpty()) {
-            if (!dependents2.isEmpty()){
-                dependents.putAll(dependents2);
-            }
-            metadata.putAll(dependents);
+        if (!dependents2.isEmpty()){
+            metadata.putAll(dependents2);
         }
 
         if (!metadata.isEmpty()) {
@@ -226,10 +226,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             if (!dependents.isEmpty()) {
                 metadata.putAll(dependents);
             }
-            dependents = SearchUtils.getDependents(getConnection(),
+            Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(),
                 "dependencyGroup", "dependentGroup", pk);
-            if (!dependents.isEmpty()){
-                metadata.putAll(dependents);
+            if (!dependents2.isEmpty()){
+                metadata.putAll(dependents2);
             }
         }
 
@@ -328,16 +328,38 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     protected void addDatasetVersionMetadata(Long pk, Map<String, Object> metaData) throws SQLException {
         metaData.put("dependency", pk);
-        addDatasetDependency(metaData);
+        addDependency(metaData);
         addDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
+        // retrieve just added dependents in normalized form
+        Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency",
+            "dependent", pk);
+        if (!dependents.isEmpty()){
+            metaData.putAll(dependents);
+        }
+        Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(), "dependency",
+            "dependentGroup", pk);
+        if (!dependents2.isEmpty()){
+            metaData.putAll(dependents2);
+        }
     }
 
     protected void addGroupMetadata(DatasetContainer datasetGroup, Map<String, Object> metaData) throws SQLException {
         long datasetGroupPk = datasetGroup.getPk();
         metaData.put("dependencyName", datasetGroup.getPath());
         metaData.put("dependencyGroup", datasetGroupPk);
-        addDatasetDependency(metaData);
+        addDependency(metaData);
         addDatacatObjectMetadata(datasetGroupPk, metaData, "DatasetGroup", "DatasetGroup");
+        // retrieve the just added dependents in their normalized form
+        Map<String, Object> dependents = SearchUtils.getDependents(getConnection(),
+            "dependencyGroup", "dependent", datasetGroupPk);
+        if (!dependents.isEmpty()) {
+            metaData.putAll(dependents);
+        }
+        Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(),
+            "dependencyGroup", "dependentGroup", datasetGroupPk);
+        if (!dependents2.isEmpty()){
+            metaData.putAll(dependents2);
+        }
     }
 
     protected void addFolderMetadata(long logicalFolderPK, Map<String, Object> metaData) throws SQLException {
@@ -407,10 +429,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             // Nothing to be removed
             return;
         }
-        addDatasetDependency(metaData);
+        addDependency(metaData);
     }
 
-    protected void addDatasetDependency(Map<String, Object> metaData) throws SQLException {
+    protected void addDependency(Map<String, Object> metaData) throws SQLException {
         if (!(metaData instanceof HashMap)) {
             metaData = new HashMap<>(metaData);
         }
@@ -420,12 +442,13 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             metaData.remove("dependencyGroup");
             return;
         }
-        Long dependency = (Long)metaData.get("dependency");
-        Long dependencyGroup = (Long)metaData.get("dependencyGroup");
+        Long dependency = (Long)metaData.remove("dependency");
+        Long dependencyGroup = (Long)metaData.remove("dependencyGroup");
+        // keep dependencyName to store as metadata field of the Dependency container
         String name = (String)metaData.get("dependencyName");
-        String dependents = (String)metaData.get("dependents");
-        String dependentGroups = (String)metaData.get("dependentGroups");
-        String dependentType = (String)metaData.get("dependentType");
+        String dependents = (String)metaData.remove("dependents");
+        String dependentGroups = (String)metaData.remove("dependentGroups");
+        String dependentType = (String)metaData.remove("dependentType");
 
         // handle dataset dependents
         if (dependents != null && !dependents.isEmpty()) {
@@ -454,14 +477,14 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     } catch (SQLException ex){
                         if (ex.getMessage().toLowerCase().contains("deadlock")){
                             // should only happen in MySQL testing
-                            System.out.println("addDatasetDependency(dd): Deadlock detected");
+                            System.out.println("addDependency(ds): Deadlock detected...retrying.");
                             try {
                                 Thread.sleep((int) (Math.random() * 1000));
                             } catch (InterruptedException e){
                                 throw new SQLException(e);
                             }
                             // retry
-                            addDatasetDependency(metaData);
+                            addDependency(metaData);
                         }
                     }
                 }
@@ -494,30 +517,19 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     } catch (SQLException ex){
                         if (ex.getMessage().toLowerCase().contains("deadlock")){
                             // should only happen in MySQL testing
-                            System.out.println("addDatasetDependency(gd): Deadlock detected");
+                            System.out.println("addDependency(grp): Deadlock detected...retrying.");
                             try {
                                 Thread.sleep((int) (Math.random() * 1000));
                             } catch (InterruptedException e){
                                 throw new SQLException(e);
                             }
                             // retry
-                            addDatasetDependency(metaData);
+                            addDependency(metaData);
                         }
                     }
                 }
             }
         }
-
-        // remove all dependency fields other than dependencyName, a.k.a. the dependency path
-        metaData.remove("dependents");
-        metaData.remove("predecessor.dataset");
-        metaData.remove("successor.dataset");
-        metaData.remove("predecessor.group");
-        metaData.remove("successor.group");
-        metaData.remove("dependentGroups");
-        metaData.remove("dependentType");
-        metaData.remove("dependency");
-        metaData.remove("dependencyGroup");
     }
 
 //    protected void deleteDatasetVersionMetadata(Long pk, Set<String> metaDataKeys) throws SQLException{
@@ -572,7 +584,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         } catch (SQLException ex){
             if (ex.getMessage().toLowerCase().contains("deadlock")){
                 // this should only happen in MySQL testing
-                System.out.println("addDatacatObjectMetadata(): Deadlock detected");
+                System.out.println("addDatacatObjectMetadata(): Deadlock detected...retrying.");
                 try {
                     Thread.sleep((int)(Math.random()*1000));
                     addDatacatObjectMetadata(objectPK, metaData, tablePrefix, column);

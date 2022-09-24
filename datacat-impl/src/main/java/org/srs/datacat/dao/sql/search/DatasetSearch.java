@@ -74,6 +74,33 @@ public class DatasetSearch {
                     Optional.fromNullable(metaFieldsToRetrieve), 
                     Optional.fromNullable(sortFields),
                     ignoreShowKeyError);
+            if (!dependentSearch.isEmpty()){
+                // check the existence of dependents first
+                boolean found = !containers.iterator().hasNext();
+                for(DatacatNode container: containers) {
+                    String dependent = dependentSearch.equals("dependents")? "dependent": "dependentGroup";
+                    if (SearchUtils.checkDependents(this.conn, "dependencyGroup", dependent,
+                        container.getPk(), query)){
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return new DirectoryStream<DatasetModel>() {
+                        Iterator<DatasetModel> iter = null;
+                        @Override
+                        public Iterator<DatasetModel> iterator(){
+                            if (iter == null) {
+                                iter = Collections.emptyIterator();
+                            }
+                            return iter;
+                        }
+                        @Override
+                        public void close() throws IOException {
+                        }
+                    };
+                }
+            }
             return retrieveDatasets();
         } catch (SQLException ex) {
             throw new IOException("Error retrieving results", ex);

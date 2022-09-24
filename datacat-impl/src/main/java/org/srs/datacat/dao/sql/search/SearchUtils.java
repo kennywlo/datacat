@@ -88,20 +88,31 @@ public final class SearchUtils {
         builder.versionId(rs.getInt("versionid"));
         builder.latest(rs.getBoolean("latest"));
 
+        boolean checkDependency = true;
         try {
             builder.path(PathUtils.resolve(rs.getString("containerpath"), name));
         } catch (SQLException e) {
-            // Set path for the Dataset container
-            String path = SearchUtils.getDependencyPath(conn, versionPk);
-            builder.path(path);
+            // if it's a dependency container, set the path
+            String depPath = SearchUtils.getDependencyPath(conn, versionPk);
+            if (!depPath.isEmpty()) {
+                builder.path(depPath);
+            } else{
+                checkDependency = false;
+            }
         }
 
         ArrayList<DatasetLocationModel> locations = new ArrayList<>();
         HashMap<String, Object> metadata = new HashMap<>();
-        boolean isDependency = false;
+        boolean hasDependents = false;
         for(String s: includedMetadata){
             if (s.contains("dependency") || s.contains("dependents")){
-                isDependency = true;
+                if (!checkDependency){
+                    // Not a dependent dataset, try next
+                    if(!rs.next()){
+                        rs.close();
+                    }
+                    return null;
+                }
                 String[] deps = s.split("\\.");
                 Map<String, Object> retmap, retmap2;
                 if (deps[1].equals("groups")){
@@ -127,6 +138,7 @@ public final class SearchUtils {
                 }
                 if (!retmap.isEmpty()) {
                     metadata.putAll(retmap);
+                    hasDependents = true;
                 } else{
                     // Not a dependent dataset, try next
                     if(!rs.next()){
@@ -161,7 +173,7 @@ public final class SearchUtils {
             }
         }
         builder.locations(locations);
-        if (isDependency){
+        if (hasDependents){
             builder.versionMetadata(metadata);
         } else{
             builder.metadata(metadata);

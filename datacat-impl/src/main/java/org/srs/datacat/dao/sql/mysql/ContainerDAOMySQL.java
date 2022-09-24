@@ -82,8 +82,6 @@ public class ContainerDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.d
             builder.parentPk(parent.getPk());
             builder.path(PathUtils.resolve(parent.getPath(), name));
             retObject = builder.build();
-            // For MySQL
-            getConnection().commit();
         }
         if(request.getMetadataMap() != null && !request.getMetadataMap().isEmpty()){
             if(newType == RecordType.FOLDER){
