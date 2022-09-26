@@ -2,7 +2,7 @@ import java.net.URI;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
+import java.util.Base64;
 
 String method = sampler.getMethod();
 String path = sampler.getUrl().getPath();
@@ -27,13 +27,12 @@ StringBuilder fullHeader = new StringBuilder()
     .append(date_header).append("\n");
 log.info("path = " + fullHeader.toString().replace("\n", ","));
 
-byte[] secretKey = DatatypeConverter.parseBase64Binary(auth_secret_key);
-
+byte[] secretKey = Base64.getDecoder().decode(auth_secret_key);
 Mac hmac = Mac.getInstance(HMACSHA1);
 SecretKey hmacKey = new SecretKeySpec(secretKey, HMACSHA1);
 hmac.init(hmacKey);
 byte[] rawDigest = hmac.doFinal(fullHeader.toString().getBytes());
-String digest = DatatypeConverter.printBase64Binary(rawDigest);
+String digest = Base64.getEncoder().encodeToString(rawDigest);
 String hmacAuth = "SRS:" + auth_key_id + ":" + digest;
 // log.info("hmacAuth = " + hmacAuth);
 vars.put("hmacAuth", hmacAuth);
