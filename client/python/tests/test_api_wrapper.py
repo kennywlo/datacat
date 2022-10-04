@@ -692,8 +692,8 @@ class ApiWrapper(unittest.TestCase):
                 added_after = self.client.path(path='/testpath/depGroup1_4;metadata=dependents')
                 added_after = dict(added_after)
                 if self.enable_assertion:
-                    assert added_after['predecessor.dataset'] == expected['predecessor.dataset'], \
-                        "Case 2.1 group dependent addition result is not as expected: {}.\n" \
+                    assert sorted(added_after['predecessor.dataset'].split(",")) == sorted(expec:wted['predecessor.dataset'].split(",")), \
+                                "Case 2.1 group dependent addition result is not as expected: {}.\n" \
                         "Expected: {}".format(added_after, expected)
 
                 print("Case 2.1 group dependent removal successful:")

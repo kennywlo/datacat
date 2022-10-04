@@ -2,6 +2,19 @@
 package org.srs.datacat.dao.sql.mysql;
 
 import com.google.common.base.Optional;
+import org.srs.datacat.dao.sql.SqlDAOFactory;
+import org.srs.datacat.dao.sql.search.SearchUtils;
+import org.srs.datacat.model.DatacatRecord;
+import org.srs.datacat.model.DatasetModel;
+import org.srs.datacat.model.DatasetView;
+import org.srs.datacat.model.RecordType;
+import org.srs.datacat.model.dataset.DatasetLocationModel;
+import org.srs.datacat.model.dataset.DatasetOption;
+import org.srs.datacat.model.dataset.DatasetVersionModel;
+import org.srs.datacat.model.dataset.DatasetViewInfoModel;
+import org.srs.datacat.shared.*;
+import org.srs.vfs.PathUtils;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,30 +22,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.FileSystemException;
 import java.nio.file.NoSuchFileException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.srs.datacat.dao.sql.SqlDAOFactory;
-import org.srs.datacat.dao.sql.search.SearchUtils;
-import org.srs.datacat.model.DatacatRecord;
-import org.srs.datacat.model.dataset.DatasetLocationModel;
-import org.srs.datacat.model.DatasetModel;
-import org.srs.datacat.model.dataset.DatasetVersionModel;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.model.dataset.DatasetViewInfoModel;
-import org.srs.datacat.shared.*;
-import org.srs.datacat.model.RecordType;
+import java.sql.*;
+import java.util.*;
+
 import static org.srs.datacat.model.DcExceptions.*;
-import org.srs.datacat.model.dataset.DatasetOption;
-import org.srs.vfs.PathUtils;
 
 /**
  *
@@ -213,12 +206,7 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
 
                 // Retrieve the dependency info as part of the metadata, if any
                 Map<String, Object> deps = SearchUtils.getDependents(getConnection(),
-                    "dependency", "dependent", builder.pk);
-                if (!deps.isEmpty()) {
-                    metadata.putAll(deps);
-                }
-                deps = SearchUtils.getDependents(getConnection(),
-                    "dependency", "dependentGroup", builder.pk);
+                    "dependency", builder.pk, null);
                 if (!deps.isEmpty()) {
                     metadata.putAll(deps);
                 }

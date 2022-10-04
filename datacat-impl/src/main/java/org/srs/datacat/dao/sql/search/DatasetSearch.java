@@ -74,33 +74,6 @@ public class DatasetSearch {
                     Optional.fromNullable(metaFieldsToRetrieve), 
                     Optional.fromNullable(sortFields),
                     ignoreShowKeyError);
-            if (!dependentSearch.isEmpty()){
-                // check the existence of dependents first
-                boolean found = !containers.iterator().hasNext();
-                for(DatacatNode container: containers) {
-                    String dependent = dependentSearch.equals("dependents")? "dependent": "dependentGroup";
-                    if (SearchUtils.checkDependents(this.conn, "dependencyGroup", dependent,
-                        container.getPk(), query)){
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    return new DirectoryStream<DatasetModel>() {
-                        Iterator<DatasetModel> iter = null;
-                        @Override
-                        public Iterator<DatasetModel> iterator(){
-                            if (iter == null) {
-                                iter = Collections.emptyIterator();
-                            }
-                            return iter;
-                        }
-                        @Override
-                        public void close() throws IOException {
-                        }
-                    };
-                }
-            }
             return retrieveDatasets();
         } catch (SQLException ex) {
             throw new IOException("Error retrieving results", ex);
@@ -233,9 +206,13 @@ public class DatasetSearch {
                     }
                     // Store the dependent info to be kept for later reference
                     metadataFields.add( s.substring("deps".length()+1) );
+                    if (!dependentSearch.isEmpty()){
+                        // Need this info later on
+                        metadataFields.add("dependentSearch");
+                    }
                     continue;
                 }
-                Column retrieve = null;
+                Column retrieve;
                 if(sd.inSelectionScope( s )){
                     retrieve = getColumnFromSelectionScope( dsv, s );
                     metadataFields.add( s );

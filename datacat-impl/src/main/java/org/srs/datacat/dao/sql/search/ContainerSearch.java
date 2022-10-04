@@ -1,26 +1,10 @@
 package org.srs.datacat.dao.sql.search;
 
 import com.google.common.base.Optional;
-import java.io.IOException;
-import java.io.StringReader;
-import java.math.BigInteger;
-import java.nio.file.DirectoryStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.freehep.commons.lang.AST;
 import org.freehep.commons.lang.bool.Lexer;
 import org.freehep.commons.lang.bool.Parser;
 import org.freehep.commons.lang.bool.sym;
-import static org.srs.datacat.dao.sql.search.DatasetSearch.sqlEscape;
 import org.srs.datacat.dao.sql.search.plugins.DatacatPlugin;
 import org.srs.datacat.dao.sql.search.tables.DatasetContainers;
 import org.srs.datacat.dao.sql.search.tables.MetajoinedStatement;
@@ -28,12 +12,24 @@ import org.srs.datacat.model.DatacatNode;
 import org.srs.datacat.model.DatasetContainer;
 import org.srs.datacat.model.ModelProvider;
 import org.zerorm.core.Column;
-import static org.zerorm.core.Op.$;
-
 import org.zerorm.core.Op;
 import org.zerorm.core.Select;
 import org.zerorm.core.Table;
 import org.zerorm.core.interfaces.MaybeHasAlias;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.math.BigInteger;
+import java.nio.file.DirectoryStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.srs.datacat.dao.sql.search.DatasetSearch.sqlEscape;
+import static org.zerorm.core.Op.$;
 
 /**
  *
@@ -228,6 +224,10 @@ public class ContainerSearch {
                     }
                     // Store the dependent info to be kept for later reference
                     metadataFields.add( s.substring("deps".length()+1) );
+                    if (!dependentSearch.isEmpty()){
+                        // Need this info later on
+                        metadataFields.add("dependentSearch");
+                    }
                     continue;
                 }
                 Column retrieve = null;

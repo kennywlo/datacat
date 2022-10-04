@@ -1,29 +1,18 @@
 package org.srs.datacat.dao.sql.search;
 
+import org.freehep.commons.lang.AST;
+import org.srs.datacat.model.*;
+import org.srs.datacat.model.container.DatasetContainerBuilder;
+import org.srs.datacat.model.dataset.DatasetLocationModel;
+import org.srs.datacat.shared.DatasetLocation;
+import org.srs.vfs.PathUtils;
+import org.zerorm.core.Select;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.DirectoryStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.util.*;
-
-import org.freehep.commons.lang.AST;
-import org.srs.datacat.model.DatacatNode;
-import org.zerorm.core.Select;
-
-import org.srs.datacat.model.DatasetContainer;
-import org.srs.datacat.model.DatasetModel;
-import org.srs.datacat.model.dataset.DatasetLocationModel;
-import org.srs.datacat.model.ModelProvider;
-import org.srs.datacat.model.RecordType;
-import org.srs.datacat.model.container.DatasetContainerBuilder;
-import org.srs.datacat.shared.DatasetLocation;
-
-import org.srs.vfs.PathUtils;
 
 /**
  *
@@ -88,7 +77,6 @@ public final class SearchUtils {
         builder.versionId(rs.getInt("versionid"));
         builder.latest(rs.getBoolean("latest"));
 
-        boolean checkDependency = true;
         try {
             builder.path(PathUtils.resolve(rs.getString("containerpath"), name));
         } catch (SQLException e) {
@@ -96,8 +84,6 @@ public final class SearchUtils {
             String depPath = SearchUtils.getDependencyPath(conn, versionPk);
             if (!depPath.isEmpty()) {
                 builder.path(depPath);
-            } else{
-                checkDependency = false;
             }
         }
 
@@ -106,46 +92,25 @@ public final class SearchUtils {
         boolean hasDependents = false;
         for(String s: includedMetadata){
             if (s.contains("dependency") || s.contains("dependents")){
-                if (!checkDependency){
-                    // Not a dependent dataset, try next
-                    if(!rs.next()){
-                        rs.close();
-                    }
-                    return null;
-                }
                 String[] deps = s.split("\\.");
-                Map<String, Object> retmap, retmap2;
-                if (deps[1].equals("groups")){
-                    retmap =  SearchUtils.getDependencyGroups(conn, versionPk);
-                } else{ // return dependents
-                    retmap = SearchUtils.getDependentsByType(conn, "dependency", "dependent",
-                        versionPk, deps[1]);
-                    retmap2 = SearchUtils.getDependentsByType(conn, "dependency", "dependentGroup",
-                        versionPk, deps[1]);
-                    if (!retmap2.isEmpty()){
-                        retmap.putAll(retmap2);
-                    }
-                    retmap2 = SearchUtils.getDependentsByType(conn, "dependencyGroup", "dependent",
-                        versionPk, deps[1]);
-                    if (!retmap2.isEmpty()){
-                        retmap.putAll(retmap2);
-                    }
-                    retmap2 = SearchUtils.getDependentsByType(conn, "dependencyGroup", "dependentGroup",
-                        versionPk, deps[1]);
-                    if (!retmap2.isEmpty()){
-                        retmap.putAll(retmap2);
-                    }
-                }
+                Map<String, Object> retmap = SearchUtils.getDependents(conn, "dependency",
+                    versionPk, deps[1]);
                 if (!retmap.isEmpty()) {
                     metadata.putAll(retmap);
                     hasDependents = true;
-                } else{
-                    // Not a dependent dataset, try next
-                    if(!rs.next()){
+                    continue;
+                } else if (includedMetadata.contains("dependentSearch")) {
+                    // this dataset from query result by pk
+                    continue;
+                } else {
+                    if (!rs.next()){
                         rs.close();
                     }
                     return null;
                 }
+            } else if (s.contains("dependentSearch")){
+                // this dataset from query result by pk
+                builder.path(rs.getString("path"));
                 continue;
             }
             try {
@@ -199,33 +164,28 @@ public final class SearchUtils {
         HashMap<String, Object> metadata = new HashMap<>();
         for(String s: includedMetadata){
             if (s.contains("dependency") || s.contains("dependents")){
-                String path;
-                if (s.contains("groups")) {
-                    path = SearchUtils.getDependencyGroupPath(conn, rs.getLong("pk"));
-                    builder.type(RecordType.GROUP);
-                } else{
-                    // default type set to RecordType.FOLDER
-                    path = SearchUtils.getDependencyPath(conn, rs.getLong("pk"));
-                }
-                if (!path.isEmpty()) {
-                    builder.path(path);
-                    metadata.put("dependencyName", path);
-                    String[] deps = s.split("\\.");
-                    String depContainer = s.contains("groups") ? "dependencyGroup" : "dependency";
-                    Map<String, Object> depmap = SearchUtils.getDependentsByType(conn, depContainer,
-                        "dependent", rs.getLong("pk"), deps[1]);
-                    depmap.putAll(SearchUtils.getDependentsByType(conn, depContainer,
-                        "dependentGroup", rs.getLong("pk"), deps[1]));
-                    if (!depmap.isEmpty()) {
-                        metadata.putAll(depmap);
-                    }else{
-                        // Not a dependent container, try next
-                        if(!rs.next()){
+                String path = SearchUtils.getDependencyGroupPath(conn, rs.getLong("pk"));
+                if (path.isEmpty()) {
+                    if (includedMetadata.contains("dependentSearch")) {
+                        // this container is query result by pk
+                        continue;
+                    } else {
+                        if (!rs.next()) {
                             rs.close();
                         }
                         return null;
                     }
                 }
+                String[] deps = s.split("\\.");
+                Map<String, Object> depmap = SearchUtils.getDependents(conn, "dependencyGroup",
+                    rs.getLong("pk"), deps[1]);
+                builder.path(path);
+                builder.type(RecordType.GROUP);
+                metadata.put("dependencyName", path);
+                metadata.putAll(depmap);
+                continue;
+            } else if (s.contains("dependentSearch")){
+                // this container is query result by pk
                 continue;
             }
             Object o = rs.getObject(s);
@@ -600,15 +560,17 @@ public final class SearchUtils {
         return found;
     }
 
-    public static Map<String, Object> getDependents(Connection conn, String dependencyContainer, String dependent,
-                                                    Long dependency) throws SQLException {
+    public static Map<String, Object> getDependents(Connection conn, String dependencyContainer, Long dependency,
+                                                    String filter) throws SQLException {
         String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
         Map<String, Object> metadata = new HashMap<>();
         for (String type: dependentTypes) {
-            Map<String, Object> dependents = SearchUtils.getDependentsByType(conn, dependencyContainer, dependent,
-                dependency, type);
-            if (!dependents.isEmpty()) {
-                metadata.putAll(dependents);
+            metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependent",
+                dependency, type));
+            metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependentGroup",
+                dependency, type));
+            if (filter != null && filter.equals(type)) {
+                break;
             }
         }
         return metadata;
@@ -617,8 +579,11 @@ public final class SearchUtils {
     public static Map<String, Object> getDependentsByType(Connection conn, String dependencyContainer,
                                                           String dependent,  Long dependency,
                                                           String type) throws SQLException {
-        if (type.isEmpty() || type.equals("*") || type.equals("groups")) {
-            return SearchUtils.getDependents(conn, dependencyContainer, dependent, dependency);
+        if (type.equals("groups")){
+            return SearchUtils.getDependencyGroups(conn, dependency);
+        }
+        if (type.isEmpty() || type.equals("*")) {
+            return SearchUtils.getDependents(conn, dependencyContainer, dependency, null);
         }
         String sql = "SELECT dependencyName, " + dependent + " FROM DatasetDependency WHERE " +
             dependencyContainer + " = ? AND (dependentType = ? AND " + dependent + " IS NOT NULL)";

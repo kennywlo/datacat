@@ -194,14 +194,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         }
         // fetch the dependency info
         Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency",
-            "dependent", builder.pk);
+            builder.pk, null);
         if (!dependents.isEmpty()){
             metadata.putAll(dependents);
-        }
-        Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(), "dependency",
-            "dependentGroup", builder.pk);
-        if (!dependents2.isEmpty()){
-            metadata.putAll(dependents2);
         }
 
         if (!metadata.isEmpty()) {
@@ -221,15 +216,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         Map<String, Object> metadata = getMetadata(pk, tableType, tableType);
         // fetch the dependency info
         if (tableType != null && tableType.equals("DatasetGroup")) {
-            Map<String, Object> dependents = SearchUtils.getDependents(getConnection(),
-                "dependencyGroup", "dependent", pk);
+            Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependencyGroup",
+                pk, null);
             if (!dependents.isEmpty()) {
                 metadata.putAll(dependents);
-            }
-            Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(),
-                "dependencyGroup", "dependentGroup", pk);
-            if (!dependents2.isEmpty()){
-                metadata.putAll(dependents2);
             }
         }
 
@@ -331,15 +321,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         addDependency(metaData);
         addDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
         // retrieve just added dependents in normalized form
-        Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency",
-            "dependent", pk);
+        Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency", pk,
+            null);
         if (!dependents.isEmpty()){
             metaData.putAll(dependents);
-        }
-        Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(), "dependency",
-            "dependentGroup", pk);
-        if (!dependents2.isEmpty()){
-            metaData.putAll(dependents2);
         }
     }
 
@@ -351,14 +336,9 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         addDatacatObjectMetadata(datasetGroupPk, metaData, "DatasetGroup", "DatasetGroup");
         // retrieve the just added dependents in their normalized form
         Map<String, Object> dependents = SearchUtils.getDependents(getConnection(),
-            "dependencyGroup", "dependent", datasetGroupPk);
+            "dependencyGroup",  datasetGroupPk, null);
         if (!dependents.isEmpty()) {
             metaData.putAll(dependents);
-        }
-        Map<String, Object> dependents2 = SearchUtils.getDependents(getConnection(),
-            "dependencyGroup", "dependentGroup", datasetGroupPk);
-        if (!dependents2.isEmpty()){
-            metaData.putAll(dependents2);
         }
     }
 
@@ -388,6 +368,12 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     protected void mergeDependencyMetadata(Map<String, Object> metaData)
         throws SQLException {
+        // remove from existing view
+        metaData.remove("predecessor.dataset");
+        metaData.remove("predecessor.group");
+        metaData.remove("successor.dataset");
+        metaData.remove("successor.group");
+
         if (metaData.containsKey("dependents") || metaData.containsKey("dependentGroups")) {
             String type = (String) metaData.get("dependentType");
             String depContainer;

@@ -366,13 +366,5 @@ class GroupDependency(unittest.TestCase):
 
         print("\nReturn value of client.search call:", searchResults)
 
-        searchResults = GroupDependency.client.search(target=ds_searchTest.path,
-                                                      show="dependency.groups",
-                                                      containerFilter='dependentGroups in ({})'.format(
-                                                          dep_group_searchTest.pk),
-                                                      ignoreShowKeyError=True)
-
-        print("\nReturn value of client.search call:", searchResults)
-
         expectedValue = dep_group_searchTest.pk
         assert (searchResults[0].pk == expectedValue), "Expected value not equal to returned value"
