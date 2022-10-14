@@ -517,7 +517,6 @@ public final class SearchUtils {
             if (rs.next()){
                 dependencyPath = rs.getString("dependencyName");
             }
-            rs.close();
         }
         return dependencyPath;
     }
@@ -531,7 +530,6 @@ public final class SearchUtils {
             if (rs.next()){
                 dependencyPath = rs.getString("dependencyName");
             }
-            rs.close();
         }
         return dependencyPath;
     }
@@ -555,7 +553,6 @@ public final class SearchUtils {
                     break;
                 }
             }
-            rs.close();
         }
         return found;
     }
@@ -596,7 +593,6 @@ public final class SearchUtils {
             while (rs.next()) {
                 dependents.add(rs.getLong(dependent));
             }
-            rs.close();
             // locate more dependents by the reciprocal nature of the relation
             if (Arrays.asList("predecessor", "successor").contains(type)) {
                 Long[] moreDependents = SearchUtils.getReciprocalDependents(conn, dependencyContainer, dependent,
@@ -643,7 +639,6 @@ public final class SearchUtils {
                     dependents.add(d);
                 }
             }
-            rs.close();
             return dependents.toArray(new Long[0]);
         }
     }
@@ -661,7 +656,6 @@ public final class SearchUtils {
                     dependentTypes.add(dt);
                 }
             }
-            rs.close();
             // Check other types by reciprocal relation
             String[] moreDependentTypes = SearchUtils.getDependentTypeReciprocal(conn, "dependent", dependency);
             for (String dt: moreDependentTypes) {
@@ -693,7 +687,6 @@ public final class SearchUtils {
                     types.add(dtR);
                 }
             }
-            rs.close();
             return types.toArray(new String[types.size()]);
         }
     }
@@ -710,7 +703,6 @@ public final class SearchUtils {
                 String sep = dependencyGroups.length() == 0 ? "":",";
                 dependencyGroups.append(sep).append(rs.getString("dependencyName"));
             }
-            rs.close();
             if (!dependencyGroups.toString().equals("")){
                 verMetadata.put("dependencyGroups", dependencyGroups.toString());
             }
