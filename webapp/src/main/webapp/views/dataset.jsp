@@ -127,7 +127,9 @@
                                 <td>${location.scanStatus}</td>
                                 <td>${web_dc:formatTimestamp(location.dateCreated)}</td>
                                 <td>${web_dc:formatTimestamp(location.dateScanned)}</td>
-                                <td class="location-resource">${location.resource}</td>
+                                <td class="location-resource">
+                                    <a href="${model.contextPath}/r/DataCatalog/get?datasetLocation=${location.pk}">${location.resource}</a>
+                                </td>
                             </tr>
                         </c:forEach>
                     </tbody>
