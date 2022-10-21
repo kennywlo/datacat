@@ -77,9 +77,12 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setObject(1, o);
             stmt.executeUpdate();
-            // For MySQL
-            getConnection().commit();
+            // timing-sensitive
+            this.commit();
+        } catch (IOException ex) {
+            throw new SQLException(ex);
         } catch (SQLException ex){
+            getConnection().rollback();
             if (ex.getMessage().toLowerCase().contains("deadlock")){
                 // this should only happen in MySQL testing
                 System.out.println("delete1(): Deadlock detected");
@@ -195,9 +198,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         // fetch the dependency info
         Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency",
             builder.pk, null);
-        if (!dependents.isEmpty()){
-            metadata.putAll(dependents);
-        }
+        metadata.putAll(dependents);
 
         if (!metadata.isEmpty()) {
             builder.metadata(metadata);
@@ -218,9 +219,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         if (tableType != null && tableType.equals("DatasetGroup")) {
             Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependencyGroup",
                 pk, null);
-            if (!dependents.isEmpty()) {
-                metadata.putAll(dependents);
-            }
+            metadata.putAll(dependents);
         }
 
         if (!metadata.isEmpty()) {
@@ -320,12 +319,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         metaData.put("dependency", pk);
         addDependency(metaData);
         addDatacatObjectMetadata(pk, metaData, "VerDataset", "DatasetVersion");
-        // retrieve just added dependents in normalized form
-        Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency", pk,
-            null);
-        if (!dependents.isEmpty()){
-            metaData.putAll(dependents);
-        }
     }
 
     protected void addGroupMetadata(DatasetContainer datasetGroup, Map<String, Object> metaData) throws SQLException {
@@ -334,12 +327,6 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         metaData.put("dependencyGroup", datasetGroupPk);
         addDependency(metaData);
         addDatacatObjectMetadata(datasetGroupPk, metaData, "DatasetGroup", "DatasetGroup");
-        // retrieve the just added dependents in their normalized form
-        Map<String, Object> dependents = SearchUtils.getDependents(getConnection(),
-            "dependencyGroup",  datasetGroupPk, null);
-        if (!dependents.isEmpty()) {
-            metaData.putAll(dependents);
-        }
     }
 
     protected void addFolderMetadata(long logicalFolderPK, Map<String, Object> metaData) throws SQLException {
@@ -368,53 +355,50 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
 
     protected void mergeDependencyMetadata(Map<String, Object> metaData)
         throws SQLException {
-        // remove from existing view
-        metaData.remove("predecessor.dataset");
-        metaData.remove("predecessor.group");
-        metaData.remove("successor.dataset");
-        metaData.remove("successor.group");
-
+        String depContainer;
+        if (metaData.containsKey("dependency")){
+            depContainer = "dependency";
+        } else if (metaData.containsKey("dependencyGroup")){
+            depContainer = "dependencyGroup";
+        } else{
+            throw new SQLException("Missing dependency container");
+        }
+        // first, let's remove the existing dependency info
         if (metaData.containsKey("dependents") || metaData.containsKey("dependentGroups")) {
             String type = (String) metaData.get("dependentType");
-            String depContainer;
-            long dependencyPk;
-            if (metaData.containsKey("dependencyGroup")) {
-                depContainer = "dependencyGroup";
-                dependencyPk = (long) metaData.get("dependencyGroup");
-            } else{
-                depContainer = "dependency";
-                dependencyPk = (long) metaData.get("dependency");
-            }
-            if (type.equals("*")){
-                String deleteSql = "DELETE FROM DatasetDependency WHERE " + depContainer + " = ?";
-                try (PreparedStatement stmt = getConnection().prepareStatement(deleteSql)){
-                    stmt.setLong(1, dependencyPk);
-                    stmt.executeUpdate();
-                }
-            } else{
-                String deleteSql = "DELETE FROM DatasetDependency WHERE " + depContainer + " = ? and DependentType = ?";
-                try (PreparedStatement stmt = getConnection().prepareStatement(deleteSql)){
-                    stmt.setLong(1, dependencyPk);
-                    stmt.setString(2, type);
-                    stmt.executeUpdate();
-                } catch (SQLException ex) {
-                    if (ex.getMessage().toLowerCase().contains("deadlock")){
-                        // should only happen in MySQL testing
-                        System.out.println("mergeDependencyMetadata(dd): Deadlock detected");
-                        try {
-                            Thread.sleep((int)(Math.random()*1000));
-                        } catch (InterruptedException e){
-                            throw new SQLException(e);
-                        }
-                        // retry
-                        mergeDependencyMetadata(metaData);
-                    }
-                }
-            }
-        } else {
-            // Nothing to be removed
-            return;
+            SearchUtils.deleteDependentsByType(getConnection(), depContainer,
+                    (long) metaData.get(depContainer), type);
         }
+        String pd = (String) metaData.remove("predecessor.dataset");
+        if (pd != null){
+            SearchUtils.deleteDependentsByType(getConnection(), depContainer,
+                (long) metaData.get(depContainer), "predecessor");
+            metaData.put("dependents", pd);
+            metaData.put("dependentType", "predecessor");
+        }
+        String pg = (String) metaData.remove("predecessor.group");
+        if (pg != null){
+            SearchUtils.deleteDependentsByType(getConnection(), depContainer,
+                (long) metaData.get(depContainer), "predecessor");
+            metaData.put("dependentGroups", pg);
+            metaData.put("dependentType", "predecessor");
+        }
+        String sd = (String) metaData.remove("successor.dataset");
+        if (sd != null){
+            SearchUtils.deleteDependentsByType(getConnection(), depContainer,
+                (long) metaData.get(depContainer), "successor");
+            metaData.put("dependents", sd);
+            metaData.put("dependentType", "successor");
+        }
+        String sg = (String) metaData.remove("successor.group");
+        if (sg != null){
+            SearchUtils.deleteDependentsByType(getConnection(), depContainer,
+                (long) metaData.get(depContainer), "successor");
+            metaData.put("dependentGroups", sg);
+            metaData.put("dependentType", "successor");
+        }
+
+        // now add the new dependency info
         addDependency(metaData);
     }
 
@@ -436,7 +420,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         String dependentGroups = (String)metaData.remove("dependentGroups");
         String dependentType = (String)metaData.remove("dependentType");
 
-        // handle dataset dependents
+        // add dataset dependents
         if (dependents != null && !dependents.isEmpty()) {
             String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
                 "Dependent, DependentType)" + " values (?, ?, ?, ?, ?)";
@@ -461,6 +445,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     try {
                         stmt.executeUpdate();
                     } catch (SQLException ex){
+                        getConnection().rollback();
                         if (ex.getMessage().toLowerCase().contains("deadlock")){
                             // should only happen in MySQL testing
                             System.out.println("addDependency(ds): Deadlock detected...retrying.");
@@ -476,7 +461,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 }
             }
         }
-        // handle group dependents
+        // add group dependents
         if (dependentGroups != null && !dependentGroups.isEmpty()) {
             String dependencySql = "insert into DatasetDependency (Dependency, DependencyGroup, DependencyName, " +
                 "DependentGroup, DependentType)" + " values (?, ?, ?, ?, ?)";
@@ -501,6 +486,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                     try {
                         stmt.executeUpdate();
                     } catch (SQLException ex){
+                        getConnection().rollback();
                         if (ex.getMessage().toLowerCase().contains("deadlock")){
                             // should only happen in MySQL testing
                             System.out.println("addDependency(grp): Deadlock detected...retrying.");
@@ -516,6 +502,24 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 }
             }
         }
+
+        // for timing
+        try {
+            this.commit();
+        } catch (IOException ex){
+            throw new SQLException(ex);
+        }
+        // retrieve and return all dependents in normalized form
+        Map<String, Object> currDependents = SearchUtils.getDependents(getConnection(),
+            dependency == null ? "dependencyGroup":"dependency",
+            dependency == null ? dependencyGroup:dependency, null);
+        System.out.println("addDependency depContainer="+name);
+        if (currDependents.isEmpty()) {
+            metaData.remove("dependencyName");
+        } else {
+            metaData.putAll(currDependents);
+        }
+        System.out.println("addDependency dependents="+currDependents);
     }
 
 //    protected void deleteDatasetVersionMetadata(Long pk, Set<String> metaDataKeys) throws SQLException{
@@ -568,6 +572,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
                 stmt.executeUpdate();
             }
         } catch (SQLException ex){
+            getConnection().rollback();
             if (ex.getMessage().toLowerCase().contains("deadlock")){
                 // this should only happen in MySQL testing
                 System.out.println("addDatacatObjectMetadata(): Deadlock detected...retrying.");

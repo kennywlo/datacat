@@ -573,6 +573,37 @@ public final class SearchUtils {
         return metadata;
     }
 
+    public static void deleteDependentsByType(Connection conn, String dependencyContainer,
+                                              Long dependency, String type) throws SQLException {
+        if (type.equals("*")){
+            String deleteSql = "DELETE FROM DatasetDependency WHERE " + dependencyContainer + " = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteSql)){
+                stmt.setLong(1, dependency);
+                stmt.executeUpdate();
+            }
+        } else{
+            String deleteSql = "DELETE FROM DatasetDependency WHERE " + dependencyContainer +
+                " = ? and DependentType = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteSql)){
+                stmt.setLong(1, dependency);
+                stmt.setString(2, type);
+                stmt.executeUpdate();
+            } catch (SQLException ex) {
+                conn.rollback();
+                if (ex.getMessage().toLowerCase().contains("deadlock")){
+                    try {
+                        Thread.sleep((int)(Math.random()*1000));
+                    } catch (InterruptedException e){
+                        throw new SQLException(e);
+                    }
+                    System.out.println("deleteDependentsByType: Deadlock detected...retrying");
+                    deleteDependentsByType(conn, dependencyContainer, dependency, type);
+                }
+            }
+        }
+    }
+
+
     public static Map<String, Object> getDependentsByType(Connection conn, String dependencyContainer,
                                                           String dependent,  Long dependency,
                                                           String type) throws SQLException {
