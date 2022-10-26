@@ -579,7 +579,11 @@ public final class SearchUtils {
             String deleteSql = "DELETE FROM DatasetDependency WHERE " + dependencyContainer + " = ?";
             try (PreparedStatement stmt = conn.prepareStatement(deleteSql)){
                 stmt.setLong(1, dependency);
-                stmt.executeUpdate();
+                int affected = stmt.executeUpdate();
+                if (affected > 0) {
+                    conn.commit();
+                }
+                System.out.println("deleteDependentsByType affected="+affected);
             }
         } else{
             String deleteSql = "DELETE FROM DatasetDependency WHERE " + dependencyContainer +
@@ -587,7 +591,11 @@ public final class SearchUtils {
             try (PreparedStatement stmt = conn.prepareStatement(deleteSql)){
                 stmt.setLong(1, dependency);
                 stmt.setString(2, type);
-                stmt.executeUpdate();
+                int affected = stmt.executeUpdate();
+                if (affected > 0){
+                    conn.commit();
+                }
+                System.out.println("deleteDependentsByType affected="+affected);
             } catch (SQLException ex) {
                 conn.rollback();
                 if (ex.getMessage().toLowerCase().contains("deadlock")){
@@ -598,6 +606,8 @@ public final class SearchUtils {
                     }
                     System.out.println("deleteDependentsByType: Deadlock detected...retrying");
                     deleteDependentsByType(conn, dependencyContainer, dependency, type);
+                } else {
+                    throw new SQLException(ex);
                 }
             }
         }

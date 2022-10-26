@@ -2,6 +2,17 @@
 package org.srs.datacat.dao.sql;
 
 import com.google.common.base.Optional;
+import org.srs.datacat.model.DatacatRecord;
+import org.srs.datacat.model.DatasetModel;
+import org.srs.datacat.model.DatasetView;
+import org.srs.datacat.model.RecordType;
+import org.srs.datacat.model.dataset.DatasetLocationModel;
+import org.srs.datacat.model.dataset.DatasetOption;
+import org.srs.datacat.model.dataset.DatasetVersionModel;
+import org.srs.datacat.model.dataset.DatasetViewInfoModel;
+import org.srs.datacat.shared.*;
+import org.srs.vfs.PathUtils;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,27 +24,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.srs.datacat.model.DatacatRecord;
-import org.srs.datacat.model.dataset.DatasetLocationModel;
-import org.srs.datacat.model.DatasetModel;
-import org.srs.datacat.model.dataset.DatasetVersionModel;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.model.dataset.DatasetViewInfoModel;
-import org.srs.datacat.shared.Patchable;
-import org.srs.datacat.shared.Dataset;
-import org.srs.datacat.shared.DatasetLocation;
-import org.srs.datacat.shared.DatasetVersion;
-import org.srs.datacat.shared.DatasetViewInfo;
-import org.srs.datacat.model.RecordType;
+import java.util.*;
+
 import static org.srs.datacat.model.DcExceptions.*;
-import org.srs.datacat.model.dataset.DatasetOption;
-import org.srs.vfs.PathUtils;
 
 /**
  *
@@ -464,17 +457,6 @@ public class SqlDatasetDAO extends SqlBaseDAO implements org.srs.datacat.dao.Dat
             builder.latest(isCurrent);
             builder.path(dsRecord.getPath() + ";v=" + newVersionId);
             HashMap<String, Object> metadataMap = request.getMetadataMap();
-            String dependents="", dependentType="";
-            if(!metadataMap.isEmpty()) {
-                if (metadataMap.get("dependents") != null){
-                    metadataMap.put("dependencyName", builder.path);
-                    dependents = (String)metadataMap.get("dependents");
-                    dependentType = (String)metadataMap.get("dependentType");
-                    metadataMap.remove("dependents");
-                    metadataMap.remove("dependentType");
-                    metadataMap.remove("dependency");
-                }
-            }
             try(ResultSet rs = stmt.getGeneratedKeys()){
                 rs.next();
                 builder.pk(rs.getLong(1));
@@ -485,11 +467,7 @@ public class SqlDatasetDAO extends SqlBaseDAO implements org.srs.datacat.dao.Dat
             retVersion = builder.build();
 
             if(!request.getMetadataMap().isEmpty()){
-                if (!dependents.isEmpty()) {
-                    metadataMap.put("dependents", dependents);
-                    metadataMap.put("dependentType", dependentType);
-                }
-                addDatasetVersionMetadata(retVersion.getPk(), metadataMap);
+                addDatasetVersionMetadata(retVersion, metadataMap);
             }
         }
 

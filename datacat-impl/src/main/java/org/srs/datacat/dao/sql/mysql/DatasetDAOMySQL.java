@@ -463,17 +463,6 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
             builder.latest(isCurrent);
             builder.path(dsRecord.getPath() + ";v=" + newVersionId);
             HashMap<String, Object> metadataMap = request.getMetadataMap();
-            String dependents="", dependentType="";
-            if(!metadataMap.isEmpty()) {
-                if (metadataMap.get("dependents") != null){
-                    metadataMap.put("dependencyName", builder.path);
-                    dependents = (String)metadataMap.get("dependents");
-                    dependentType = (String)metadataMap.get("dependentType");
-                    metadataMap.remove("dependents");
-                    metadataMap.remove("dependentType");
-                    metadataMap.remove("dependency");
-                }
-            }
             try(ResultSet rs = stmt.getGeneratedKeys()){
                 rs.next();
                 builder.pk(rs.getLong(1));
@@ -486,11 +475,7 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
             retVersion = builder.build();
 
             if(!metadataMap.isEmpty()){
-                if (!dependents.isEmpty()) {
-                    metadataMap.put("dependents", dependents);
-                    metadataMap.put("dependentType", dependentType);
-                }
-                addDatasetVersionMetadata(retVersion.getPk(), metadataMap);
+                addDatasetVersionMetadata(retVersion, metadataMap);
             }
         }
 
