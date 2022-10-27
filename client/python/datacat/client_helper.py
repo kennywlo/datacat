@@ -788,6 +788,7 @@ class ClientHelper(object):
                     update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
                     dependents = list(set(ds_dependents + update_dependents))
                     dependency_metadata["dependents"] = str(dependents)
+                    container.versionMetadata.pop("{}.dataset".format(dep_type))
 
                 if "{}.group".format(dep_type) in vmd.keys():
                     # if adding dependents of the same dependent type:
@@ -796,6 +797,7 @@ class ClientHelper(object):
                     update_dependents = convert_dependent_to_list(vmd.get("{}.group".format(dep_type)))
                     dependents = list(set(grp_dependents + update_dependents))
                     dependency_metadata["dependentGroups"] = str(dependents)
+                    container.versionMetadata.pop("{}.group".format(dep_type))
 
                 container.versionMetadata.update(dependency_metadata)
             else:
@@ -837,6 +839,7 @@ class ClientHelper(object):
                     update_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
                     dependents = list(set(ds_dependents + update_dependents))
                     dependency_metadata["dependents"] = str(dependents)
+                    container.metadata.pop("{}.dataset".format(dep_type))
 
                 if "{}.group".format(dep_type) in vmd.keys():
                     # if adding dependents of the same dependent type:
@@ -845,6 +848,7 @@ class ClientHelper(object):
                     update_dependents = convert_dependent_to_list(vmd.get("{}.group".format(dep_type)))
                     dependents = list(set(grp_dependents + update_dependents))
                     dependency_metadata["dependentGroups"] = str(dependents)
+                    container.metadata.pop("{}.group".format(dep_type))
 
                 container.metadata.update(dependency_metadata)
             else:
@@ -935,9 +939,11 @@ class ClientHelper(object):
                 # Ensure dependent type provided by user is present in container group
                 if "{}.dataset".format(dep_type) in vmd.keys():
                     update_dataset_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
+                    container.versionMetadata.pop("{}.dataset".format(dep_type))
 
                 if "{}.group".format(dep_type) in vmd.keys():
                     update_group_dependents = convert_dependent_to_list(vmd.get("{}.group".format(dep_type)))
+                    container.versionMetadata.pop("{}.group".format(dep_type))
 
                 if "{}.group".format(dep_type) not in vmd.keys() and "{}.dataset".format(dep_type) not in vmd.keys():
                     raise ValueError("No dependents of type {} found".format(dep_type))
@@ -1004,9 +1010,11 @@ class ClientHelper(object):
                 # Ensure dependent type provided by user is present in container group
                 if "{}.dataset".format(dep_type) in vmd.keys():
                     update_dataset_dependents = convert_dependent_to_list(vmd.get("{}.dataset".format(dep_type)))
+                    container.metadata.pop("{}.dataset".format(dep_type))
 
                 if "{}.group".format(dep_type) in vmd.keys():
                     update_group_dependents = convert_dependent_to_list(vmd.get("{}.group".format(dep_type)))
+                    container.metadata.pop("{}.group".format(dep_type))
 
                 if "{}.group".format(dep_type) not in vmd.keys() and "{}.dataset".format(dep_type) not in vmd.keys():
                     raise ValueError("No dependents of type {} found".format(dep_type))

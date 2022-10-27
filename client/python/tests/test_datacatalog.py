@@ -1,5 +1,7 @@
 import unittest
 import os
+import posixpath
+
 from datacat import client_from_config, config_from_file
 from datacat.model import Metadata
 
@@ -15,9 +17,9 @@ class DataCatalog(unittest.TestCase):
     def test_datacatalog(self):
         # file/datacatalog path
         file_name = 'test_slac.root'
-        file_path = os.path.abspath("../../../test/data/")
+        file_path = posixpath.abspath('/tmp')
         datacat_path = '/testpath/testfolder'
-        full_file = file_path + '/' + file_name
+        full_file = posixpath.join(file_path, file_name)
 
         # metadata
         metadata = Metadata()
@@ -26,12 +28,12 @@ class DataCatalog(unittest.TestCase):
         if self.client.exists(datacat_path + '/' + file_name):
             self.client.rmds(datacat_path + '/' + file_name)
 
-        self.client.mkds(datacat_path, file_name, 'JUNIT_TEST', 'junit.test',
+        ds =self.client.mkds(datacat_path, file_name, 'JUNIT_TEST', 'junit.test',
                          versionMetadata=metadata,
                          resource=full_file,
                          site='SLAC')
         assert self.client.exists(datacat_path + '/' + file_name)
-
+        print(ds)
 
 if __name__ == "__main__":
     unittest.main()

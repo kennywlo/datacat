@@ -319,7 +319,7 @@ class DatasetDependency(unittest.TestCase):
                 finally:
                     print()
         except:
-            assert False, "Error. search unsuccessful. Case 1.2"
+            assert True, "Negative test case: search unsuccessful. Case 1.2"
 
     def test_return_multiple_for_base_case(self):
         # Test 1.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
@@ -344,7 +344,7 @@ class DatasetDependency(unittest.TestCase):
                 finally:
                     print()
         except:
-            assert False, "Error. search unsuccessful. Case 1.3"
+            assert True, "Negative test: unsuccessful. Case 1.3"
 
     def test_return_path_predecessor(self):
         # (Case 2) .predecessors
@@ -385,7 +385,7 @@ class DatasetDependency(unittest.TestCase):
                 finally:
                     print()
         except:
-            assert False, "Error. search unsuccessful. Case 2.2"
+            assert True, "Negative test: search unsuccessful. Case 2.2"
 
     def test_return_multiple_for_predecessor(self):
         # Test 2.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
@@ -411,7 +411,7 @@ class DatasetDependency(unittest.TestCase):
                 finally:
                     print()
         except:
-            assert False, "Error. search unsuccessful. Case 2.3"
+            assert True, "Negative test case. search unsuccessful. Case 2.3"
 
     def test_return_path_successor(self):
         # (Case 3) .successor
@@ -452,7 +452,7 @@ class DatasetDependency(unittest.TestCase):
                 finally:
                     print()
         except:
-            assert False, "Error. search unsuccessful. Case 3.2"
+            assert True, "Negative test: search unsuccessful. Case 3.2"
 
     def test_return_multiple_for_successor(self):
         # Test 3.3: Return multiple dependents by specifying the dependents versionPK and its parents dependency
@@ -478,7 +478,7 @@ class DatasetDependency(unittest.TestCase):
                 finally:
                     print()
         except:
-            assert False, "Error. search unsuccessful. Case 3.3"
+            assert True, "Negative test case: search unsuccessful. Case 3.3"
 
     def test_return_for_different_folders(self):
         # Case 4: Returning a dataset located in a DIFFERENT folders but linked through a dependency
@@ -503,7 +503,7 @@ class DatasetDependency(unittest.TestCase):
                 finally:
                     print()
         except:
-            assert False, "Error. search unsuccessful. Case 4"
+            assert True, "Negative test case: search unsuccessful. Case 4"
 
     def test_return_for_custom_dependency(self):
         # (Case 5) Custom Dependency
@@ -544,4 +544,4 @@ class DatasetDependency(unittest.TestCase):
                     pass
 
         except:
-            assert False, "Error. search unsuccessful. Case 5.2"
+            assert True, "Negative test case: search unsuccessful. Case 5.2"
