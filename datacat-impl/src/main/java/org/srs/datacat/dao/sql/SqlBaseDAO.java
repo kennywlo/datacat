@@ -435,7 +435,7 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         String[] dependentTypes = SearchUtils.getDependentTypes(getConnection(),
             dependency == null ? "dependencyGroup":"dependency",
             dependency == null ? dependencyGroup:dependency);
-        if (dependentTypes.length > 0) {
+        if (dependentTypes.length == 0) {
             // remove this dependency container, for no dependents left
             metaData.remove("dependencyName");
         }
