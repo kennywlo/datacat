@@ -67,7 +67,6 @@ public final class SearchUtils {
         builder.pk(rs.getLong("pk"));
         builder.parentPk(rs.getLong("parent"));
         builder.name(name);
-
         builder.fileFormat(rs.getString("fileformat"));
         builder.dataType(rs.getString("datatype"));
         builder.created(rs.getTimestamp("created"));
@@ -77,33 +76,37 @@ public final class SearchUtils {
         builder.versionId(rs.getInt("versionid"));
         builder.latest(rs.getBoolean("latest"));
 
+        String dependencyName="";
         try {
             builder.path(PathUtils.resolve(rs.getString("containerpath"), name));
-        } catch (SQLException e) {
-            // if it's a dependency container, set the path
-            String depPath = SearchUtils.getDependencyPath(conn, versionPk);
-            if (!depPath.isEmpty()) {
-                builder.path(depPath);
+        } catch (SQLException ex){
+            // if it's a dependency container, set the container path
+            dependencyName = SearchUtils.getDependencyPath(conn, versionPk);
+            if (!dependencyName.isEmpty()) {
+                builder.path(dependencyName);
             }
         }
-
         ArrayList<DatasetLocationModel> locations = new ArrayList<>();
         HashMap<String, Object> metadata = new HashMap<>();
-        boolean hasDependents = false;
+        boolean foundDependents = false;
         for(String s: includedMetadata){
             if (s.contains("dependency") || s.contains("dependents")){
-                String[] deps = s.split("\\.");
-                Map<String, Object> retmap = SearchUtils.getDependents(conn, "dependency",
-                    versionPk, deps[1]);
-                if (!retmap.isEmpty()) {
-                    metadata.putAll(retmap);
-                    hasDependents = true;
-                    continue;
+                if (dependencyName.isEmpty()){
+                    dependencyName = SearchUtils.getDependencyPath(conn, versionPk);
+                }
+                if (!dependencyName.isEmpty()) {
+                    String[] deps = s.split("\\.");
+                    Map<String, Object> dependents = SearchUtils.getDependents(conn, "dependency",
+                        versionPk, deps[1]);
+                    metadata.put("dependencyName", dependencyName);
+                    metadata.putAll(dependents);
+                    foundDependents = true;
                 } else if (includedMetadata.contains("dependentSearch")) {
                     // this dataset from query result by pk
                     continue;
                 } else {
-                    if (!rs.next()){
+                    // not a matching dataset, skip
+                    if (!rs.next()) {
                         rs.close();
                     }
                     return null;
@@ -123,7 +126,7 @@ public final class SearchUtils {
                     metadata.put(s, o);
                 }
             } catch (SQLException ex) {
-                // case of column not found
+                // in case column not found
                 continue;
             }
         }
@@ -138,7 +141,7 @@ public final class SearchUtils {
             }
         }
         builder.locations(locations);
-        if (hasDependents){
+        if (foundDependents){
             builder.versionMetadata(metadata);
         } else{
             builder.metadata(metadata);
@@ -508,6 +511,22 @@ public final class SearchUtils {
         return stream;
     }
 
+    public static Map<String, String> getDependencySpec(List<String> l){
+        HashMap<String, String> m = new HashMap<>();
+        for (String s: l) {
+            String[] a = s.split("\\.");
+            String p = a.length > 0 ? a[0]: s;
+            if (p.contains("dependency") || p.contains("dependents")) {
+                if (a.length > 1){
+                    m.put("type", a[1]);
+                } else{
+                    m.put("type", "*");
+                }
+            }
+        }
+        return m;
+    }
+
     public static String getDependencyPath(Connection conn, long dependency) throws SQLException {
         String sql = "SELECT dependencyName from DatasetDependency WHERE Dependency = ?";
         String dependencyPath = "";
@@ -534,27 +553,26 @@ public final class SearchUtils {
         return dependencyPath;
     }
 
-
-    public static boolean checkDependents(Connection conn,
-                                          String dependencyContainer,
-                                          String dependent,
-                                          Long dependency,
-                                          String query) throws SQLException {
-        String sql = "SELECT " + dependent + " FROM DatasetDependency WHERE "+ dependencyContainer + " = ?";
-        String[] dependents = query.replaceAll("[\\[\\](){}]", "").split("[ ,]+");
-        boolean found = false;
+    public static Map<String, Object> getDependency(Connection conn, String dependencyName)
+        throws SQLException {
+        String sql = "SELECT Dependency, DependencyGroup FROM DatasetDependency WHERE DependencyName = ?";
+        HashMap<String, Object> result = new HashMap<>();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, dependency);
+            stmt.setString(1, dependencyName);
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                String d = Long.valueOf(rs.getLong(dependent)).toString();
-                if (Arrays.asList(dependents).contains(d)){
-                    found = true;
-                    break;
+            if (rs.next()) {
+                // found
+                long dependency = rs.getLong("Dependency");
+                if (dependency != 0) {
+                    result.put("dependency", dependency);
+                    result.put("dependencyContainer", "dependency");
+                } else {
+                    result.put("dependencyGroup", rs.getLong("DependencyGroup"));
+                    result.put("dependencyContainer", "dependencyGroup");
                 }
             }
         }
-        return found;
+        return result;
     }
 
     public static Map<String, Object> getDependents(Connection conn, String dependencyContainer, Long dependency,
@@ -579,11 +597,7 @@ public final class SearchUtils {
             String deleteSql = "DELETE FROM DatasetDependency WHERE " + dependencyContainer + " = ?";
             try (PreparedStatement stmt = conn.prepareStatement(deleteSql)){
                 stmt.setLong(1, dependency);
-                int affected = stmt.executeUpdate();
-                if (affected > 0) {
-                    conn.commit();
-                }
-                System.out.println("deleteDependentsByType affected="+affected);
+                stmt.executeUpdate();
             }
         } else{
             String deleteSql = "DELETE FROM DatasetDependency WHERE " + dependencyContainer +
@@ -591,11 +605,7 @@ public final class SearchUtils {
             try (PreparedStatement stmt = conn.prepareStatement(deleteSql)){
                 stmt.setLong(1, dependency);
                 stmt.setString(2, type);
-                int affected = stmt.executeUpdate();
-                if (affected > 0){
-                    conn.commit();
-                }
-                System.out.println("deleteDependentsByType affected="+affected);
+                stmt.executeUpdate();
             } catch (SQLException ex) {
                 conn.rollback();
                 if (ex.getMessage().toLowerCase().contains("deadlock")){

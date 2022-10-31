@@ -1,44 +1,25 @@
 package org.srs.datacat.rest.resources;
 
+import org.srs.datacat.dao.sql.search.SearchUtils;
+import org.srs.datacat.model.*;
+import org.srs.datacat.rest.BaseResource;
+import org.srs.datacat.rest.RestException;
+import org.srs.datacat.rest.SearchPluginProvider;
+import org.srs.datacat.shared.RequestView;
+
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.NoSuchFileException;
+import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
-import org.srs.datacat.model.DatasetModel;
-import org.srs.datacat.model.DatasetResultSetModel;
-import org.srs.datacat.model.DatasetView;
-import org.srs.datacat.model.DatasetContainer;
-import org.srs.datacat.model.ContainerResultSetModel;
-import org.srs.datacat.model.RecordType;
-
-import org.srs.datacat.shared.RequestView;
-import org.srs.datacat.rest.BaseResource;
 import static org.srs.datacat.rest.BaseResource.OPTIONAL_EXTENSIONS;
-import org.srs.datacat.rest.SearchPluginProvider;
-import org.srs.datacat.rest.RestException;
 
 /**
  *
@@ -90,7 +71,7 @@ public class SearchResource extends BaseResource {
         DatasetView dv = getDatasetView();
 
         try {
-            // fetch the groups in dependency search
+            // fetch the dataset groups in dependents search
             if (containerFilter != null && containerFilter.contains("dependentGroups")){
                 DirectoryStream<DatasetContainer> stream = getProvider().searchContainers(Arrays.asList("/**^"),
                     buildCallContext(), containerFilter, metafields, sortFields, ignoreShowKeyError);
@@ -109,8 +90,49 @@ public class SearchResource extends BaseResource {
                     .results(groups).count(count).build();
                 return Response.ok(new GenericEntity<ContainerResultSetModel>(searchResults) {}).build();
             }
-
-            // fetch datasets
+            Map<String, String> m;
+            if (filter != null && filter.contains("dependents")) {
+                // case of dependent search by pk, just proceed
+                ;
+            } else if (!(m=SearchUtils.getDependencySpec(metadata)).isEmpty()){
+                // transform the query request in dependents search
+                try {
+                    Map<String, Object> r = SearchUtils.getDependency(getConnection(), requestPath);
+                    if (r.isEmpty()){
+                        // no dependents; just return empty set
+                        DatasetResultSetModel emptyResults = getProvider().getModelProvider().getDatasetResultSetBuilder()
+                            .results(new ArrayList<>()).count(0).build();
+                        return Response.ok(new GenericEntity<DatasetResultSetModel>(emptyResults) {}).build();
+                    }
+                    String depContainer = (String)r.get("dependencyContainer");
+                    Long pk = (Long)r.get("dependency");
+                    Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), depContainer,
+                        pk, m.get("type"));
+                    String dep_ids="";
+                    for (String key : dependents.keySet()) {
+                        if (!key.contains("dataset")){
+                            // should only return datasets
+                            continue;
+                        }
+                        if (dep_ids.isEmpty()) {
+                            dep_ids = (String)dependents.get(key);
+                        } else{
+                            dep_ids += (","+dependents.get("key"));
+                        }
+                    }
+                    if (!dep_ids.isEmpty()) {
+                        filter = "dependents in (" + dep_ids + ")";
+                    } else{
+                        // no dependents; just return empty set
+                        DatasetResultSetModel emptyResults = getProvider().getModelProvider().getDatasetResultSetBuilder()
+                            .results(new ArrayList<>()).count(0).build();
+                        return Response.ok(new GenericEntity<DatasetResultSetModel>(emptyResults) {}).build();
+                    }
+                } catch (SQLException ex) {
+                    throw new IOException(ex);
+                }
+            }
+            // fetch the datasets
             DirectoryStream<DatasetModel> stream = getProvider().search(Arrays.asList(pathPattern), buildCallContext(),
                 dv, filter, containerFilter, metafields, sortFields, ignoreShowKeyError);
 

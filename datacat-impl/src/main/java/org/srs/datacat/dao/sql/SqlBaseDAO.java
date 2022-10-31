@@ -387,8 +387,10 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
             SearchUtils.deleteDependentsByType(getConnection(), depContainer,
                 (long) metaData.get(depContainer), "successor");
         }
+        // for timing
+        getConnection().commit();
 
-        // now add the new dependency info
+        // now add the updated dependency info
         addDependency(metaData);
     }
 
@@ -426,17 +428,11 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         saveDependents(dependencyName, dependency, dependencyGroup, dependents, dependentGroups, dependentType);
 
         // for timing below
-        try {
-            this.commit();
-        } catch (IOException ex){
-            throw new SQLException(ex);
-        }
+        getConnection().commit();
+
         // retrieve and return all dependents in normalized form
-        String[] dependentTypes = SearchUtils.getDependentTypes(getConnection(),
-            dependency == null ? "dependencyGroup":"dependency",
-            dependency == null ? dependencyGroup:dependency);
-        if (dependentTypes.length == 0) {
-            // remove this dependency container, for no dependents left
+        if (SearchUtils.getDependency(getConnection(), dependencyName).isEmpty()){
+            // no dependents, hence not a dependency container
             metaData.remove("dependencyName");
         }
     }
