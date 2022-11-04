@@ -13,6 +13,7 @@ import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.NoSuchFileException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.*;
@@ -90,63 +91,67 @@ public class SearchResource extends BaseResource {
                     .results(groups).count(count).build();
                 return Response.ok(new GenericEntity<ContainerResultSetModel>(searchResults) {}).build();
             }
+
             Map<String, String> m;
+            boolean skip = false;
             if (filter != null && filter.contains("dependents")) {
                 // case of dependent search by pk, just proceed
                 ;
             } else if (!(m=SearchUtils.getDependencySpec(metadata)).isEmpty()){
                 // transform the query request in dependents search
                 try {
-                    Map<String, Object> r = SearchUtils.getDependency(getConnection(), requestPath);
+                    Connection conn = getConnection();
+                    Map<String, Object> r = SearchUtils.getDependency(conn, requestPath);
                     if (r.isEmpty()){
                         // no dependents; just return empty set
-                        DatasetResultSetModel emptyResults = getProvider().getModelProvider().getDatasetResultSetBuilder()
-                            .results(new ArrayList<>()).count(0).build();
-                        return Response.ok(new GenericEntity<DatasetResultSetModel>(emptyResults) {}).build();
-                    }
-                    String depContainer = (String)r.get("dependencyContainer");
-                    Long pk = (Long)r.get("dependency");
-                    Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), depContainer,
-                        pk, m.get("type"));
-                    String dep_ids="";
-                    for (String key : dependents.keySet()) {
-                        if (!key.contains("dataset")){
-                            // should only return datasets
-                            continue;
-                        }
-                        if (dep_ids.isEmpty()) {
-                            dep_ids = (String)dependents.get(key);
-                        } else{
-                            dep_ids += (","+dependents.get("key"));
-                        }
-                    }
-                    if (!dep_ids.isEmpty()) {
-                        filter = "dependents in (" + dep_ids + ")";
+                        skip = true;
                     } else{
-                        // no dependents; just return empty set
-                        DatasetResultSetModel emptyResults = getProvider().getModelProvider().getDatasetResultSetBuilder()
-                            .results(new ArrayList<>()).count(0).build();
-                        return Response.ok(new GenericEntity<DatasetResultSetModel>(emptyResults) {}).build();
+                        String depContainer = (String) r.get("dependencyContainer");
+                        Long pk = (Long) r.get("dependency");
+                        Map<String, Object> dependents = SearchUtils.getDependents(conn, depContainer,
+                            pk, m.get("type"));
+                        String dep_ids = "";
+                        for (String key : dependents.keySet()) {
+                            if (!key.contains("dataset")) {
+                                // should only return datasets
+                                continue;
+                            }
+                            if (dep_ids.isEmpty()) {
+                                dep_ids = (String) dependents.get(key);
+                            } else {
+                                dep_ids += ("," + dependents.get("key"));
+                            }
+                        }
+                        if (!dep_ids.isEmpty()) {
+                            filter = "dependents in (" + dep_ids + ")";
+                        } else{
+                            // no dependents; just return empty set
+                            skip = true;
+                        }
                     }
+                    conn.close();
                 } catch (SQLException ex) {
                     throw new IOException(ex);
                 }
             }
-            // fetch the datasets
-            DirectoryStream<DatasetModel> stream = getProvider().search(Arrays.asList(pathPattern), buildCallContext(),
-                dv, filter, containerFilter, metafields, sortFields, ignoreShowKeyError);
 
-            List<DatasetModel> datasets = new ArrayList<>();
+            // fetch the datasets
             int count = 0;
-            Iterator<DatasetModel> iter = stream.iterator();
-            for(int i = 0; iter.hasNext(); i++, count++){
-                if(i >= offset && i < (offset + max)){
-                    datasets.add(iter.next());
-                } else {
-                    iter.next();
+            List<DatasetModel> datasets = new ArrayList<>();
+            if (!skip) {
+                DirectoryStream<DatasetModel> stream = getProvider().search(Arrays.asList(pathPattern), buildCallContext(),
+                    dv, filter, containerFilter, metafields, sortFields, ignoreShowKeyError);
+
+                Iterator<DatasetModel> iter = stream.iterator();
+                for (int i = 0; iter.hasNext(); i++, count++) {
+                    if (i >= offset && i < (offset + max)) {
+                        datasets.add(iter.next());
+                    } else {
+                        iter.next();
+                    }
                 }
+                stream.close();
             }
-            stream.close();
             DatasetResultSetModel searchResults = getProvider().getModelProvider().getDatasetResultSetBuilder()
                     .results(datasets).count(count).build();
             return Response.ok(new GenericEntity<DatasetResultSetModel>(searchResults) {}).build();

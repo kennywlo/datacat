@@ -81,6 +81,7 @@ public class DownloadResource extends BaseResource {
                 throw new SQLException("Invalid file identifier");
             }
         }
+        conn.close();
         return filePath;
     }
 }
