@@ -1,11 +1,12 @@
 import copy
+
 from .model import Dataset, Group, Metadata
 
 
 # noinspection PyPep8Naming,PyShadowingBuiltins,PyUnusedLocal
 class ClientHelper(object):
     """
-    Pythonic Client Helper for the Client interacting with the data catalog.
+        Client Helper for the Client interacting with the data catalog.
     """
 
     def __init__(self, parent):
@@ -399,7 +400,7 @@ class ClientHelper(object):
         else:
             raise ValueError("Unrecognized dependency container")
 
-    def get_dependents(self, dep_container, dep_type, max_depth, chunk_size):
+    def get_dependents(self, dep_container, dep_type, max_depth, chunk_size, **kwargs):
 
         # Retrieve and store the dependencyName of current container
         try:
@@ -563,7 +564,7 @@ class ClientHelper(object):
                 nextContainersToProcess_Group.clear()
         return retrieved_dependents
 
-    def get_next_dependents(self, dep_container):
+    def get_next_dependents(self, dep_container, **kwargs):
         try:
             if hasattr(dep_container, "versionMetadata"):
                 self.dep_name = dep_container.versionMetadata["dependencyName"]
@@ -731,9 +732,6 @@ class ClientHelper(object):
         VersionPKs are required for each dependent dataset.
         :param dep_groups: The groups we wish to use as children of the parent container
         """
-        patchds = kwargs.get('patchds')
-        patchdir = kwargs.get('patchdir')
-
         if not dep_datasets and not dep_groups:
             return None
 
@@ -807,6 +805,7 @@ class ClientHelper(object):
 
             # patching with patchds()
             try:
+                patchds = kwargs.get('patchds')
                 ret = patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
             except:
                 assert False, "Failed to add dependents"
@@ -860,6 +859,7 @@ class ClientHelper(object):
 
             # patching with patchdir()
             try:
+                patchdir = kwargs.get('patchdir')
                 ret = patchdir(path=container.path, container=container, type="group")
             except:
                 assert False, "Failed to add dataset dependents."
@@ -875,9 +875,6 @@ class ClientHelper(object):
         :param dep_datasets: The datasets we wish to remove from the parent container
         :param dep_groups: The groups we wish to remove from the parent container
         """
-        patchds = kwargs.get('patchds')
-        patchdir = kwargs.get('patchdir')
-
         def convert_dependent_to_list(dependents):
             """
             convert string of comma seperated versionPk of dependent datasets to list of int.
@@ -977,8 +974,8 @@ class ClientHelper(object):
 
                 # use patchds() to patch dataset container
                 try:
-                    ret = patchds(path=dep_container.path, dataset=container,
-                                       versionId=dep_container.versionId)
+                    patchds = kwargs.get('patchds')
+                    ret = patchds(path=dep_container.path, dataset=container, versionId=dep_container.versionId)
                 except:
                     assert False, "Failed to remove dependents"
             else:
@@ -1048,6 +1045,7 @@ class ClientHelper(object):
 
                 # use patchdir() to patch group container
                 try:
+                    patchdir = kwargs.get('patchdir')
                     ret = patchdir(path=container.path, container=container, type="group")
                 except:
                     assert False, "Failed to remove dependents"

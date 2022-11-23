@@ -93,7 +93,7 @@ class Client(object):
         return self.mkdir(path, "group", parents, metadata, **kwargs)
 
     @checked_error
-    def get_dependents(self, dep_container, dep_type, max_depth, chunk_size):
+    def get_dependents(self, dep_container, dep_type, max_depth, chunk_size, **kwargs):
         """
         Retrieves dependents up to the provided "chunk_size" at a time, subject to "max_depth".
 
@@ -103,19 +103,19 @@ class Client(object):
         :param chunk_size: Total amount of dependents retrieved.
         :return: List of retrieved dependents.
         """
-        return self.client_helper.get_dependents(dep_container, dep_type, max_depth, chunk_size)
+        return self.client_helper.get_dependents(dep_container, dep_type, max_depth, chunk_size, **kwargs)
 
     @checked_error
-    def get_next_dependents(self, dep_container):
+    def get_next_dependents(self, dep_container, **kwargs):
         """
          Retrieve next dependents attached to container object.
         :param dep_container: Parent container object you wish to get next dependents from
         :return: List of dependent objects attached to container object
         """
-        return self.client_helper.get_next_dependents(dep_container)
+        return self.client_helper.get_next_dependents(dep_container, **kwargs)
 
     @checked_error
-    def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
+    def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None, **kwargs):
         """
          Attach new dependents to container object.
         :param dep_container: Parent container object to add dependents to
@@ -124,12 +124,12 @@ class Client(object):
         VersionPKs are required for each dependent dataset.
         :param dep_groups: The groups we wish to use as children of the parent container
         """
-        return self.client_helper.add_dependents(dep_container, dep_type, dep_datasets, dep_groups,
-                                                 patchdir=self.patchdir, patchds=self.patchds)
-
+        kwargs['patchds'] = self.patchds
+        kwargs['patchdir'] = self.patchdir
+        return self.client_helper.add_dependents(dep_container, dep_type, dep_datasets, dep_groups, **kwargs)
 
     @checked_error
-    def remove_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None,):
+    def remove_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None, **kwargs):
         """
         Remove dependents from container object provided
         :param dep_container: Parent container object to remove dependents from
@@ -137,9 +137,9 @@ class Client(object):
         :param dep_datasets: The datasets we wish to remove from the parent container
         :param dep_groups: The groups we wish to remove from the parent container
         """
-        return self.client_helper.remove_dependents(dep_container, dep_type, dep_datasets, dep_groups,
-                                                    patchdir=self.patchdir, patchds=self.patchds)
-
+        kwargs['patchds'] = self.patchds
+        kwargs['patchdir'] = self.patchdir
+        return self.client_helper.remove_dependents(dep_container, dep_type, dep_datasets, dep_groups, **kwargs)
 
     @checked_error
     def mkds(self, path, name, dataType, fileFormat, versionId="new", site=None, resource=None, versionMetadata=None,
