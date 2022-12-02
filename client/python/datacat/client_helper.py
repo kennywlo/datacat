@@ -84,7 +84,13 @@ class ClientHelper(object):
 
         decodeResults = []
         if type == "dataset":
-            decodeResults = self.parent.search(target=self.dep_name,
+            dep_name = self.dep_name
+            versionId = None
+            if ";v=" in self.dep_name:
+                dep_name = self.dep_name[:self.dep_name.index(";v=")-1]
+                versionId = self.dep_name[self.dep_name.index(";v=")+3:]
+            decodeResults = self.parent.search(target=dep_name,
+                                               versionId=versionId,
                                                show="dependents",
                                                query='dependents in ({})'.format(ToDecodeCommaDelimited),
                                                ignoreShowKeyError=True)
@@ -151,7 +157,13 @@ class ClientHelper(object):
         searchResults = []
         try:
             if dependentsToRetrieve:
-                searchResults = self.parent.search(target=self.dep_name,
+                dep_name = self.dep_name
+                versionId = None
+                if ";v=" in self.dep_name:
+                    dep_name = self.dep_name[:self.dep_name.index(";v=")-1]
+                    versionId = self.dep_name[self.dep_name.index(";v=")+3:]
+                searchResults = self.parent.search(target=dep_name,
+                                                   versionId=versionId,
                                                    show="dependents",
                                                    query='dependents in ({})'.format(dependentsToRetrieve),
                                                    ignoreShowKeyError=True)
@@ -310,12 +322,18 @@ class ClientHelper(object):
 
             if dependentsToRetrieve == joined_string_datasets:
                 if dependentsToRetrieveGroups == joined_string_groups:
-                    raise "Done"
+                    raise Exception("Done")
 
             searchResults = []
             try:
                 if dependentsToRetrieve:
-                    searchResults = self.parent.search(target=self.dep_name,
+                    dep_name = self.dep_name
+                    versionId = None
+                    if ";v=" in self.dep_name:
+                        dep_name = self.dep_name[:self.dep_name.index(";v=")-1]
+                        versionId = self.dep_name[self.dep_name.index(";v=")+3:]
+                    searchResults = self.parent.search(target=dep_name,
+                                                       versionId=versionId,
                                                        show="dependents",
                                                        query='dependents in ({})'.format(dependentsToRetrieve),
                                                        ignoreShowKeyError=True)
