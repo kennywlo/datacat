@@ -84,13 +84,7 @@ class ClientHelper(object):
 
         decodeResults = []
         if type == "dataset":
-            dep_name = self.dep_name
-            versionId = None
-            if ";v=" in self.dep_name:
-                dep_name = self.dep_name[:self.dep_name.index(";v=")-1]
-                versionId = self.dep_name[self.dep_name.index(";v=")+3:]
-            decodeResults = self.parent.search(target=dep_name,
-                                               versionId=versionId,
+            decodeResults = self.parent.search(target=self.dep_name,
                                                show="dependents",
                                                query='dependents in ({})'.format(ToDecodeCommaDelimited),
                                                ignoreShowKeyError=True)
@@ -157,13 +151,7 @@ class ClientHelper(object):
         searchResults = []
         try:
             if dependentsToRetrieve:
-                dep_name = self.dep_name
-                versionId = None
-                if ";v=" in self.dep_name:
-                    dep_name = self.dep_name[:self.dep_name.index(";v=")-1]
-                    versionId = self.dep_name[self.dep_name.index(";v=")+3:]
-                searchResults = self.parent.search(target=dep_name,
-                                                   versionId=versionId,
+                searchResults = self.parent.search(target=self.dep_name,
                                                    show="dependents",
                                                    query='dependents in ({})'.format(dependentsToRetrieve),
                                                    ignoreShowKeyError=True)
@@ -786,11 +774,13 @@ class ClientHelper(object):
 
             if dep_datasets is not None and all(isinstance(dataset, Dataset) for dataset in dep_datasets):
                 ds_dependents = self.get_dependent_id(dep_datasets)
-                dependency_metadata["dependents"] = str(ds_dependents)
+                if ds_dependents:
+                    dependency_metadata["dependents"] = str(ds_dependents)
 
             if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
                 grp_dependents = self.get_dependent_id(dep_groups)
-                dependency_metadata["dependentGroups"] = str(grp_dependents)
+                if grp_dependents:
+                    dependency_metadata["dependentGroups"] = str(grp_dependents)
 
             if hasattr(container, "versionMetadata"):
                 # if container has versionMetadata field
@@ -838,11 +828,13 @@ class ClientHelper(object):
 
             if dep_datasets is not None and all(isinstance(dataset, Dataset) for dataset in dep_datasets):
                 ds_dependents = self.get_dependent_id(dep_datasets)
-                dependency_metadata["dependents"] = str(ds_dependents)
+                if ds_dependents:
+                    dependency_metadata["dependents"] = str(ds_dependents)
 
             if dep_groups is not None and all(isinstance(group, Group) for group in dep_groups):
                 grp_dependents = self.get_dependent_id(dep_groups)
-                dependency_metadata["dependentGroups"] = str(grp_dependents)
+                if grp_dependents:
+                    dependency_metadata["dependentGroups"] = str(grp_dependents)
 
             if hasattr(container, "metadata"):
                 # if container has metadata field
