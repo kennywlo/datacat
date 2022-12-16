@@ -6,12 +6,12 @@ requires = [
 
 setup(
     name='datacat',
-    version='0.6',
+    version='0.6.1',
     packages=['datacat'],
-    url='http://srs.slac.stanford.edu',
+    url='https://supercdms-dev.slac.stanford.edu',
     license='SLAC BSD',
-    author='Brian Van Klaveren',
-    author_email='bvan@slac.stanford.edu',
+    author='Kenny Lo',
+    author_email='kennywlo@slac.stanford.edu',
     description='Datacat client library',
     install_requires=requires,
     entry_points={
