@@ -260,7 +260,7 @@ public final class SearchUtils {
                 + "    order by prefix asc ";
         return buildMetaInfoGlobalContext(conn, sql);
     }
-    
+
     public static MetanameContext buildMetaInfoGlobalContext(Connection conn, String sql) throws IOException{
 
         try(PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -269,6 +269,7 @@ public final class SearchUtils {
             MetanameContext dmc = new MetanameContext();
             ArrayList<String> postfixes = new ArrayList<>();
             String lastPrefix = null;
+            Class lastType = null;
             while(rs.next()){
                 String maybePrefix = rs.getString("prefix");
                 String metaname = rs.getString("metaname");
@@ -290,15 +291,27 @@ public final class SearchUtils {
 
                 if(maybePrefix != null && !maybePrefix.isEmpty()){
                     if(lastPrefix != null && !lastPrefix.equals(maybePrefix)){
-                        dmc.add(new MetanameContext.Entry(lastPrefix, postfixes, 
-                                                          lastPrefix.length(), type));
+                        dmc.add(new MetanameContext.Entry(lastPrefix, postfixes,
+                            lastPrefix.length(), lastType));
                         postfixes.clear();
                     }
                     lastPrefix = maybePrefix;
+                    lastType = type;
                     postfixes.add(metaname);
                 } else {
+                    if (lastPrefix != null && !postfixes.isEmpty()){
+                        dmc.add(new MetanameContext.Entry(lastPrefix, postfixes,
+                            lastPrefix.length(), lastType));
+                        lastPrefix = null;
+                        lastType= null;
+                        postfixes.clear();
+                    }
                     dmc.add(new MetanameContext.Entry(metaname, type));
                 }
+            }
+            if (lastPrefix != null && !postfixes.isEmpty()){
+                dmc.add(new MetanameContext.Entry(lastPrefix, postfixes,
+                    lastPrefix.length(), lastType));
             }
             return dmc;
         } catch(SQLException e) {
