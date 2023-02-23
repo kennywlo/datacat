@@ -234,13 +234,13 @@ public final class SearchUtils {
         String sql = "select metaname, ValueType, prefix "
                 + "    from DatasetMetaInfo vx "
                 + "    left outer join ( "
-                + "            select substr(v1.metaname,0,4) prefix,  "
+                + "            select substr(v1.metaname,1,4) prefix,  "
                 + "                    count(v1.metaname) prefixcount "
                 + "            from  "
                 + "            DatasetMetaInfo v1 "
-                + "            group by substr(v1.metaname,0,4) "
+                + "            group by substr(v1.metaname,1,4) "
                 + "            having count(v1.metaname) > 5 "
-                + "    ) v0 on substr(vx.metaname,0,4) = prefix "
+                + "    ) v0 on substr(vx.metaname,1,4) = prefix "
                 + "    order by prefix asc ";
         return buildMetaInfoGlobalContext(conn, sql);
     }
@@ -250,13 +250,13 @@ public final class SearchUtils {
         String sql = "select metaname, ValueType, prefix "
                 + "    from ContainerMetaInfo vx "
                 + "    left outer join ( "
-                + "            select substr(v1.metaname,0,4) prefix,  "
+                + "            select substr(v1.metaname,1,4) prefix,  "
                 + "                    count(v1.metaname) prefixcount "
                 + "            from  "
                 + "            ContainerMetaInfo v1 "
-                + "            group by substr(v1.metaname,0,4) "
+                + "            group by substr(v1.metaname,1,4) "
                 + "            having count(v1.metaname) > 5 "
-                + "    ) v0 on substr(vx.metaname,0,4) = prefix "
+                + "    ) v0 on substr(vx.metaname,1,4) = prefix "
                 + "    order by prefix asc ";
         return buildMetaInfoGlobalContext(conn, sql);
     }
@@ -590,16 +590,34 @@ public final class SearchUtils {
 
     public static Map<String, Object> getDependents(Connection conn, String dependencyContainer, Long dependency,
                                                     String filter) throws SQLException {
-        String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
+        if (filter == null) {
+            filter = "";
+        }
         Map<String, Object> metadata = new HashMap<>();
+        if (filter.equals("predecessors") || filter.equals("successors")){
+            String node;
+            if (dependencyContainer.equals("Dependency")) {
+                node = dependency.toString() + ".d";
+            } else if (dependencyContainer.equals("DependencyGroup")){
+                node =dependency.toString() + ".g";
+            } else {
+                throw new SQLException("Unrecognized dependency type");
+            }
+            String type = filter.equals("predecessors")? "predecessor":"successor";
+            Map<String, HashSet<String>> p = SearchDependency.getDependents(conn, node, type);
+            metadata.put(filter, SearchDependency.getJson(p));
+            return metadata;
+        }
+
+        String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
         for (String type: dependentTypes) {
+            if (!filter.isEmpty() && !filter.equals(type)){
+                continue;
+            }
             metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependent",
                 dependency, type));
             metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependentGroup",
                 dependency, type));
-            if (filter != null && filter.equals(type)) {
-                break;
-            }
         }
         return metadata;
     }
