@@ -590,11 +590,11 @@ public final class SearchUtils {
 
     public static Map<String, Object> getDependents(Connection conn, String dependencyContainer, Long dependency,
                                                     String filter) throws SQLException {
-        if (filter == null) {
-            filter = "";
-        }
+        String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
         Map<String, Object> metadata = new HashMap<>();
-        if (filter.equals("predecessors") || filter.equals("successors")){
+        if (filter == null || filter.isEmpty() || filter.equals("groups")){
+            filter = "*";
+        } else if (filter.equals("predecessors") || filter.equals("successors")){
             String node;
             if (dependencyContainer.equals("Dependency")) {
                 node = dependency.toString() + ".d";
@@ -609,15 +609,13 @@ public final class SearchUtils {
             return metadata;
         }
 
-        String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
-        for (String type: dependentTypes) {
-            if (!filter.isEmpty() && !filter.equals(type)){
-                continue;
+        for (String type: dependentTypes){
+            if (filter.equals(type) || filter.equals("*")){
+                metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependent",
+                    dependency, type));
+                metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependentGroup",
+                    dependency, type));
             }
-            metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependent",
-                dependency, type));
-            metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependentGroup",
-                dependency, type));
         }
         return metadata;
     }
@@ -658,11 +656,9 @@ public final class SearchUtils {
     public static Map<String, Object> getDependentsByType(Connection conn, String dependencyContainer,
                                                           String dependent,  Long dependency,
                                                           String type) throws SQLException {
-        if (type.equals("groups")){
-            return SearchUtils.getDependencyGroups(conn, dependency);
-        }
+
         if (type.isEmpty() || type.equals("*")) {
-            return SearchUtils.getDependents(conn, dependencyContainer, dependency, null);
+            return SearchUtils.getDependents(conn, dependencyContainer, dependency, "*");
         }
         String sql = "SELECT dependencyName, " + dependent + " FROM DatasetDependency WHERE " +
             dependencyContainer + " = ? AND (dependentType = ? AND " + dependent + " IS NOT NULL)";
@@ -770,25 +766,6 @@ public final class SearchUtils {
                 }
             }
             return types.toArray(new String[types.size()]);
-        }
-    }
-
-    public static Map<String, Object> getDependencyGroups(Connection conn, Long dependency) throws SQLException {
-        String sql = "SELECT dependencyName, dependencyGroup FROM DatasetDependency WHERE dependent = ? " +
-            "AND dependencyGroup IS NOT NULL";
-        HashMap<String, Object> verMetadata = new HashMap();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, dependency);
-            ResultSet rs = stmt.executeQuery();
-            StringBuilder dependencyGroups = new StringBuilder();
-            while (rs.next()) {
-                String sep = dependencyGroups.length() == 0 ? "":",";
-                dependencyGroups.append(sep).append(rs.getString("dependencyName"));
-            }
-            if (!dependencyGroups.toString().equals("")){
-                verMetadata.put("dependencyGroups", dependencyGroups.toString());
-            }
-            return verMetadata;
         }
     }
 
