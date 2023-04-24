@@ -198,8 +198,12 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         // fetch the dependency info
         Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependency",
             builder.pk, "*");
-        metadata.putAll(dependents);
-
+        if (!dependents.isEmpty()) {
+            metadata.putAll(dependents);
+            if (!metadata.containsKey("dependencyName")) {
+                metadata.put("dependencyName", builder.path);
+            }
+        }
         if (!metadata.isEmpty()) {
             builder.metadata(metadata);
         }
@@ -213,15 +217,20 @@ public class SqlBaseDAO implements org.srs.datacat.dao.BaseDAO {
         } else if (builder instanceof DatasetGroup.Builder) {
             tableType = "DatasetGroup";
         }
-
         Map<String, Object> metadata = getMetadata(pk, tableType, tableType);
         // fetch the dependency info
         if (tableType != null && tableType.equals("DatasetGroup")) {
             Map<String, Object> dependents = SearchUtils.getDependents(getConnection(), "dependencyGroup",
                 pk, "*");
-            metadata.putAll(dependents);
+            if (dependents.isEmpty()){
+                metadata.remove("dependencyName");
+            } else {
+                metadata.putAll(dependents);
+                if (!metadata.containsKey("dependencyName")){
+                    metadata.put("dependencyName", builder.path);
+                }
+            }
         }
-
         if (!metadata.isEmpty()) {
             builder.metadata(metadata);
         }

@@ -209,6 +209,9 @@ public class DatasetDAOMySQL extends BaseDAOMySQL implements org.srs.datacat.dao
                     "dependency", builder.pk, "*");
                 if (!deps.isEmpty()) {
                     metadata.putAll(deps);
+                    if (!metadata.containsKey("dependencyName")) {
+                        metadata.put("dependencyName", builder.path);
+                    }
                 }
                 builder.metadata(metadata);
                 return new DatasetViewInfo(builder.build(), locations);
