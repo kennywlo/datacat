@@ -1,12 +1,13 @@
 from setuptools import setup
 
 requires = [
-    'requests'
+    'requests',
+    'graphlib_backport'
 ]
 
 setup(
     name='datacat',
-    version='0.6.1',
+    version='0.6.3',
     packages=['datacat'],
     url='https://supercdms-dev.slac.stanford.edu',
     license='SLAC BSD',

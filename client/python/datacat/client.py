@@ -115,6 +115,18 @@ class Client(object):
         return self.client_helper.get_next_dependents(dep_container, **kwargs)
 
     @checked_error
+    def check_dependency_cycles(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
+        """
+        Check existing cycles in dep_container and if dependents are to be added.
+            :param dep_container: Parent container object to add dependents to
+            :param dep_type: Type of dependents to add
+            :param dep_datasets: The datasets we wish to use as children of the parent container.
+                VersionPKs are required for each dependent dataset.
+            :param dep_groups: The groups we wish to use as children of the parent container
+        """
+        self.client_helper.check_dependency_cycles(dep_container, dep_type, dep_datasets, dep_groups)
+
+    @checked_error
     def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None, **kwargs):
         """
          Attach new dependents to container object.

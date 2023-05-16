@@ -529,6 +529,10 @@ class ApiWrapper(unittest.TestCase):
         except:
             assert False, "Case 5.3 group dependent addition unsuccessful"
 
+        # Case 5.4 check for cycles in dependencies
+        grp3_4 = self.client.path(path='/testpath/depGroup3_4')
+        self.client.check_dependency_cycles(grp3_4, "predecessor")
+
     """ ============= remove_dependents() testing starts here =============
     # ==================================================================="""
     "\n******* remove_dependents() TESTING BEGINS *******\n"

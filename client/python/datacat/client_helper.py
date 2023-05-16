@@ -1,6 +1,14 @@
+import json
+import sys
 import copy
 
 from .model import Dataset, Group, Metadata
+
+if sys.version_info < (3, 9):
+    print("If older than Python 3.9, use the back port")
+    from graphlib_backport import TopologicalSorter, CycleError
+else:
+    from graphlib import TopologicalSorter, CycleError
 
 
 # noinspection PyPep8Naming,PyShadowingBuiltins,PyUnusedLocal
@@ -729,6 +737,77 @@ class ClientHelper(object):
 
         return retrieved_dependents
 
+    def check_dependency_cycles(self, dep_container, dep_type, dep_datasets=None, dep_groups=None):
+        """
+            Check existing cycles in dep_container and if dependents are to be added.
+            :param dep_container: Parent container object to add dependents to
+            :param dep_type: Type of dependents to add
+            :param dep_datasets: The datasets we wish to use as children of the parent container.
+                VersionPKs are required for each dependent dataset.
+            :param dep_groups: The groups we wish to use as children of the parent container
+        """
+        search_key = dep_type + "s"
+        container_node = ts = None
+        if isinstance(dep_container, Dataset):
+            container_node = str(dep_container.versionPk) + ".d"
+            dep_path = dep_container.path + ";v=" + str(dep_container.versionId)
+            dep_tree = None
+            rs = self.parent.search(target=dep_path,
+                                    show="dependency." + search_key,
+                                    query="dependents in ({})".format(dep_container.versionPk),
+                                    ignoreShowKeyError=True)
+            if rs:
+                dep_tree = rs[0]
+            if dep_tree and hasattr(dep_tree, "versionMetadata"):
+                if dep_tree.versionMetadata.get(search_key):
+                    dt = json.loads(dep_tree.versionMetadata[search_key])
+                    try:
+                        # checking existing tree graph
+                        print(list(TopologicalSorter(dt).static_order()))
+                        ts = TopologicalSorter(dt)
+                    except CycleError as e:
+                        print(f"Cycle detected in existing dependency tree: {e.args}")
+                else:
+                    ts = TopologicalSorter()
+            else:
+                ts = TopologicalSorter()
+        elif isinstance(dep_container, Group):
+            container_node = str(dep_container.pk) + ".g"
+            dep_path = dep_container.path
+            dep_tree = None
+            rs = self.parent.search(target=dep_path,
+                                    show="dependency." + search_key,
+                                    containerFilter="dependentGroups in ({})".format(dep_container.pk),
+                                    ignoreShowKeyError=True)
+            if rs:
+                dep_tree = rs[0]
+            if dep_tree and hasattr(dep_tree, "metadata"):
+                try:
+                    if dep_tree.metadata.get(search_key):
+                        dt = json.loads(dep_tree.metadata[search_key])
+                        # check cycles in existing graph
+                        print(list(TopologicalSorter(dt).static_order()))
+                        ts = TopologicalSorter(dt)
+                    else:
+                        ts = TopologicalSorter()
+                except CycleError as e:
+                    print(f"Cycle detected in existing dependency tree: {e.args}")
+            else:
+                ts = TopologicalSorter()
+        else:
+            raise ValueError("Unrecognized dependency container")
+        try:
+            if dep_datasets:
+                for ds in dep_datasets:
+                    n = str(ds.versionPk) + ".d"
+                    ts.add(container_node, n)
+            if dep_groups:
+                for dg in dep_groups:
+                    n = str(dg.pk) + ".g"
+                    ts.add(container_node, n)
+        except CycleError as e:
+            print(f"Cycle detected before add: {e.args}")
+
     def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None, **kwargs):
         """
          Attach new dependents to container object.
@@ -739,7 +818,10 @@ class ClientHelper(object):
         :param dep_groups: The groups we wish to use as children of the parent container
         """
         if not dep_datasets and not dep_groups:
+            # nothing to be done
             return None
+        else:
+            self.check_dependency_cycles(dep_container, dep_type, dep_datasets, dep_groups)
 
         def convert_dependent_to_list(dependents):
             """
