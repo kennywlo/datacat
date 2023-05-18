@@ -1,14 +1,9 @@
 import json
-import sys
 import copy
 
 from .model import Dataset, Group, Metadata
 
-if sys.version_info < (3, 9):
-    print("If older than Python 3.9, use the back port")
-    from graphlib_backport import TopologicalSorter, CycleError
-else:
-    from graphlib import TopologicalSorter, CycleError
+from graphlib import TopologicalSorter, CycleError
 
 
 # noinspection PyPep8Naming,PyShadowingBuiltins,PyUnusedLocal
@@ -745,6 +740,7 @@ class ClientHelper(object):
             :param dep_datasets: The datasets we wish to use as children of the parent container.
                 VersionPKs are required for each dependent dataset.
             :param dep_groups: The groups we wish to use as children of the parent container
+            :return ts: the topological sorter object
         """
         search_key = dep_type + "s"
         container_node = ts = None
@@ -805,6 +801,7 @@ class ClientHelper(object):
                 for dg in dep_groups:
                     n = str(dg.pk) + ".g"
                     ts.add(container_node, n)
+            return ts
         except CycleError as e:
             print(f"Cycle detected before add: {e.args}")
 

@@ -123,8 +123,9 @@ class Client(object):
             :param dep_datasets: The datasets we wish to use as children of the parent container.
                 VersionPKs are required for each dependent dataset.
             :param dep_groups: The groups we wish to use as children of the parent container
+            :return ts: the topological sorter object
         """
-        self.client_helper.check_dependency_cycles(dep_container, dep_type, dep_datasets, dep_groups)
+        return self.client_helper.check_dependency_cycles(dep_container, dep_type, dep_datasets, dep_groups)
 
     @checked_error
     def add_dependents(self, dep_container, dep_type, dep_datasets=None, dep_groups=None, **kwargs):
