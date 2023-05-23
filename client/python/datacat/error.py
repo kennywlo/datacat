@@ -33,7 +33,7 @@ class DcRequestException(DcException):
         self.status_code = getattr(response, "status_code", None)
         self.headers = getattr(response, "headers", None)
         self.content = getattr(response, "content", None)
-        super(DcRequestException, self).__init__(http_error.message)
+        super(DcRequestException, self).__init__(http_error.args[0])
 
     def __str__(self):
         formatted_string = "(HTTP Error: %s): %s" % (self.status_code, self.content)
