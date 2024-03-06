@@ -592,9 +592,23 @@ public final class SearchUtils {
                                                     String filter) throws SQLException {
         String[] dependentTypes = SearchUtils.getDependentTypes(conn, dependencyContainer, dependency);
         Map<String, Object> metadata = new HashMap<>();
+        String type="";
+        boolean found = false;
+        for (String dt : dependentTypes){
+            String dts = dt + "s";
+            if (dts.equals(filter)){
+                type = dt;
+                found = true;
+                break;
+            } else if (dt.equals(filter)){
+                type = dt;
+                break;
+            }
+        }
+
         if (filter == null || filter.isEmpty() || filter.equals("groups")){
             filter = "*";
-        } else if (filter.equals("predecessors") || filter.equals("successors")){
+        } else if (found){
             String node;
             if (dependencyContainer.equals("dependency")) {
                 node = dependency.toString() + ".d";
@@ -603,18 +617,17 @@ public final class SearchUtils {
             } else {
                 throw new SQLException("Unrecognized dependency type");
             }
-            String type = filter.equals("predecessors")? "predecessor":"successor";
             Map<String, HashSet<String>> p = DependentSearch.getDependents(conn, node, type);
             metadata.put(filter, DependentSearch.getJson(p));
             return metadata;
         }
 
-        for (String type: dependentTypes){
-            if (filter.equals(type) || filter.equals("*")){
+        for (String dt: dependentTypes){
+            if (filter.equals(dt) || filter.equals("*")) {
                 metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependent",
-                    dependency, type));
+                    dependency, dt));
                 metadata.putAll(SearchUtils.getDependentsByType(conn, dependencyContainer, "dependentGroup",
-                    dependency, type));
+                    dependency, dt));
             }
         }
         return metadata;

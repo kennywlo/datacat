@@ -74,7 +74,7 @@ public class SearchResource extends BaseResource {
         try {
             // fetch the dataset groups in dependents search
             if (containerFilter != null && containerFilter.contains("dependentGroups")){
-                DirectoryStream<DatasetContainer> stream = getProvider().searchContainers(Arrays.asList("/**^"),
+                DirectoryStream<DatasetContainer> stream = getProvider().searchContainers(Arrays.asList(requestPath),
                     buildCallContext(), containerFilter, metafields, sortFields, ignoreShowKeyError);
                 List<DatasetContainer> groups = new ArrayList<>();
                 int count = 0;
