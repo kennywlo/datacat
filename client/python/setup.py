@@ -10,7 +10,7 @@ if sys.version_info < (3, 9):
 
 setup(
     name='datacat',
-    version='0.6.4',
+    version='0.6.6',
     packages=['datacat'],
     url='https://supercdms-dev.slac.stanford.edu',
     license='SLAC BSD',
